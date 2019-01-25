@@ -35,7 +35,7 @@ def test_shuffle(setup_rng, dataset):
     retval = dataset.shuffle()
     assert retval is dataset
     assert len(dataset) == len(before)
-    assert all(data in dataset for data in before)
+    assert all(s in dataset for s in before)
     assert list(dataset) != before
 
 
