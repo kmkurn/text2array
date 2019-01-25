@@ -3,7 +3,7 @@ import abc
 import random
 
 
-class DatasetABC(Iterable, metaclass=abc.ABCMeta):
+class DatasetABC(Iterable, metaclass=abc.ABCMeta):  # pragma: no cover
     @abc.abstractmethod
     def batch(self, batch_size: int) -> Iterable:
         pass
