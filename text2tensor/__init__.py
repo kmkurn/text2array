@@ -60,11 +60,11 @@ class Dataset(DatasetABC, Sequence):
         if batch_size <= 0:
             raise ValueError('batch size must be greater than 0')
 
-        minibatches = []
+        batches = []
         for begin in range(0, len(self._samples), batch_size):
             end = begin + batch_size
-            minibatches.append(self._samples[begin:end])
-        return minibatches
+            batches.append(self._samples[begin:end])
+        return batches
 
     def batch_exactly(self, batch_size: int) -> list:
         """Group the samples in the dataset into batches of exact size.
@@ -78,11 +78,11 @@ class Dataset(DatasetABC, Sequence):
         Returns:
             The list of batches.
         """
-        minibatches = self.batch(batch_size)
+        batches = self.batch(batch_size)
         if len(self._samples) % batch_size != 0:
-            assert len(minibatches[-1]) < batch_size
-            minibatches = minibatches[:-1]
-        return minibatches
+            assert len(batches[-1]) < batch_size
+            batches = batches[:-1]
+        return batches
 
     def _shuffle_inplace(self) -> None:
         assert isinstance(self._samples, MutableSequence)
@@ -125,7 +125,7 @@ class StreamDataset(DatasetABC, Iterable):
         Returns:
             The iterable of batches.
         """
-        return _Minibatches(self._stream, batch_size)
+        return _Batches(self._stream, batch_size)
 
     def batch_exactly(self, batch_size: int) -> Iterable:
         """Group the samples in the dataset into batches of exact size.
@@ -139,10 +139,10 @@ class StreamDataset(DatasetABC, Iterable):
         Returns:
             The iterable of batches.
         """
-        return _Minibatches(self._stream, batch_size, drop=True)
+        return _Batches(self._stream, batch_size, drop=True)
 
 
-class _Minibatches(Iterable):
+class _Batches(Iterable):
     def __init__(self, stream: Iterable, bsize: int, drop: bool = False) -> None:
         if bsize <= 0:
             raise ValueError('batch size must be greater than 0')
@@ -154,11 +154,11 @@ class _Minibatches(Iterable):
     def __iter__(self) -> Iterator:
         it, exhausted = iter(self._stream), False
         while not exhausted:
-            minibatch: list = []
-            while not exhausted and len(minibatch) < self._bsize:
+            batch: list = []
+            while not exhausted and len(batch) < self._bsize:
                 try:
-                    minibatch.append(next(it))
+                    batch.append(next(it))
                 except StopIteration:
                     exhausted = True
-            if not self._drop or len(minibatch) == self._bsize:
-                yield minibatch
+            if not self._drop or len(batch) == self._bsize:
+                yield batch
