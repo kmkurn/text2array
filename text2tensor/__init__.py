@@ -1,8 +1,19 @@
 from collections.abc import Iterable, Iterator, MutableSequence, Sequence
+import abc
 import random
 
 
-class Dataset(Sequence):
+class DatasetABC(Iterable, metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def batch(self, batch_size: int) -> Iterable:
+        pass
+
+    @abc.abstractmethod
+    def batch_exactly(self, batch_size: int) -> Iterable:
+        pass
+
+
+class Dataset(DatasetABC, Sequence):
     def __init__(self, samples: Sequence) -> None:
         if not isinstance(samples, Sequence):
             raise TypeError('"samples" is not a sequence')
@@ -57,7 +68,7 @@ class Dataset(Sequence):
         self._samples = shuf_samples
 
 
-class StreamDataset(Iterable):
+class StreamDataset(DatasetABC, Iterable):
     def __init__(self, stream: Iterable) -> None:
         if not isinstance(stream, Iterable):
             raise TypeError('"stream" is not iterable')
