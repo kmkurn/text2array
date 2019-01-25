@@ -27,9 +27,7 @@ class Dataset(DatasetABC, Sequence):
         return len(self._samples)
 
     def shuffle(self) -> 'Dataset':
-        if isinstance(self._samples, list):
-            random.shuffle(self._samples)
-        elif isinstance(self._samples, MutableSequence):
+        if isinstance(self._samples, MutableSequence):
             self._shuffle_inplace()
         else:
             self._shuffle_copy()
