@@ -33,8 +33,10 @@ def test_len(dataset):
 def test_shuffle(setup_rng, dataset):
     before = list(dataset)
     retval = dataset.shuffle()
-    assert list(dataset) != before
     assert retval is dataset
+    assert len(dataset) == len(before)
+    assert all(data in dataset for data in before)
+    assert list(dataset) != before
 
 
 def test_batch(dataset):
