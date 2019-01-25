@@ -1,15 +1,16 @@
 from collections.abc import Iterable, Iterator, MutableSequence, Sequence
 import abc
 import random
+import typing as ty
 
 
 class DatasetABC(Iterable, metaclass=abc.ABCMeta):  # pragma: no cover
     @abc.abstractmethod
-    def batch(self, batch_size: int) -> Iterable:
+    def batch(self, batch_size: int) -> ty.Iterable[Sequence]:
         pass
 
     @abc.abstractmethod
-    def batch_exactly(self, batch_size: int) -> Iterable:
+    def batch_exactly(self, batch_size: int) -> ty.Iterable[Sequence]:
         pass
 
 
@@ -48,7 +49,7 @@ class Dataset(DatasetABC, Sequence):
             self._shuffle_copy()
         return self
 
-    def batch(self, batch_size: int) -> list:
+    def batch(self, batch_size: int) -> ty.List[Sequence]:
         """Group the samples in the dataset into batches.
 
         Args:
@@ -66,7 +67,7 @@ class Dataset(DatasetABC, Sequence):
             batches.append(self._samples[begin:end])
         return batches
 
-    def batch_exactly(self, batch_size: int) -> list:
+    def batch_exactly(self, batch_size: int) -> ty.List[Sequence]:
         """Group the samples in the dataset into batches of exact size.
 
         If the length of ``samples`` is not divisible by ``batch_size``, the last
@@ -116,7 +117,7 @@ class StreamDataset(DatasetABC, Iterable):
     def __iter__(self) -> Iterator:
         return iter(self._stream)
 
-    def batch(self, batch_size: int) -> Iterable:
+    def batch(self, batch_size: int) -> ty.Iterable[Sequence]:
         """Group the samples in the dataset into batches.
 
         Args:
@@ -127,7 +128,7 @@ class StreamDataset(DatasetABC, Iterable):
         """
         return _Batches(self._stream, batch_size)
 
-    def batch_exactly(self, batch_size: int) -> Iterable:
+    def batch_exactly(self, batch_size: int) -> ty.Iterable[Sequence]:
         """Group the samples in the dataset into batches of exact size.
 
         If the length of ``samples`` is not divisible by ``batch_size``, the last
@@ -142,7 +143,7 @@ class StreamDataset(DatasetABC, Iterable):
         return _Batches(self._stream, batch_size, drop=True)
 
 
-class _Batches(Iterable):
+class _Batches(ty.Iterable[Sequence]):
     def __init__(self, stream: Iterable, bsize: int, drop: bool = False) -> None:
         if bsize <= 0:
             raise ValueError('batch size must be greater than 0')
@@ -151,7 +152,7 @@ class _Batches(Iterable):
         self._bsize = bsize
         self._drop = drop
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> ty.Iterator[Sequence]:
         it, exhausted = iter(self._stream), False
         while not exhausted:
             batch: list = []
