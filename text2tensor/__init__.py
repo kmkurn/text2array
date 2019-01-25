@@ -1,4 +1,4 @@
-from collections.abc import MutableSequence, Sequence
+from collections.abc import Iterable, Iterator, MutableSequence, Sequence
 import random
 
 
@@ -55,3 +55,42 @@ class Dataset(Sequence):
         random.shuffle(shuf_indices)
         shuf_samples = [self._samples[i] for i in shuf_indices]
         self._samples = shuf_samples
+
+
+class StreamDataset(Iterable):
+    def __init__(self, stream: Iterable) -> None:
+        if not isinstance(stream, Iterable):
+            raise TypeError('"stream" is not iterable')
+
+        self._stream = stream
+
+    def __iter__(self) -> Iterator:
+        return iter(self._stream)
+
+    def batch(self, batch_size: int) -> Iterable:
+        return _Minibatches(self._stream, batch_size)
+
+    def batch_exactly(self, batch_size: int) -> Iterable:
+        return _Minibatches(self._stream, batch_size, drop=True)
+
+
+class _Minibatches(Iterable):
+    def __init__(self, stream: Iterable, bsize: int, drop: bool = False) -> None:
+        if bsize <= 0:
+            raise ValueError('batch size must be greater than 0')
+
+        self._stream = stream
+        self._bsize = bsize
+        self._drop = drop
+
+    def __iter__(self) -> Iterator:
+        it, exhausted = iter(self._stream), False
+        while not exhausted:
+            minibatch: list = []
+            while not exhausted and len(minibatch) < self._bsize:
+                try:
+                    minibatch.append(next(it))
+                except StopIteration:
+                    exhausted = True
+            if not self._drop or len(minibatch) == self._bsize:
+                yield minibatch
