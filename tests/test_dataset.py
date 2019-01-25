@@ -1,8 +1,8 @@
 from collections.abc import Sequence
 
-from text2tensor import Dataset
-
 import pytest
+
+from text2tensor import Dataset
 
 
 def test_init():
