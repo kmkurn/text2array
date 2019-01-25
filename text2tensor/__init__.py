@@ -14,6 +14,12 @@ class DatasetABC(Iterable, metaclass=abc.ABCMeta):  # pragma: no cover
 
 
 class Dataset(DatasetABC, Sequence):
+    """A dataset that fits in memory (no streaming).
+
+    Args:
+        samples: Sequence of samples the dataset should contain.
+    """
+
     def __init__(self, samples: Sequence) -> None:
         if not isinstance(samples, Sequence):
             raise TypeError('"samples" is not a sequence')
@@ -27,6 +33,15 @@ class Dataset(DatasetABC, Sequence):
         return len(self._samples)
 
     def shuffle(self) -> 'Dataset':
+        """Shuffle the dataset.
+
+        This method shuffles in-place if ``samples`` is a mutable sequence.
+        Otherwise, a copy is made and then shuffled. This copy is a mutable
+        sequence, so subsequent shuffling will be done in-place.
+
+        Returns:
+            The dataset object itself (useful for chaining).
+        """
         if isinstance(self._samples, MutableSequence):
             self._shuffle_inplace()
         else:
@@ -34,6 +49,14 @@ class Dataset(DatasetABC, Sequence):
         return self
 
     def batch(self, batch_size: int) -> list:
+        """Group the samples in the dataset into batches.
+
+        Args:
+            batch_size: Maximum number of samples in each batch.
+
+        Returns:
+            The list of batches.
+        """
         if batch_size <= 0:
             raise ValueError('batch size must be greater than 0')
 
@@ -44,6 +67,17 @@ class Dataset(DatasetABC, Sequence):
         return minibatches
 
     def batch_exactly(self, batch_size: int) -> list:
+        """Group the samples in the dataset into batches of exact size.
+
+        If the length of ``samples`` is not divisible by ``batch_size``, the last
+        batch (whose length is less than ``batch_size``) is dropped.
+
+        Args:
+            batch_size: Number of samples in each batch.
+
+        Returns:
+            The list of batches.
+        """
         minibatches = self.batch(batch_size)
         if len(self._samples) % batch_size != 0:
             assert len(minibatches[-1]) < batch_size
@@ -67,6 +101,12 @@ class Dataset(DatasetABC, Sequence):
 
 
 class StreamDataset(DatasetABC, Iterable):
+    """A dataset that streams its samples.
+
+    Args:
+        stream: Stream of examples the dataset should stream from.
+    """
+
     def __init__(self, stream: Iterable) -> None:
         if not isinstance(stream, Iterable):
             raise TypeError('"stream" is not iterable')
@@ -77,9 +117,28 @@ class StreamDataset(DatasetABC, Iterable):
         return iter(self._stream)
 
     def batch(self, batch_size: int) -> Iterable:
+        """Group the samples in the dataset into batches.
+
+        Args:
+            batch_size: Maximum number of samples in each batch.
+
+        Returns:
+            The iterable of batches.
+        """
         return _Minibatches(self._stream, batch_size)
 
     def batch_exactly(self, batch_size: int) -> Iterable:
+        """Group the samples in the dataset into batches of exact size.
+
+        If the length of ``samples`` is not divisible by ``batch_size``, the last
+        batch (whose length is less than ``batch_size``) is dropped.
+
+        Args:
+            batch_size: Number of samples in each batch.
+
+        Returns:
+            The iterable of batches.
+        """
         return _Minibatches(self._stream, batch_size, drop=True)
 
 
