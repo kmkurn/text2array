@@ -13,6 +13,14 @@ def test_init(counter):
     assert list(it) == list(range(5))
 
 
+def test_init_returns_iterable(finite_counter):
+    dat = StreamDataset(finite_counter)
+    dat_lst1 = list(dat)
+    dat_lst2 = list(dat)
+    assert len(dat_lst1) == len(dat_lst2)
+    assert len(dat_lst2) > 0
+
+
 def test_init_stream_non_iterable():
     with pytest.raises(TypeError) as exc:
         StreamDataset(5)
