@@ -38,10 +38,8 @@ def counter():
 
 
 @pytest.fixture
-def stream_dataset():
-    c = Counter()
-    yield StreamDataset(c)
-    c.reset()
+def stream_dataset(counter):
+    return StreamDataset(counter)
 
 
 @pytest.fixture
