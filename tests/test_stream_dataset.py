@@ -6,21 +6,8 @@ import pytest
 from text2tensor import StreamDataset
 
 
-class Counter:
-    def __init__(self, limit=None):
-        self._count = 0
-        self._limit = limit
-
-    def __iter__(self):
-        while True:
-            yield self._count
-            self._count += 1
-            if self._limit is not None and self._count >= self._limit:
-                break
-
-
-def test_init():
-    dat = StreamDataset(Counter())
+def test_init(counter):
+    dat = StreamDataset(counter)
     assert isinstance(dat, Iterable)
 
 
@@ -28,16 +15,6 @@ def test_init_stream_non_iterable():
     with pytest.raises(TypeError) as exc:
         StreamDataset(5)
     assert '"stream" is not iterable' in str(exc.value)
-
-
-@pytest.fixture
-def stream_dataset():
-    return StreamDataset(Counter())
-
-
-@pytest.fixture
-def finite_stream_dataset():
-    return StreamDataset(Counter(limit=11))
 
 
 def test_iter(stream_dataset):
