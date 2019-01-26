@@ -1,8 +1,8 @@
 from collections.abc import Iterable
 from itertools import takewhile
 
+import numpy as np
 import pytest
-import torch
 
 from text2tensor import StreamBatches
 
@@ -46,10 +46,10 @@ def test_to_tensors(stream_batches):
 
     bs = takewhile(lambda b: sum(b) < 30, stream_batches)
     for t, b in zip(ts, bs):
-        assert torch.is_tensor(t)
-        assert t.dtype == torch.long
-        assert t.dim() == 1
-        assert t.size(0) == len(b)
+        assert isinstance(t, np.ndarray)
+        assert t.dtype == np.int32
+        assert t.ndim == 1
+        assert t.shape[0] == len(b)
 
 
 def test_to_tensors_returns_iterable(finite_stream_batches):

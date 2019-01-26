@@ -1,7 +1,7 @@
 from typing import Iterable, Iterator, List, Sequence
 import abc
 
-import torch
+import numpy as np
 
 from .datasets import Dataset, StreamDataset
 
@@ -20,7 +20,7 @@ class BatchesABC(Iterable[Batch], metaclass=abc.ABCMeta):  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def to_tensors(self) -> Iterable[torch.LongTensor]:
+    def to_tensors(self) -> Iterable[np.ndarray]:
         pass
 
 
@@ -64,7 +64,7 @@ class Batches(BatchesABC, Sequence[Batch]):
         q, r = divmod(len(self._dataset), self._bsize)
         return q + (1 if q > 0 and not self._drop else 0)
 
-    def to_tensors(self) -> List[torch.LongTensor]:
+    def to_tensors(self) -> List[np.ndarray]:
         """Convert each minibatch into a tensor.
 
         Returns:
@@ -72,7 +72,7 @@ class Batches(BatchesABC, Sequence[Batch]):
         """
         ts = []
         for b in self:
-            t = torch.tensor(b, dtype=torch.long)
+            t = np.array(b, np.int32)
             ts.append(t)
         return ts
 
@@ -116,7 +116,7 @@ class StreamBatches(BatchesABC, Iterable[Batch]):
             if len(batch) == self._bsize or (batch and not self._drop):
                 yield batch
 
-    def to_tensors(self) -> Iterable[torch.LongTensor]:
+    def to_tensors(self) -> Iterable[np.ndarray]:
         """Convert each minibatch into a tensor.
 
         Returns:
@@ -124,9 +124,9 @@ class StreamBatches(BatchesABC, Iterable[Batch]):
         """
         return self._StreamTensors(self)
 
-    class _StreamTensors(Iterable[torch.LongTensor]):
+    class _StreamTensors(Iterable[np.ndarray]):
         def __init__(self, bs: 'StreamBatches') -> None:
             self._bs = bs
 
-        def __iter__(self) -> Iterator[torch.LongTensor]:
-            yield from (torch.tensor(b, dtype=torch.long) for b in self._bs)
+        def __iter__(self) -> Iterator[np.ndarray]:
+            yield from (np.array(b, np.int32) for b in self._bs)
