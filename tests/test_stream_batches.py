@@ -13,29 +13,12 @@ class TestInit:
         assert bs.batch_size == 2
         assert not bs.drop_last
         assert isinstance(bs, Iterable)
-
-        it = iter(bs)
-        assert next(it) == [0, 1]
-        assert next(it) == [2, 3]
-        assert next(it) == [4, 5]
-        assert next(it) == [6, 7]
-        assert next(it) == [8, 9]
-        assert next(it) == [10]
-        with pytest.raises(StopIteration):
-            next(it)
+        assert list(bs) == [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10]]
 
     def test_kwargs(self, finite_stream_dataset):
         bs = StreamBatches(finite_stream_dataset, 2, drop_last=True)
         assert bs.drop_last
-
-        it = iter(bs)
-        assert next(it) == [0, 1]
-        assert next(it) == [2, 3]
-        assert next(it) == [4, 5]
-        assert next(it) == [6, 7]
-        assert next(it) == [8, 9]
-        with pytest.raises(StopIteration):
-            next(it)
+        assert list(bs) == [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]]
 
     def test_divisible_length(self, finite_stream_dataset):
         bs = StreamBatches(finite_stream_dataset, 1)
