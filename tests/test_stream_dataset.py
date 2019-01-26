@@ -5,10 +5,10 @@ import pytest
 from text2array import StreamDataset, StreamBatches
 
 
-def test_init(counter):
-    dat = StreamDataset(counter)
+def test_init(stream):
+    dat = StreamDataset(stream)
     assert isinstance(dat, Iterable)
-    assert list(dat) == list(range(counter.limit))
+    assert list(dat) == list(stream)
 
 
 def test_init_stream_non_iterable():
