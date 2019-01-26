@@ -37,11 +37,19 @@ def batches(dataset):
 
 def test_getitem_negative_index(batches):
     assert batches[-1] == [4]
+    assert batches[-2] == [2, 3]
+    assert batches[-3] == [0, 1]
 
 
 def test_getitem_index_error(batches):
+    # index too large
     with pytest.raises(IndexError) as exc:
         batches[len(batches)]
+    assert 'index out of range' in str(exc.value)
+
+    # index too small
+    with pytest.raises(IndexError) as exc:
+        batches[-len(batches) - 1]
     assert 'index out of range' in str(exc.value)
 
 

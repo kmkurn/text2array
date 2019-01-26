@@ -1,30 +1,27 @@
 from collections.abc import Iterable
-from itertools import takewhile
 
 import pytest
 
 from text2array import StreamDataset, StreamBatches
 
 
-def test_init(counter):
-    dat = StreamDataset(counter)
-    assert isinstance(dat, Iterable)
-    it = takewhile(lambda x: x < 5, dat)
-    assert list(it) == list(range(5))
-
-
-def test_init_returns_iterable(finite_counter):
+def test_init(finite_counter):
     dat = StreamDataset(finite_counter)
-    dat_lst1 = list(dat)
-    dat_lst2 = list(dat)
-    assert len(dat_lst1) == len(dat_lst2)
-    assert len(dat_lst2) > 0
+    assert isinstance(dat, Iterable)
+    assert list(dat) == list(range(finite_counter.limit))
 
 
 def test_init_stream_non_iterable():
     with pytest.raises(TypeError) as exc:
         StreamDataset(5)
     assert '"stream" is not iterable' in str(exc.value)
+
+
+def test_can_be_iterated_twice(finite_stream_dataset):
+    dat_lst1 = list(finite_stream_dataset)
+    dat_lst2 = list(finite_stream_dataset)
+    assert len(dat_lst1) == len(dat_lst2)
+    assert len(dat_lst2) > 0
 
 
 def test_batch(finite_stream_dataset):
