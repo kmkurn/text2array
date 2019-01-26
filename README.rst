@@ -1,4 +1,4 @@
-text2tensor
-^^^^^^^^^^^
+text2array
+^^^^^^^^^^
 
-Convert your NLP text dataset to (batched) tensors!
+Convert your NLP text dataset to arrays!

@@ -3,7 +3,7 @@ from itertools import takewhile
 
 import pytest
 
-from text2tensor import StreamDataset, StreamBatches
+from text2array import StreamDataset, StreamBatches
 
 
 def test_init(counter):

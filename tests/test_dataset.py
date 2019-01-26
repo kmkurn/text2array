@@ -2,7 +2,7 @@ from collections.abc import Sequence
 
 import pytest
 
-from text2tensor import Batches, Dataset
+from text2array import Batches, Dataset
 
 
 def test_init():

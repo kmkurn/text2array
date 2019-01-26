@@ -3,7 +3,7 @@ from collections.abc import Sequence
 import numpy as np
 import pytest
 
-from text2tensor import Batches
+from text2array import Batches
 
 
 class TestInit:
@@ -45,8 +45,8 @@ def test_getitem_index_error(batches):
     assert 'index out of range' in str(exc.value)
 
 
-def test_to_tensors(batches):
-    ts = batches.to_tensors()
+def test_to_arrays(batches):
+    ts = batches.to_arrays()
     assert isinstance(ts, Sequence)
     assert len(ts) == len(batches)
     for i in range(len(ts)):

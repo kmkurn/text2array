@@ -1,6 +1,6 @@
 import pytest
 
-from text2tensor import Dataset, StreamDataset
+from text2array import Dataset, StreamDataset
 
 
 class Counter:

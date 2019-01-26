@@ -4,11 +4,11 @@ from setuptools import setup, find_packages
 readme = Path(__file__).resolve().parent / 'README.rst'
 
 setup(
-    name='text2tensor',
+    name='text2array',
     version='0.0.1',
-    description='Convert your NLP text data to tensors!',
+    description='Convert your NLP text data to arrays!',
     long_description=readme.read_text(),
-    url='https://github.com/kmkurn/text2tensor',
+    url='https://github.com/kmkurn/text2array',
     author='Kemal Kurniawan',
     author_email='kemal@kkurniawan.com',
     license='MIT',

@@ -20,7 +20,7 @@ class BatchesABC(Iterable[Batch], metaclass=abc.ABCMeta):  # pragma: no cover
         pass
 
     @abc.abstractmethod
-    def to_tensors(self) -> Iterable[np.ndarray]:
+    def to_arrays(self) -> Iterable[np.ndarray]:
         pass
 
 
@@ -64,11 +64,11 @@ class Batches(BatchesABC, Sequence[Batch]):
         q, r = divmod(len(self._dataset), self._bsize)
         return q + (1 if q > 0 and not self._drop else 0)
 
-    def to_tensors(self) -> List[np.ndarray]:
-        """Convert each minibatch into a tensor.
+    def to_arrays(self) -> List[np.ndarray]:
+        """Convert each minibatch into an ndarray.
 
         Returns:
-            The list of tensors.
+            The list of arrays.
         """
         ts = []
         for b in self:
@@ -116,15 +116,15 @@ class StreamBatches(BatchesABC, Iterable[Batch]):
             if len(batch) == self._bsize or (batch and not self._drop):
                 yield batch
 
-    def to_tensors(self) -> Iterable[np.ndarray]:
-        """Convert each minibatch into a tensor.
+    def to_arrays(self) -> Iterable[np.ndarray]:
+        """Convert each minibatch into an ndarray.
 
         Returns:
-            The iterable of tensors.
+            The iterable of arrays.
         """
-        return self._StreamTensors(self)
+        return self._StreamArrays(self)
 
-    class _StreamTensors(Iterable[np.ndarray]):
+    class _StreamArrays(Iterable[np.ndarray]):
         def __init__(self, bs: 'StreamBatches') -> None:
             self._bs = bs
 
