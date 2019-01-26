@@ -37,6 +37,10 @@ class TestInit:
         with pytest.raises(StopIteration):
             next(it)
 
+    def test_divisible_length(self, finite_stream_dataset):
+        bs = StreamBatches(finite_stream_dataset, 1)
+        assert list(bs) == [[i] for i, _ in enumerate(finite_stream_dataset)]
+
     def test_nonpositive_batch_size(self, finite_stream_dataset):
         with pytest.raises(ValueError) as exc:
             StreamBatches(finite_stream_dataset, 0)
