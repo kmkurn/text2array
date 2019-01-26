@@ -4,7 +4,7 @@ from itertools import takewhile
 import numpy as np
 import pytest
 
-from text2tensor import StreamBatches
+from text2array import StreamBatches
 
 
 class TestInit:
@@ -40,8 +40,8 @@ def finite_stream_batches(finite_stream_dataset):
     return StreamBatches(finite_stream_dataset, 2)
 
 
-def test_to_tensors(stream_batches):
-    ts = stream_batches.to_tensors()
+def test_to_arrays(stream_batches):
+    ts = stream_batches.to_arrays()
     assert isinstance(ts, Iterable)
 
     bs = takewhile(lambda b: sum(b) < 30, stream_batches)
@@ -52,8 +52,8 @@ def test_to_tensors(stream_batches):
         assert t.shape[0] == len(b)
 
 
-def test_to_tensors_returns_iterable(finite_stream_batches):
-    ts = finite_stream_batches.to_tensors()
+def test_to_arrays_returns_iterable(finite_stream_batches):
+    ts = finite_stream_batches.to_arrays()
     ts_lst1 = list(ts)
     ts_lst2 = list(ts)
     assert len(ts_lst1) == len(ts_lst2)
