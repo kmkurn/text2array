@@ -177,6 +177,11 @@ class BatchesABC(Iterable[Batch], metaclass=abc.ABCMeta):  # pragma: no cover
     def batch_size(self) -> int:
         pass
 
+    @property
+    @abc.abstractmethod
+    def drop_last(self) -> bool:
+        pass
+
     @abc.abstractmethod
     def to_tensors(self) -> Iterable[torch.LongTensor]:
         pass
@@ -203,6 +208,10 @@ class Batches(BatchesABC, Sequence[Batch]):
     @property
     def batch_size(self) -> int:
         return self._bsize
+
+    @property
+    def drop_last(self) -> bool:
+        return self._drop
 
     def __getitem__(self, index):
         if index >= len(self):
@@ -253,6 +262,10 @@ class StreamBatches(BatchesABC, Iterable[Batch]):
     @property
     def batch_size(self) -> int:
         return self._bsize
+
+    @property
+    def drop_last(self) -> bool:
+        return self._drop
 
     def __iter__(self) -> Iterator[Batch]:
         it, exhausted = iter(self._dataset), False

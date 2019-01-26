@@ -10,6 +10,7 @@ class TestInit:
     def test_ok(self, dataset):
         bs = Batches(dataset, 2)
         assert bs.batch_size == 2
+        assert not bs.drop_last
         assert isinstance(bs, Sequence)
         assert len(bs) == 3
         assert bs[0] == [0, 1]
@@ -18,6 +19,7 @@ class TestInit:
 
     def test_kwargs(self, dataset):
         bs = Batches(dataset, 2, drop_last=True)
+        assert bs.drop_last
         assert len(bs) == 2
         assert bs[0] == [0, 1]
         assert bs[1] == [2, 3]
