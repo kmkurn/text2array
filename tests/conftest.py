@@ -8,9 +8,6 @@ class Counter:
         self._count = 0
         self._limit = limit
 
-    def reset(self):
-        self._count = 0
-
     def __iter__(self):
         self._count = 0
         while True:
