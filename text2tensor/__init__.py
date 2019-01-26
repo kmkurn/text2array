@@ -221,9 +221,14 @@ class Batches(Sequence[Batch]):
 
 
 class StreamBatches(Iterable[Batch]):
-    def __init__(self, dataset: StreamDataset, batch_size: int) -> None:
+    def __init__(
+            self, dataset: StreamDataset, batch_size: int, drop_last: bool = False) -> None:
+        if batch_size <= 0:
+            raise ValueError('batch size must be greater than 0')
+
         self._dataset = dataset
         self._bsize = batch_size
+        self._drop = drop_last
 
     @property
     def batch_size(self) -> int:
@@ -238,4 +243,15 @@ class StreamBatches(Iterable[Batch]):
                     batch.append(next(it))
                 except StopIteration:
                     exhausted = True
-            yield batch
+            if not self._drop or len(batch) == self._bsize:
+                yield batch
+
+    def to_tensors(self) -> Iterable[torch.LongTensor]:
+        return self._StreamTensors(self)
+
+    class _StreamTensors(Iterable[torch.LongTensor]):
+        def __init__(self, bs: 'StreamBatches') -> None:
+            self._bs = bs
+
+        def __iter__(self) -> Iterator[torch.LongTensor]:
+            yield from (torch.tensor(b, dtype=torch.long) for b in self._bs)
