@@ -221,6 +221,15 @@ class Batches(Sequence[Batch]):
 
 
 class StreamBatches(Iterable[Batch]):
+    """A class to represent an iterable of minibatches.
+
+    Args:
+        dataset: Dataset to make batches from.
+        batch_size: Maximum number of samples in each batch.
+        drop_last (optional): Whether to drop the last batch when ``batch_size`` does not
+            evenly divide the length of ``dataset``.
+    """
+
     def __init__(
             self, dataset: StreamDataset, batch_size: int, drop_last: bool = False) -> None:
         if batch_size <= 0:
@@ -247,6 +256,11 @@ class StreamBatches(Iterable[Batch]):
                 yield batch
 
     def to_tensors(self) -> Iterable[torch.LongTensor]:
+        """Convert each minibatch into a tensor.
+
+        Returns:
+            The iterable of tensors.
+        """
         return self._StreamTensors(self)
 
     class _StreamTensors(Iterable[torch.LongTensor]):
