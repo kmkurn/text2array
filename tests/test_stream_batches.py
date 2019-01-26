@@ -1,5 +1,4 @@
 from collections.abc import Iterable
-from itertools import takewhile
 
 import numpy as np
 import pytest
@@ -40,16 +39,13 @@ def finite_stream_batches(finite_stream_dataset):
     return StreamBatches(finite_stream_dataset, 2)
 
 
-def test_to_arrays(stream_batches):
-    ts = stream_batches.to_arrays()
+def test_to_arrays(finite_stream_batches):
+    ts = finite_stream_batches.to_arrays()
     assert isinstance(ts, Iterable)
 
-    bs = takewhile(lambda b: sum(b) < 30, stream_batches)
-    for t, b in zip(ts, bs):
-        assert isinstance(t, np.ndarray)
-        assert t.dtype == np.int32
-        assert t.ndim == 1
-        assert t.shape[0] == len(b)
+    assert all(isinstance(t, np.ndarray) for t in ts)
+    assert all(t.dtype == np.int32 for t in ts)
+    assert [t.tolist() for t in ts] == [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10]]
 
 
 def test_to_arrays_returns_iterable(finite_stream_batches):
