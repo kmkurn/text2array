@@ -5,12 +5,12 @@ import pytest
 from text2array import Batches, Dataset
 
 
-def test_init():
-    dat = Dataset(range(5))
+def test_init(samples):
+    dat = Dataset(samples)
     assert isinstance(dat, Sequence)
     assert len(dat) == 5
     for i in range(len(dat)):
-        assert dat[i] == i
+        assert dat[i] == samples[i]
 
 
 def test_init_samples_non_sequence():
@@ -21,8 +21,8 @@ def test_init_samples_non_sequence():
 
 class TestShuffle:
     @pytest.fixture
-    def tuple_dataset(self):
-        return Dataset(tuple(range(5)))
+    def tuple_dataset(self, samples):
+        return Dataset(tuple(samples))
 
     def assert_shuffle(self, dataset):
         before = list(dataset)
