@@ -171,7 +171,18 @@ class _Batches(Iterable[Batch]):
                 yield batch
 
 
-class Batches(Sequence[Batch]):
+class BatchesABC(Iterable[Batch], metaclass=abc.ABCMeta):  # pragma: no cover
+    @property
+    @abc.abstractmethod
+    def batch_size(self) -> int:
+        pass
+
+    @abc.abstractmethod
+    def to_tensors(self) -> Iterable[torch.LongTensor]:
+        pass
+
+
+class Batches(BatchesABC, Sequence[Batch]):
     """A class to represent a sequence of minibatches.
 
     Args:
@@ -220,7 +231,7 @@ class Batches(Sequence[Batch]):
         return ts
 
 
-class StreamBatches(Iterable[Batch]):
+class StreamBatches(BatchesABC, Iterable[Batch]):
     """A class to represent an iterable of minibatches.
 
     Args:
