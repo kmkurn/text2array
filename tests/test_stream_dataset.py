@@ -9,17 +9,14 @@ from text2tensor import StreamDataset, StreamBatches
 def test_init(counter):
     dat = StreamDataset(counter)
     assert isinstance(dat, Iterable)
+    it = takewhile(lambda x: x < 5, dat)
+    assert list(it) == list(range(5))
 
 
 def test_init_stream_non_iterable():
     with pytest.raises(TypeError) as exc:
         StreamDataset(5)
     assert '"stream" is not iterable' in str(exc.value)
-
-
-def test_iter(stream_dataset):
-    it = takewhile(lambda x: x < 5, stream_dataset)
-    assert list(it) == list(range(5))
 
 
 def test_batch(finite_stream_dataset):

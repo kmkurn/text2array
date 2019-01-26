@@ -8,23 +8,15 @@ from text2tensor import Batches, Dataset
 def test_init():
     dat = Dataset(range(5))
     assert isinstance(dat, Sequence)
+    assert len(dat) == 5
+    for i in range(len(dat)):
+        assert dat[i] == i
 
 
 def test_init_samples_non_sequence():
     with pytest.raises(TypeError) as exc:
         Dataset(10)
     assert '"samples" is not a sequence' in str(exc.value)
-
-
-# TODO put this inside test_init
-def test_getitem(dataset):
-    for i in range(5):
-        assert dataset[i] == i
-
-
-# TODO put this inside test_init
-def test_len(dataset):
-    assert len(dataset) == 5
 
 
 class TestShuffle:
