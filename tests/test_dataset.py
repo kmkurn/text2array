@@ -2,7 +2,7 @@ from collections.abc import Sequence
 
 import pytest
 
-from text2tensor import Dataset
+from text2tensor import Batches, Dataset
 
 
 def test_init():
@@ -50,20 +50,17 @@ class TestShuffle:
 
 
 def test_batch(dataset):
-    minibatches = dataset.batch(2)
-    assert isinstance(minibatches, Sequence)
-    assert len(minibatches) == 3
-    assert minibatches[0] == [0, 1]
-    assert minibatches[1] == [2, 3]
-    assert minibatches[2] == [4]
+    bs = dataset.batch(2)
+    assert isinstance(bs, Batches)
+    assert bs.batch_size == 2
+    assert not bs.drop_last
 
 
 def test_batch_exactly(dataset):
-    minibatches = dataset.batch_exactly(2)
-    assert isinstance(minibatches, Sequence)
-    assert len(minibatches) == 2
-    assert minibatches[0] == [0, 1]
-    assert minibatches[1] == [2, 3]
+    bs = dataset.batch_exactly(2)
+    assert isinstance(bs, Batches)
+    assert bs.batch_size == 2
+    assert bs.drop_last
 
 
 def test_batch_nonpositive_batch_size(dataset):
