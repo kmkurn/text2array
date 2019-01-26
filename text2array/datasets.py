@@ -19,7 +19,9 @@ class Dataset(DatasetABC, Sequence[int]):
     """A dataset that fits in memory (no streaming).
 
     Args:
-        samples: Sequence of samples the dataset should contain.
+        samples: Sequence of samples the dataset should contain. This sequence should
+            support indexing by a positive/negative index of type :obj:`int` or a
+            :obj:`slice` object.
     """
 
     def __init__(self, samples: Sequence[int]) -> None:
