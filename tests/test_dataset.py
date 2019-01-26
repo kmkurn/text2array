@@ -16,16 +16,13 @@ def test_init_samples_non_sequence():
     assert '"samples" is not a sequence' in str(exc.value)
 
 
-@pytest.fixture
-def dataset():
-    return Dataset(list(range(5)))
-
-
+# TODO put this inside test_init
 def test_getitem(dataset):
     for i in range(5):
         assert dataset[i] == i
 
 
+# TODO put this inside test_init
 def test_len(dataset):
     assert len(dataset) == 5
 
