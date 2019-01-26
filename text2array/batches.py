@@ -129,4 +129,4 @@ class StreamBatches(BatchesABC, Iterable[Batch]):
             self._bs = bs
 
         def __iter__(self) -> Iterator[np.ndarray]:
-            yield from (np.array(b, np.int32) for b in self._bs)
+            return (np.array(b, np.int32) for b in self._bs)

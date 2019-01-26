@@ -53,5 +53,4 @@ def test_to_arrays(batches):
         t, b = ts[i], batches[i]
         assert isinstance(t, np.ndarray)
         assert t.dtype == np.int32
-        assert t.ndim == 1
-        assert t.shape[0] == len(b)
+        assert t.tolist() == list(b)
