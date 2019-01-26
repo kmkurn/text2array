@@ -4,9 +4,9 @@ from text2array import Dataset, StreamDataset
 
 
 class Counter:
-    def __init__(self, limit=None):
+    def __init__(self):
         self.count = 0
-        self.limit = limit
+        self.limit = 5
 
     def __iter__(self):
         self.count = 0
@@ -30,7 +30,7 @@ def dataset():
 
 @pytest.fixture
 def counter():
-    return Counter(limit=11)
+    return Counter()
 
 
 @pytest.fixture
