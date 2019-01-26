@@ -3,7 +3,7 @@ from itertools import takewhile
 
 import pytest
 
-from text2tensor import StreamDataset
+from text2tensor import StreamDataset, StreamBatches
 
 
 def test_init(counter):
@@ -23,35 +23,17 @@ def test_iter(stream_dataset):
 
 
 def test_batch(finite_stream_dataset):
-    bsize = 2
-    minibatches = finite_stream_dataset.batch(bsize)
-    assert isinstance(minibatches, Iterable)
-
-    it = iter(minibatches)
-    assert next(it) == [0, 1]
-    assert next(it) == [2, 3]
-    assert next(it) == [4, 5]
-    while True:
-        try:
-            assert len(next(it)) <= bsize
-        except StopIteration:
-            break
+    bs = finite_stream_dataset.batch(2)
+    assert isinstance(bs, StreamBatches)
+    assert bs.batch_size == 2
+    assert not bs.drop_last
 
 
 def test_batch_exactly(finite_stream_dataset):
-    bsize = 2
-    minibatches = finite_stream_dataset.batch_exactly(bsize)
-    assert isinstance(minibatches, Iterable)
-
-    it = iter(minibatches)
-    assert next(it) == [0, 1]
-    assert next(it) == [2, 3]
-    assert next(it) == [4, 5]
-    while True:
-        try:
-            assert len(next(it)) == bsize
-        except StopIteration:
-            break
+    bs = finite_stream_dataset.batch_exactly(2)
+    assert isinstance(bs, StreamBatches)
+    assert bs.batch_size == 2
+    assert bs.drop_last
 
 
 def test_batch_nonpositive_batch_size(stream_dataset):

@@ -9,11 +9,11 @@ import torch
 
 class DatasetABC(Iterable[int], metaclass=abc.ABCMeta):  # pragma: no cover
     @abc.abstractmethod
-    def batch(self, batch_size: int) -> Iterable[Sequence[int]]:
+    def batch(self, batch_size: int) -> 'BatchesABC':
         pass
 
     @abc.abstractmethod
-    def batch_exactly(self, batch_size: int) -> Iterable[Sequence[int]]:
+    def batch_exactly(self, batch_size: int) -> 'BatchesABC':
         pass
 
 
@@ -55,25 +55,18 @@ class Dataset(DatasetABC, Sequence[int]):
             self._shuffle_copy()
         return self
 
-    def batch(self, batch_size: int) -> List[Batch]:
+    def batch(self, batch_size: int) -> 'Batches':
         """Group the samples in the dataset into batches.
 
         Args:
             batch_size: Maximum number of samples in each batch.
 
         Returns:
-            The list of batches.
+            The batches.
         """
-        if batch_size <= 0:
-            raise ValueError('batch size must be greater than 0')
+        return Batches(self, batch_size)
 
-        batches = []
-        for begin in range(0, len(self._samples), batch_size):
-            end = begin + batch_size
-            batches.append(self._samples[begin:end])
-        return batches
-
-    def batch_exactly(self, batch_size: int) -> List[Batch]:
+    def batch_exactly(self, batch_size: int) -> 'Batches':
         """Group the samples in the dataset into batches of exact size.
 
         If the length of ``samples`` is not divisible by ``batch_size``, the last
@@ -83,13 +76,9 @@ class Dataset(DatasetABC, Sequence[int]):
             batch_size: Number of samples in each batch.
 
         Returns:
-            The list of batches.
+            The batches.
         """
-        batches = self.batch(batch_size)
-        if len(self._samples) % batch_size != 0:
-            assert len(batches[-1]) < batch_size
-            batches = batches[:-1]
-        return batches
+        return Batches(self, batch_size, drop_last=True)
 
     def _shuffle_inplace(self) -> None:
         assert isinstance(self._samples, MutableSequenceABC)
@@ -123,18 +112,18 @@ class StreamDataset(DatasetABC, Iterable[int]):
     def __iter__(self) -> Iterator[int]:
         return iter(self._stream)
 
-    def batch(self, batch_size: int) -> Iterable[Batch]:
+    def batch(self, batch_size: int) -> 'StreamBatches':
         """Group the samples in the dataset into batches.
 
         Args:
             batch_size: Maximum number of samples in each batch.
 
         Returns:
-            The iterable of batches.
+            The batches.
         """
-        return _Batches(self._stream, batch_size)
+        return StreamBatches(self, batch_size)
 
-    def batch_exactly(self, batch_size: int) -> Iterable[Batch]:
+    def batch_exactly(self, batch_size: int) -> 'StreamBatches':
         """Group the samples in the dataset into batches of exact size.
 
         If the length of ``samples`` is not divisible by ``batch_size``, the last
@@ -144,31 +133,9 @@ class StreamDataset(DatasetABC, Iterable[int]):
             batch_size: Number of samples in each batch.
 
         Returns:
-            The iterable of batches.
+            The batches.
         """
-        return _Batches(self._stream, batch_size, drop=True)
-
-
-class _Batches(Iterable[Batch]):
-    def __init__(self, stream: Iterable[int], bsize: int, drop: bool = False) -> None:
-        if bsize <= 0:
-            raise ValueError('batch size must be greater than 0')
-
-        self._stream = stream
-        self._bsize = bsize
-        self._drop = drop
-
-    def __iter__(self) -> Iterator[Batch]:
-        it, exhausted = iter(self._stream), False
-        while not exhausted:
-            batch: list = []
-            while not exhausted and len(batch) < self._bsize:
-                try:
-                    batch.append(next(it))
-                except StopIteration:
-                    exhausted = True
-            if not self._drop or len(batch) == self._bsize:
-                yield batch
+        return StreamBatches(self, batch_size, drop_last=True)
 
 
 class BatchesABC(Iterable[Batch], metaclass=abc.ABCMeta):  # pragma: no cover
