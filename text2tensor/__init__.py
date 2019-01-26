@@ -182,6 +182,9 @@ class Batches(Sequence[Batch]):
     """
 
     def __init__(self, dataset: Dataset, batch_size: int, drop_last: bool = False) -> None:
+        if batch_size <= 0:
+            raise ValueError('batch size must be greater than 0')
+
         self._dataset = dataset
         self._bsize = batch_size
         self._drop = drop_last
@@ -215,3 +218,24 @@ class Batches(Sequence[Batch]):
             t = torch.tensor(b, dtype=torch.long)
             ts.append(t)
         return ts
+
+
+class StreamBatches(Iterable[Batch]):
+    def __init__(self, dataset: StreamDataset, batch_size: int) -> None:
+        self._dataset = dataset
+        self._bsize = batch_size
+
+    @property
+    def batch_size(self) -> int:
+        return self._bsize
+
+    def __iter__(self) -> Iterator[Batch]:
+        it, exhausted = iter(self._dataset), False
+        while not exhausted:
+            batch: list = []
+            while not exhausted and len(batch) < self._bsize:
+                try:
+                    batch.append(next(it))
+                except StopIteration:
+                    exhausted = True
+            yield batch
