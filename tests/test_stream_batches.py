@@ -11,7 +11,9 @@ class TestInit:
     def test_init(self, finite_stream_dataset):
         bs = StreamBatches(finite_stream_dataset, 2)
         assert bs.batch_size == 2
+        assert not bs.drop_last
         assert isinstance(bs, Iterable)
+
         it = iter(bs)
         assert next(it) == [0, 1]
         assert next(it) == [2, 3]
@@ -24,6 +26,8 @@ class TestInit:
 
     def test_kwargs(self, finite_stream_dataset):
         bs = StreamBatches(finite_stream_dataset, 2, drop_last=True)
+        assert bs.drop_last
+
         it = iter(bs)
         assert next(it) == [0, 1]
         assert next(it) == [2, 3]
