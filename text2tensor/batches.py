@@ -113,7 +113,7 @@ class StreamBatches(BatchesABC, Iterable[Batch]):
                     batch.append(next(it))
                 except StopIteration:
                     exhausted = True
-            if not self._drop or len(batch) == self._bsize:
+            if len(batch) == self._bsize or (batch and not self._drop):
                 yield batch
 
     def to_tensors(self) -> Iterable[torch.LongTensor]:
