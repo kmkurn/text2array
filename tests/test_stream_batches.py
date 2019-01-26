@@ -12,16 +12,16 @@ class TestInit:
         assert bs.batch_size == 2
         assert not bs.drop_last
         assert isinstance(bs, Iterable)
-        assert list(bs) == [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10]]
+        assert list(bs) == [[0, 1], [2, 3], [4]]
 
     def test_kwargs(self, stream_dataset):
         bs = StreamBatches(stream_dataset, 2, drop_last=True)
         assert bs.drop_last
-        assert list(bs) == [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]]
+        assert list(bs) == [[0, 1], [2, 3]]
 
     def test_divisible_length(self, stream_dataset):
         bs = StreamBatches(stream_dataset, 1)
-        assert list(bs) == [[0], [1], [2], [3], [4], [5], [6], [7], [8], [9], [10]]
+        assert list(bs) == [[0], [1], [2], [3], [4]]
 
     def test_nonpositive_batch_size(self, stream_dataset):
         with pytest.raises(ValueError) as exc:
@@ -47,4 +47,4 @@ def test_to_arrays(stream_batches):
 
     assert all(isinstance(t, np.ndarray) for t in ts)
     assert all(t.dtype == np.int32 for t in ts)
-    assert [t.tolist() for t in ts] == [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10]]
+    assert [t.tolist() for t in ts] == [[0, 1], [2, 3], [4]]
