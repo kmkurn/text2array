@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
+import numpy as np
 import pytest
-import torch
 
 from text2tensor import Batches
 
@@ -51,7 +51,7 @@ def test_to_tensors(batches):
     assert len(ts) == len(batches)
     for i in range(len(ts)):
         t, b = ts[i], batches[i]
-        assert torch.is_tensor(t)
-        assert t.dtype == torch.long
-        assert t.dim() == 1
-        assert t.size(0) == len(b)
+        assert isinstance(t, np.ndarray)
+        assert t.dtype == np.int32
+        assert t.ndim == 1
+        assert t.shape[0] == len(b)
