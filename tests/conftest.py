@@ -12,6 +12,7 @@ class Counter:
         self._count = 0
 
     def __iter__(self):
+        self._count = 0
         while True:
             yield self._count
             self._count += 1
@@ -32,9 +33,12 @@ def dataset():
 
 @pytest.fixture
 def counter():
-    c = Counter()
-    yield Counter()
-    c.reset()
+    return Counter()
+
+
+@pytest.fixture
+def finite_counter():
+    return Counter(limit=11)
 
 
 @pytest.fixture
@@ -43,7 +47,5 @@ def stream_dataset(counter):
 
 
 @pytest.fixture
-def finite_stream_dataset():
-    c = Counter(limit=11)
-    yield StreamDataset(c)
-    c.reset()
+def finite_stream_dataset(finite_counter):
+    return StreamDataset(finite_counter)

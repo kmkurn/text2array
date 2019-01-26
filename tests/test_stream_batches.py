@@ -67,7 +67,6 @@ def test_to_tensors(stream_batches):
 
 def test_to_tensors_returns_iterable(finite_stream_batches):
     ts = finite_stream_batches.to_tensors()
-    print(list(ts))
     ts_lst1 = list(ts)
     ts_lst2 = list(ts)
     assert len(ts_lst1) == len(ts_lst2)
