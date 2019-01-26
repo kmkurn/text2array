@@ -4,6 +4,8 @@ from typing import Iterable, Iterator, List, Sequence
 import abc
 import random
 
+import torch
+
 
 class DatasetABC(Iterable[int], metaclass=abc.ABCMeta):  # pragma: no cover
     @abc.abstractmethod
@@ -167,3 +169,49 @@ class _Batches(Iterable[Batch]):
                     exhausted = True
             if not self._drop or len(batch) == self._bsize:
                 yield batch
+
+
+class Batches(Sequence[Batch]):
+    """A class to represent a sequence of minibatches.
+
+    Args:
+        dataset: Dataset to make batches from.
+        batch_size: Maximum number of samples in each batch.
+        drop_last (optional): Whether to drop the last batch when ``batch_size`` does not
+            evenly divide the length of ``dataset``.
+    """
+
+    def __init__(self, dataset: Dataset, batch_size: int, drop_last: bool = False) -> None:
+        self._dataset = dataset
+        self._bsize = batch_size
+        self._drop = drop_last
+
+    @property
+    def batch_size(self) -> int:
+        return self._bsize
+
+    def __getitem__(self, index):
+        if index >= len(self):
+            raise IndexError('index out of range')
+        if index < 0:
+            index += len(self)
+
+        begin = index * self._bsize
+        end = begin + self._bsize
+        return self._dataset[begin:end]
+
+    def __len__(self) -> int:
+        q, r = divmod(len(self._dataset), self._bsize)
+        return q + (1 if q > 0 and not self._drop else 0)
+
+    def to_tensors(self) -> List[torch.LongTensor]:
+        """Convert each minibatch into a tensor.
+
+        Returns:
+            The list of tensors.
+        """
+        ts = []
+        for b in self:
+            t = torch.tensor(b, dtype=torch.long)
+            ts.append(t)
+        return ts
