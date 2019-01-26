@@ -1,4 +1,4 @@
-from typing import Iterable, Iterator, List, Sequence
+from typing import Iterable, Iterator, Sequence
 import abc
 
 import numpy as np
@@ -64,11 +64,11 @@ class Batches(BatchesABC, Sequence[Batch]):
         q, r = divmod(len(self._dataset), self._bsize)
         return q + (1 if q > 0 and not self._drop else 0)
 
-    def to_arrays(self) -> List[np.ndarray]:
+    def to_arrays(self) -> Sequence[np.ndarray]:
         """Convert each minibatch into an ndarray.
 
         Returns:
-            The list of arrays.
+            The sequence of arrays.
         """
         ts = []
         for b in self:
