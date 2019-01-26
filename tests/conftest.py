@@ -30,19 +30,9 @@ def dataset():
 
 @pytest.fixture
 def counter():
-    return Counter()
-
-
-@pytest.fixture
-def finite_counter():
     return Counter(limit=11)
 
 
 @pytest.fixture
 def stream_dataset(counter):
     return StreamDataset(counter)
-
-
-@pytest.fixture
-def finite_stream_dataset(finite_counter):
-    return StreamDataset(finite_counter)

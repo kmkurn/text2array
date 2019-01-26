@@ -5,10 +5,10 @@ import pytest
 from text2array import StreamDataset, StreamBatches
 
 
-def test_init(finite_counter):
-    dat = StreamDataset(finite_counter)
+def test_init(counter):
+    dat = StreamDataset(counter)
     assert isinstance(dat, Iterable)
-    assert list(dat) == list(range(finite_counter.limit))
+    assert list(dat) == list(range(counter.limit))
 
 
 def test_init_stream_non_iterable():
@@ -17,22 +17,22 @@ def test_init_stream_non_iterable():
     assert '"stream" is not iterable' in str(exc.value)
 
 
-def test_can_be_iterated_twice(finite_stream_dataset):
-    dat_lst1 = list(finite_stream_dataset)
-    dat_lst2 = list(finite_stream_dataset)
+def test_can_be_iterated_twice(stream_dataset):
+    dat_lst1 = list(stream_dataset)
+    dat_lst2 = list(stream_dataset)
     assert len(dat_lst1) == len(dat_lst2)
     assert len(dat_lst2) > 0
 
 
-def test_batch(finite_stream_dataset):
-    bs = finite_stream_dataset.batch(2)
+def test_batch(stream_dataset):
+    bs = stream_dataset.batch(2)
     assert isinstance(bs, StreamBatches)
     assert bs.batch_size == 2
     assert not bs.drop_last
 
 
-def test_batch_exactly(finite_stream_dataset):
-    bs = finite_stream_dataset.batch_exactly(2)
+def test_batch_exactly(stream_dataset):
+    bs = stream_dataset.batch_exactly(2)
     assert isinstance(bs, StreamBatches)
     assert bs.batch_size == 2
     assert bs.drop_last
