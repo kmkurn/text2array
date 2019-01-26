@@ -51,7 +51,7 @@ class Batches(BatchesABC, Sequence[Batch]):
         return self._drop
 
     def __getitem__(self, index):
-        if index >= len(self):
+        if index >= len(self) or index < -len(self):
             raise IndexError('index out of range')
         if index < 0:
             index += len(self)

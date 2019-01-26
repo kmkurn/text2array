@@ -5,15 +5,15 @@ from text2array import Dataset, StreamDataset
 
 class Counter:
     def __init__(self, limit=None):
-        self._count = 0
-        self._limit = limit
+        self.count = 0
+        self.limit = limit
 
     def __iter__(self):
-        self._count = 0
+        self.count = 0
         while True:
-            yield self._count
-            self._count += 1
-            if self._limit is not None and self._count >= self._limit:
+            yield self.count
+            self.count += 1
+            if self.limit is not None and self.count >= self.limit:
                 break
 
 
