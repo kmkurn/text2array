@@ -36,6 +36,15 @@ def test_batch(stream_dataset):
     assert list(bs_lst[2]) == [dat[4]]
 
 
+def test_batch_size_evenly_divides(stream_dataset):
+    bs = stream_dataset.batch(1)
+    dat = list(stream_dataset)
+    bs_lst = list(bs)
+    assert len(bs_lst) == len(dat)
+    for i in range(len(bs_lst)):
+        assert list(bs_lst[i]) == [dat[i]]
+
+
 def test_batch_exactly(stream_dataset):
     bs = stream_dataset.batch_exactly(2)
     assert isinstance(bs, Iterator)
@@ -45,9 +54,6 @@ def test_batch_exactly(stream_dataset):
     dat = list(stream_dataset)
     assert list(bs_lst[0]) == [dat[0], dat[1]]
     assert list(bs_lst[1]) == [dat[2], dat[3]]
-
-
-# TODO add test for when batch size evenly divides length of samples
 
 
 def test_batch_nonpositive_batch_size(stream_dataset):

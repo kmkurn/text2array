@@ -50,6 +50,14 @@ def test_batch(dataset):
     assert list(bs_lst[2]) == [dataset[4]]
 
 
+def test_batch_size_evenly_divides(dataset):
+    bs = dataset.batch(1)
+    bs_lst = list(bs)
+    assert len(bs_lst) == len(dataset)
+    for i in range(len(bs_lst)):
+        assert list(bs_lst[i]) == [dataset[i]]
+
+
 def test_batch_exactly(dataset):
     bs = dataset.batch_exactly(2)
     assert isinstance(bs, Iterator)
