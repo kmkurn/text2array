@@ -5,6 +5,7 @@ FieldName = str
 FieldValue = Union[str, float, int]
 
 
+# TODO properly ignore abstractmethod from coverage
 class Sample(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod

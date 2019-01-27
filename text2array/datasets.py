@@ -4,15 +4,16 @@ from typing import Iterable, Iterator, Sequence
 import abc
 import random
 
+from .batches import Batch
 from .samples import Sample
 
 
 class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):  # pragma: no cover
     @abc.abstractmethod
-    def batch(self, batch_size: int) -> Iterator['Batch']:
+    def batch(self, batch_size: int) -> Iterator[Batch]:
         pass
 
-    def batch_exactly(self, batch_size: int) -> Iterator['Batch']:
+    def batch_exactly(self, batch_size: int) -> Iterator[Batch]:
         """Group the samples in the dataset into batches of exact size.
 
         If the number of samples is not divisible by ``batch_size``, the last
@@ -42,7 +43,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
 
         self._samples = samples
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> Sample:
         return self._samples[index]
 
     def __len__(self) -> int:
@@ -64,7 +65,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
             self._shuffle_copy()
         return self
 
-    def batch(self, batch_size: int) -> Iterator['Batch']:
+    def batch(self, batch_size: int) -> Iterator[Batch]:
         """Group the samples in the dataset into batches.
 
         Args:
@@ -109,10 +110,10 @@ class StreamDataset(DatasetABC):
 
         self._stream = stream
 
-    def __iter__(self) -> Iterator[int]:
+    def __iter__(self) -> Iterator[Sample]:
         return iter(self._stream)
 
-    def batch(self, batch_size: int) -> Iterator['Batch']:
+    def batch(self, batch_size: int) -> Iterator[Batch]:
         """Group the samples in the dataset into batches.
 
         Args:
@@ -134,7 +135,3 @@ class StreamDataset(DatasetABC):
                     exhausted = True
             if batch:
                 yield Batch(batch)
-
-
-# Need to import here to avoid circular dependency
-from .batches import Batch
