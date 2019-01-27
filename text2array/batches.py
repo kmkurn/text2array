@@ -6,7 +6,7 @@ from .samples import FieldName, FieldValue, SampleABC
 
 
 class Batch(Sequence[SampleABC]):
-    """A class to represent a single batch.i
+    """A class to represent a single batch.
 
     Args:
         samples: Sequence of samples this batch should contain.
