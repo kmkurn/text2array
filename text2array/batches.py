@@ -28,8 +28,11 @@ class Batch(Sequence[Sample]):
         except KeyError:
             raise AttributeError(f"some samples have no field '{name}'")
 
-    def to_array(self) -> Mapping[FieldName, np.ndarray]:
+    def to_array(self, pad_with: int = 0) -> Mapping[FieldName, np.ndarray]:
         """Convert the batch into :class:`np.ndarray`.
+
+        Args:
+            pad_with: Pad sequential field values with this number.
 
         Returns:
             A mapping from field names to :class:`np.ndarray`s whose first
@@ -52,21 +55,21 @@ class Batch(Sequence[Sample]):
             if isinstance(vs[0], SequenceABC):
                 vs = cast(Union[Sequence[Sequence[float]], Sequence[Sequence[int]]], vs)
                 maxlen = max(len(v) for v in vs)
-                vs = self._pad(vs, maxlen)
+                vs = self._pad(vs, maxlen, with_=pad_with)
             arrs[name] = np.array(vs)
 
         return arrs
 
-    # TODO customize padding token
     @staticmethod
     def _pad(
             vs: Union[Sequence[Sequence[float]], Sequence[Sequence[int]]],
             maxlen: int,
+            with_: int = 0,
     ) -> Union[Sequence[Sequence[float]], Sequence[Sequence[int]]]:
         res = []
         for v in vs:
             v, n = list(v), len(v)
             for _ in range(maxlen - n):
-                v.append(0)
+                v.append(with_)
             res.append(v)
         return res
