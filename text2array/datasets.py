@@ -8,7 +8,7 @@ from .batches import Batch
 from .samples import Sample
 
 
-class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):  # pragma: no cover
+class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def batch(self, batch_size: int) -> Iterator[Batch]:
         pass

@@ -1,0 +1,6 @@
+[report]
+exclude_lines =
+    # Re-enable standard pragma
+    pragma: no cover
+    # abstract method
+    abstractmethod
