@@ -77,6 +77,14 @@ def test_to_array(batch):
         assert all(c == pytest.approx(0, abs=1e-7) for c in r[len(s['fs']):])
 
 
+def test_to_array_custom_padding(batch):
+    arr = batch.to_array(pad_with=1)
+    for r, s in zip(arr['is'], batch):
+        assert all(c == 1 for c in r[len(s['is']):])
+    for r, s in zip(arr['fs'], batch):
+        assert all(c == pytest.approx(1) for c in r[len(s['fs']):])
+
+
 def test_to_array_no_common_field_names(samples):
     samples_ = list(samples)
     samples_.append({'foo': 10})
