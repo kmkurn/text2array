@@ -11,7 +11,7 @@ def setup_rng():
 
 @pytest.fixture
 def samples():
-    return [TestSample(i, i * i) for i in range(5)]
+    return [TestSample(i, (i + 1) / 3) for i in range(5)]
 
 
 @pytest.fixture
