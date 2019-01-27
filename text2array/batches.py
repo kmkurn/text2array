@@ -28,6 +28,7 @@ class Batch(Sequence[SampleABC]):
             raise AttributeError(f"some samples have no field '{name}'")
 
     def to_array(self, vocab: Optional['Vocab'] = None) -> 'BatchArray':
+        # TODO fix docstring
         """Convert the batch into numpy array.
 
         Returns:
