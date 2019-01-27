@@ -2,7 +2,7 @@ from typing import Mapping, Union
 import abc
 
 FieldName = str
-FieldValue = Union[float, int]
+FieldValue = Union[float, int, str]
 
 
 class SampleABC(metaclass=abc.ABCMeta):

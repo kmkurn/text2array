@@ -1,4 +1,4 @@
-from typing import Sequence, Set
+from typing import Mapping, Optional, Sequence, Set
 
 import numpy as np
 
@@ -27,7 +27,7 @@ class Batch(Sequence[SampleABC]):
         except KeyError:
             raise AttributeError(f"some samples have no field '{name}'")
 
-    def to_array(self) -> 'BatchArray':
+    def to_array(self, stoi: Optional[Mapping[str, int]] = None) -> 'BatchArray':
         """Convert the batch into numpy array.
 
         Returns:
@@ -48,7 +48,11 @@ class Batch(Sequence[SampleABC]):
 
         arr = BatchArray()
         for name in common:
-            setattr(arr, name, np.array(getattr(self, name)))
+            if type(getattr(self._samples[0], name)) == str and stoi is not None:
+                vs = [stoi[v] for v in getattr(self, name)]
+            else:
+                vs = getattr(self, name)
+            setattr(arr, name, np.array(vs))
         return arr
 
 
