@@ -4,18 +4,30 @@ from typing import Iterable, Iterator, Sequence
 import abc
 import random
 
+from .samples import Sample
 
-class DatasetABC(Iterable[int], metaclass=abc.ABCMeta):  # pragma: no cover
+
+class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):  # pragma: no cover
     @abc.abstractmethod
-    def batch(self, batch_size: int) -> 'BatchesABC':
+    def batch(self, batch_size: int) -> Iterator['Batch']:
         pass
 
-    @abc.abstractmethod
-    def batch_exactly(self, batch_size: int) -> 'BatchesABC':
-        pass
+    def batch_exactly(self, batch_size: int) -> Iterator['Batch']:
+        """Group the samples in the dataset into batches of exact size.
+
+        If the number of samples is not divisible by ``batch_size``, the last
+        batch (whose length is less than ``batch_size``) is dropped.
+
+        Args:
+            batch_size: Number of samples in each batch.
+
+        Returns:
+            The iterator of batches.
+        """
+        return (b for b in self.batch(batch_size) if len(b) == batch_size)
 
 
-class Dataset(DatasetABC, Sequence[int]):
+class Dataset(DatasetABC, Sequence[Sample]):
     """A dataset that fits in memory (no streaming).
 
     Args:
@@ -24,7 +36,7 @@ class Dataset(DatasetABC, Sequence[int]):
             :obj:`slice` object.
     """
 
-    def __init__(self, samples: Sequence[int]) -> None:
+    def __init__(self, samples: Sequence[Sample]) -> None:
         if not isinstance(samples, SequenceABC):
             raise TypeError('"samples" is not a sequence')
 
@@ -52,30 +64,21 @@ class Dataset(DatasetABC, Sequence[int]):
             self._shuffle_copy()
         return self
 
-    def batch(self, batch_size: int) -> 'Batches':
+    def batch(self, batch_size: int) -> Iterator['Batch']:
         """Group the samples in the dataset into batches.
 
         Args:
             batch_size: Maximum number of samples in each batch.
 
         Returns:
-            The batches.
+            The iterator of batches.
         """
-        return Batches(self, batch_size)
+        if batch_size <= 0:
+            raise ValueError('batch size must be greater than 0')
 
-    def batch_exactly(self, batch_size: int) -> 'Batches':
-        """Group the samples in the dataset into batches of exact size.
-
-        If the length of ``samples`` is not divisible by ``batch_size``, the last
-        batch (whose length is less than ``batch_size``) is dropped.
-
-        Args:
-            batch_size: Number of samples in each batch.
-
-        Returns:
-            The batches.
-        """
-        return Batches(self, batch_size, drop_last=True)
+        for begin in range(0, len(self._samples), batch_size):
+            end = begin + batch_size
+            yield Batch(self._samples[begin:end])
 
     def _shuffle_inplace(self) -> None:
         assert isinstance(self._samples, MutableSequenceABC)
@@ -93,14 +96,14 @@ class Dataset(DatasetABC, Sequence[int]):
         self._samples = shuf_samples
 
 
-class StreamDataset(DatasetABC, Iterable[int]):
+class StreamDataset(DatasetABC):
     """A dataset that streams its samples.
 
     Args:
         stream: Stream of examples the dataset should stream from.
     """
 
-    def __init__(self, stream: Iterable[int]) -> None:
+    def __init__(self, stream: Iterable[Sample]) -> None:
         if not isinstance(stream, IterableABC):
             raise TypeError('"stream" is not iterable')
 
@@ -109,31 +112,29 @@ class StreamDataset(DatasetABC, Iterable[int]):
     def __iter__(self) -> Iterator[int]:
         return iter(self._stream)
 
-    def batch(self, batch_size: int) -> 'StreamBatches':
+    def batch(self, batch_size: int) -> Iterator['Batch']:
         """Group the samples in the dataset into batches.
 
         Args:
             batch_size: Maximum number of samples in each batch.
 
         Returns:
-            The batches.
+            The iterator of batches.
         """
-        return StreamBatches(self, batch_size)
+        if batch_size <= 0:
+            raise ValueError('batch size must be greater than 0')
 
-    def batch_exactly(self, batch_size: int) -> 'StreamBatches':
-        """Group the samples in the dataset into batches of exact size.
-
-        If the length of ``samples`` is not divisible by ``batch_size``, the last
-        batch (whose length is less than ``batch_size``) is dropped.
-
-        Args:
-            batch_size: Number of samples in each batch.
-
-        Returns:
-            The batches.
-        """
-        return StreamBatches(self, batch_size, drop_last=True)
+        it, exhausted = iter(self._stream), False
+        while not exhausted:
+            batch: list = []
+            while not exhausted and len(batch) < batch_size:
+                try:
+                    batch.append(next(it))
+                except StopIteration:
+                    exhausted = True
+            if batch:
+                yield Batch(batch)
 
 
 # Need to import here to avoid circular dependency
-from .batches import BatchesABC, Batches, StreamBatches
+from .batches import Batch

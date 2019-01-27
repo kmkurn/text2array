@@ -1,8 +1,8 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 
 import pytest
 
-from text2array import StreamDataset, StreamBatches
+from text2array import Batch, StreamDataset
 
 
 def test_init(stream):
@@ -26,23 +26,35 @@ def test_can_be_iterated_twice(stream_dataset):
 
 def test_batch(stream_dataset):
     bs = stream_dataset.batch(2)
-    assert isinstance(bs, StreamBatches)
-    assert bs.batch_size == 2
-    assert not bs.drop_last
+    assert isinstance(bs, Iterator)
+    bs_lst = list(bs)
+    assert len(bs_lst) == 3
+    assert all(isinstance(b, Batch) for b in bs_lst)
+    dat = list(stream_dataset)
+    assert list(bs_lst[0]) == [dat[0], dat[1]]
+    assert list(bs_lst[1]) == [dat[2], dat[3]]
+    assert list(bs_lst[2]) == [dat[4]]
 
 
 def test_batch_exactly(stream_dataset):
     bs = stream_dataset.batch_exactly(2)
-    assert isinstance(bs, StreamBatches)
-    assert bs.batch_size == 2
-    assert bs.drop_last
+    assert isinstance(bs, Iterator)
+    bs_lst = list(bs)
+    assert len(bs_lst) == 2
+    assert all(isinstance(b, Batch) for b in bs_lst)
+    dat = list(stream_dataset)
+    assert list(bs_lst[0]) == [dat[0], dat[1]]
+    assert list(bs_lst[1]) == [dat[2], dat[3]]
+
+
+# TODO add test for when batch size evenly divides length of samples
 
 
 def test_batch_nonpositive_batch_size(stream_dataset):
     with pytest.raises(ValueError) as exc:
-        stream_dataset.batch(0)
+        next(stream_dataset.batch(0))
     assert 'batch size must be greater than 0' in str(exc.value)
 
     with pytest.raises(ValueError) as exc:
-        stream_dataset.batch_exactly(0)
+        next(stream_dataset.batch_exactly(0))
     assert 'batch size must be greater than 0' in str(exc.value)
