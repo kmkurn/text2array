@@ -33,8 +33,8 @@ def test_getattr(batch):
 
 def test_getattr_invalid_name(batch):
     with pytest.raises(AttributeError) as exc:
-        batch.z
-    assert "some samples have no field 'z'" in str(exc.value)
+        batch.foo
+    assert "some samples have no field 'foo'" in str(exc.value)
 
 
 def test_to_array(batch):
@@ -47,6 +47,18 @@ def test_to_array(batch):
     assert arr.y.shape[0] == len(batch)
     for i in range(len(batch)):
         assert arr.y[i] == pytest.approx(batch[i].y)
+    assert isinstance(arr.z, np.ndarray)
+    assert arr.z.tolist() == list(batch.z)
+
+
+def test_to_array_with_stoi(batch):
+    stoi = {'word-0': 0, 'word-1': 1, 'word-2': 2, 'word-3': 3, 'word-4': 4}
+    arr = batch.to_array(stoi=stoi)
+    assert arr.z.dtype.name.startswith('int')
+    assert arr.z.tolist() == [stoi[s.z] for s in batch]
+
+
+# TODO what if more than one fields are str?
 
 
 def test_to_array_no_common_field_names(samples):
@@ -55,7 +67,7 @@ def test_to_array_no_common_field_names(samples):
     class FooSample(SampleABC):
         @property
         def fields(self):
-            return {'z': 10}
+            return {'foo': 10}
 
     samples.append(FooSample())
     batch = Batch(samples)
