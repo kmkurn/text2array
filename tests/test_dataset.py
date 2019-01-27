@@ -30,7 +30,7 @@ class TestShuffle:
         after = list(dataset)
 
         assert retval is dataset
-        assert before != after and sorted(before) == sorted(after)
+        assert before != after and len(before) == len(after) and all(x in after for x in before)
 
     def test_mutable_seq(self, setup_rng, dataset):
         self.assert_shuffle(dataset)

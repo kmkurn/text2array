@@ -2,20 +2,20 @@ from typing import Mapping, Sequence, Set
 
 import numpy as np
 
-from .samples import FieldName, FieldValue, SampleABC
+from .samples import FieldName, FieldValue, Sample
 
 
-class Batch(Sequence[SampleABC]):
+class Batch(Sequence[Sample]):
     """A class to represent a single batch.
 
     Args:
         samples: Sequence of samples this batch should contain.
     """
 
-    def __init__(self, samples: Sequence[SampleABC]) -> None:
+    def __init__(self, samples: Sequence[Sample]) -> None:
         self._samples = samples
 
-    def __getitem__(self, index) -> SampleABC:
+    def __getitem__(self, index) -> Sample:
         return self._samples[index]
 
     def __len__(self) -> int:
@@ -23,7 +23,7 @@ class Batch(Sequence[SampleABC]):
 
     def get(self, name: str) -> Sequence[FieldValue]:
         try:
-            return [s.fields[name] for s in self._samples]
+            return [s[name] for s in self._samples]
         except KeyError:
             raise AttributeError(f"some samples have no field '{name}'")
 
@@ -37,9 +37,9 @@ class Batch(Sequence[SampleABC]):
         common: Set[FieldName] = set()
         for s in self._samples:
             if common:
-                common.intersection_update(s.fields)
+                common.intersection_update(s)
             else:
-                common = set(s.fields)
+                common = set(s)
 
         if not common:
             raise RuntimeError('some samples have no common field names with the others')
