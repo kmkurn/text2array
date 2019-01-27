@@ -20,15 +20,15 @@ def batch(samples):
 
 
 def test_getattr(batch):
-    assert isinstance(batch.x, Sequence)
-    assert len(batch.x) == len(batch)
+    assert isinstance(batch.int_, Sequence)
+    assert len(batch.int_) == len(batch)
     for i in range(len(batch)):
-        assert batch.x[i] == batch[i].x
+        assert batch.int_[i] == batch[i].int_
 
-    assert isinstance(batch.y, Sequence)
-    assert len(batch.y) == len(batch)
+    assert isinstance(batch.float_, Sequence)
+    assert len(batch.float_) == len(batch)
     for i in range(len(batch)):
-        assert batch.y[i] == pytest.approx(batch[i].y)
+        assert batch.float_[i] == pytest.approx(batch[i].float_)
 
 
 def test_getattr_invalid_name(batch):
@@ -41,28 +41,28 @@ def test_to_array(batch):
     arr = batch.to_array()
     assert isinstance(arr, BatchArray)
 
-    assert isinstance(arr.x, np.ndarray)
-    assert arr.x.tolist() == list(batch.x)
-    assert isinstance(arr.y, np.ndarray)
-    assert arr.y.shape[0] == len(batch)
+    assert isinstance(arr.int_, np.ndarray)
+    assert arr.int_.tolist() == list(batch.int_)
+    assert isinstance(arr.float_, np.ndarray)
+    assert arr.float_.shape[0] == len(batch)
     for i in range(len(batch)):
-        assert arr.y[i] == pytest.approx(batch[i].y)
-    assert isinstance(arr.z, np.ndarray)
-    assert arr.z.tolist() == list(batch.z)
+        assert arr.float_[i] == pytest.approx(batch[i].float_)
+    assert isinstance(arr.str1, np.ndarray)
+    assert arr.str1.tolist() == list(batch.str1)
 
 
 def test_to_array_with_vocab(batch):
     vocab = {
-        'z': {v: i
-              for i, v in enumerate(batch.z)},
-        'w': {v: i
-              for i, v in enumerate(batch.w)},
+        'str1': {v: i
+                 for i, v in enumerate(batch.str1)},
+        'str2': {v: i
+                 for i, v in enumerate(batch.str2)},
     }
     arr = batch.to_array(vocab=vocab)
-    assert arr.z.dtype.name.startswith('int')
-    assert arr.z.tolist() == [vocab['z'][s.z] for s in batch]
-    assert arr.w.dtype.name.startswith('int')
-    assert arr.w.tolist() == [vocab['w'][s.w] for s in batch]
+    assert arr.str1.dtype.name.startswith('int')
+    assert arr.str1.tolist() == [vocab['str1'][s.str1] for s in batch]
+    assert arr.str2.dtype.name.startswith('int')
+    assert arr.str2.tolist() == [vocab['str2'][s.str2] for s in batch]
 
 
 def test_to_array_no_common_field_names(samples):
