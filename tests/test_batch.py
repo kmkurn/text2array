@@ -23,12 +23,12 @@ def test_get(batch):
     assert isinstance(batch.get('i'), Sequence)
     assert len(batch.get('i')) == len(batch)
     for i in range(len(batch)):
-        assert batch.get('i')[i] == batch[i].fields['i']
+        assert batch.get('i')[i] == batch[i]['i']
 
     assert isinstance(batch.get('f'), Sequence)
     assert len(batch.get('f')) == len(batch)
     for i in range(len(batch)):
-        assert batch.get('f')[i] == pytest.approx(batch[i].fields['f'])
+        assert batch.get('f')[i] == pytest.approx(batch[i]['f'])
 
 
 def test_get_invalid_name(batch):
@@ -46,19 +46,12 @@ def test_to_array(batch):
     assert isinstance(arr['f'], np.ndarray)
     assert arr['f'].shape[0] == len(batch)
     for i in range(len(batch)):
-        assert arr['f'][i] == pytest.approx(batch[i].fields['f'])
+        assert arr['f'][i] == pytest.approx(batch[i]['f'])
 
 
 def test_to_array_no_common_field_names(samples):
-    from text2array import SampleABC
-
-    class FooSample(SampleABC):
-        @property
-        def fields(self):
-            return {'foo': 10}
-
     samples_ = list(samples)
-    samples_.append(FooSample())
+    samples_.append({'foo': 10})
     batch = Batch(samples_)
 
     with pytest.raises(RuntimeError) as exc:
