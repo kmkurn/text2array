@@ -1,6 +1,6 @@
 import pytest
 
-from text2array import Dataset, StreamDataset
+from text2array import Dataset, Sample, StreamDataset
 
 
 @pytest.fixture
@@ -11,7 +11,7 @@ def setup_rng():
 
 @pytest.fixture
 def samples():
-    return [Sample(i, i * i) for i in range(5)]
+    return [TestSample(i, i * i) for i in range(5)]
 
 
 @pytest.fixture
@@ -29,13 +29,17 @@ def stream_dataset(stream):
     return StreamDataset(stream)
 
 
-class Sample:
+class TestSample(Sample):
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
     def __lt__(self, s):
         return self.x < s.x or (self.x == s.x and self.y < s.y)
+
+    @property
+    def fields(self):
+        return {'x': self.x, 'y': self.y}
 
 
 class Stream:
