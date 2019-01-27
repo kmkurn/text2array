@@ -30,6 +30,17 @@ def test_get(batch):
     for i in range(len(batch)):
         assert batch.get('f')[i] == pytest.approx(batch[i]['f'])
 
+    assert isinstance(batch.get('is'), Sequence)
+    assert len(batch.get('is')) == len(batch)
+    for i in range(len(batch)):
+        assert list(batch.get('is')[i]) == list(batch[i]['is'])
+
+    assert isinstance(batch.get('fs'), Sequence)
+    assert len(batch.get('fs')) == len(batch)
+    for i in range(len(batch)):
+        for f1, f2 in zip(batch.get('fs')[i], batch[i]['fs']):
+            assert f1 == pytest.approx(f2)
+
 
 def test_get_invalid_name(batch):
     with pytest.raises(AttributeError) as exc:
@@ -42,11 +53,28 @@ def test_to_array(batch):
     assert isinstance(arr, Mapping)
 
     assert isinstance(arr['i'], np.ndarray)
+    assert arr['i'].shape == (len(batch), )
     assert arr['i'].tolist() == list(batch.get('i'))
+
     assert isinstance(arr['f'], np.ndarray)
-    assert arr['f'].shape[0] == len(batch)
+    assert arr['f'].shape == (len(batch), )
     for i in range(len(batch)):
         assert arr['f'][i] == pytest.approx(batch[i]['f'])
+
+    assert isinstance(arr['is'], np.ndarray)
+    maxlen = max(len(x) for x in batch.get('is'))
+    assert arr['is'].shape == (len(batch), maxlen)
+    for r, s in zip(arr['is'], batch):
+        assert r[:len(s['is'])].tolist() == list(s['is'])
+        assert all(c == 0 for c in r[len(s['is']):])
+
+    assert isinstance(arr['fs'], np.ndarray)
+    maxlen = max(len(x) for x in batch.get('fs'))
+    assert arr['fs'].shape == (len(batch), maxlen)
+    for r, s in zip(arr['fs'], batch):
+        for c, f in zip(r, s['fs']):
+            assert c == pytest.approx(f)
+        assert all(c == pytest.approx(0, abs=1e-7) for c in r[len(s['fs']):])
 
 
 def test_to_array_no_common_field_names(samples):

@@ -1,5 +1,5 @@
-from typing import Mapping, Union
+from typing import Mapping, Sequence, Union
 
 FieldName = str
-FieldValue = Union[float, int, str]
+FieldValue = Union[float, int, Sequence[float], Sequence[int]]
 Sample = Mapping[FieldName, FieldValue]

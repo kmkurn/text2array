@@ -11,7 +11,12 @@ def setup_rng():
 
 @pytest.fixture
 def samples():
-    return [{'i': i, 'f': (i + 1) / 3} for i in range(5)]
+    return [{
+        'i': i,
+        'f': (i + 1) / 3,
+        'is': list(range(i + 1)),
+        'fs': [0.6 * (j + 1) for j in range(i + 1)]
+    } for i in range(5)]
 
 
 @pytest.fixture

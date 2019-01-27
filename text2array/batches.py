@@ -1,4 +1,5 @@
-from typing import Mapping, Sequence, Set
+from collections.abc import Sequence as SequenceABC
+from typing import Mapping, Sequence, Set, Union, cast
 
 import numpy as np
 
@@ -43,5 +44,29 @@ class Batch(Sequence[Sample]):
 
         if not common:
             raise RuntimeError('some samples have no common field names with the others')
+        assert self._samples  # if `common` isn't empty, neither is `_samples`
 
-        return {name: np.array(self.get(name)) for name in common}
+        arrs = {}
+        for name in common:
+            vs = self.get(name)
+            if isinstance(vs[0], SequenceABC):
+                vs = cast(Union[Sequence[Sequence[float]], Sequence[Sequence[int]]], vs)
+                maxlen = max(len(v) for v in vs)
+                vs = self._pad(vs, maxlen)
+            arrs[name] = np.array(vs)
+
+        return arrs
+
+    # TODO customize padding token
+    @staticmethod
+    def _pad(
+            vs: Union[Sequence[Sequence[float]], Sequence[Sequence[int]]],
+            maxlen: int,
+    ) -> Union[Sequence[Sequence[float]], Sequence[Sequence[int]]]:
+        res = []
+        for v in vs:
+            v, n = list(v), len(v)
+            for _ in range(maxlen - n):
+                v.append(0)
+            res.append(v)
+        return res
