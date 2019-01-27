@@ -4,6 +4,12 @@ from .samples import FieldValue, SampleABC
 
 
 class Batch(Sequence[SampleABC]):
+    """A class to represent a single batch.i
+
+    Args:
+        samples: Sequence of samples this batch should contain.
+    """
+
     def __init__(self, samples: Sequence[SampleABC]) -> None:
         self._samples = samples
 
