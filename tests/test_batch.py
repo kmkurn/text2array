@@ -1,8 +1,9 @@
 from collections.abc import Sequence
 
+import numpy as np
 import pytest
 
-from text2array import Batch
+from text2array import Batch, BatchArray
 
 
 def test_init(samples):
@@ -34,3 +35,29 @@ def test_getattr_invalid_name(batch):
     with pytest.raises(AttributeError) as exc:
         batch.z
     assert "some samples have no field 'z'" in str(exc.value)
+
+
+def test_to_array(batch):
+    arr = batch.to_array()
+    assert isinstance(arr, BatchArray)
+
+    assert isinstance(arr.x, np.ndarray)
+    assert arr.x.tolist() == list(batch.x)
+    assert isinstance(arr.y, np.ndarray)
+    assert arr.y.tolist() == list(batch.y)
+
+
+def test_to_array_no_common_field_names(samples):
+    from text2array import SampleABC
+
+    class FooSample(SampleABC):
+        @property
+        def fields(self):
+            return {'z': 10}
+
+    samples.append(FooSample())
+    batch = Batch(samples)
+
+    with pytest.raises(RuntimeError) as exc:
+        batch.to_array()
+    assert 'some samples have no common field names with the others' in str(exc.value)
