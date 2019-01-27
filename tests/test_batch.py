@@ -51,14 +51,18 @@ def test_to_array(batch):
     assert arr.z.tolist() == list(batch.z)
 
 
-def test_to_array_with_stoi(batch):
-    stoi = {'word-0': 0, 'word-1': 1, 'word-2': 2, 'word-3': 3, 'word-4': 4}
-    arr = batch.to_array(stoi=stoi)
+def test_to_array_with_vocab(batch):
+    vocab = {
+        'z': {v: i
+              for i, v in enumerate(batch.z)},
+        'w': {v: i
+              for i, v in enumerate(batch.w)},
+    }
+    arr = batch.to_array(vocab=vocab)
     assert arr.z.dtype.name.startswith('int')
-    assert arr.z.tolist() == [stoi[s.z] for s in batch]
-
-
-# TODO what if more than one fields are str?
+    assert arr.z.tolist() == [vocab['z'][s.z] for s in batch]
+    assert arr.w.dtype.name.startswith('int')
+    assert arr.w.tolist() == [vocab['w'][s.w] for s in batch]
 
 
 def test_to_array_no_common_field_names(samples):

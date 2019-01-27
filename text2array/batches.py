@@ -27,7 +27,7 @@ class Batch(Sequence[SampleABC]):
         except KeyError:
             raise AttributeError(f"some samples have no field '{name}'")
 
-    def to_array(self, stoi: Optional[Mapping[str, int]] = None) -> 'BatchArray':
+    def to_array(self, vocab: Optional['Vocab'] = None) -> 'BatchArray':
         """Convert the batch into numpy array.
 
         Returns:
@@ -45,15 +45,23 @@ class Batch(Sequence[SampleABC]):
 
         if not common:
             raise RuntimeError('some samples have no common field names with the others')
+        assert self._samples  # if `common` isn't empty, neither is `samples`
 
         arr = BatchArray()
         for name in common:
-            if type(getattr(self._samples[0], name)) == str and stoi is not None:
-                vs = [stoi[v] for v in getattr(self, name)]
+            if type(getattr(self._samples[0], name)) == str and vocab is not None:
+                stoi = vocab.get(name)
+                if stoi is not None:
+                    vs = [stoi[v] for v in getattr(self, name)]
+                else:
+                    vs = getattr(self, name)
             else:
                 vs = getattr(self, name)
             setattr(arr, name, np.array(vs))
         return arr
+
+
+Vocab = Mapping[FieldName, Mapping[str, int]]
 
 
 class BatchArray:
