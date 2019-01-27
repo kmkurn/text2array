@@ -28,7 +28,7 @@ def test_getattr(batch):
     assert isinstance(batch.y, Sequence)
     assert len(batch.y) == len(batch)
     for i in range(len(batch)):
-        assert batch.y[i] == batch[i].y
+        assert batch.y[i] == pytest.approx(batch[i].y)
 
 
 def test_getattr_invalid_name(batch):
@@ -44,7 +44,9 @@ def test_to_array(batch):
     assert isinstance(arr.x, np.ndarray)
     assert arr.x.tolist() == list(batch.x)
     assert isinstance(arr.y, np.ndarray)
-    assert arr.y.tolist() == list(batch.y)
+    assert arr.y.shape[0] == len(batch)
+    for i in range(len(batch)):
+        assert arr.y[i] == pytest.approx(batch[i].y)
 
 
 def test_to_array_no_common_field_names(samples):
