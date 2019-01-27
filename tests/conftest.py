@@ -31,23 +31,23 @@ def stream_dataset(stream):
 
 class TestSample(SampleABC):
     def __init__(self, x, y, z, w):
-        self.int_ = x
-        self.float_ = y
-        self.str1 = z
-        self.str2 = w
+        self.x = x
+        self.y = y
+        self.z = z
+        self.w = w
 
     def __lt__(self, s):
-        if self.int_ != s.int_:
-            return self.int_ < s.int_
-        if self.float_ != s.float_:
-            return self.float_ < s.float_
-        if self.str1 != s.str1:
-            return self.str1 < s.str1
-        return self.str2 < s.str2
+        if self.x != s.x:
+            return self.x < s.x
+        if self.y != s.y:
+            return self.y < s.y
+        if self.z != s.z:
+            return self.z < s.z
+        return self.w < s.w
 
     @property
     def fields(self):
-        return {'int_': self.int_, 'float_': self.float_, 'str1': self.str1, 'str2': self.str2}
+        return {'i': self.x, 'f': self.y, 's1': self.z, 's2': self.w}
 
 
 class Stream:

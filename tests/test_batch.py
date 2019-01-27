@@ -1,9 +1,9 @@
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 import numpy as np
 import pytest
 
-from text2array import Batch, BatchArray
+from text2array import Batch
 
 
 def test_init(samples):
@@ -19,50 +19,34 @@ def batch(samples):
     return Batch(samples)
 
 
-def test_getattr(batch):
-    assert isinstance(batch.int_, Sequence)
-    assert len(batch.int_) == len(batch)
+def test_get(batch):
+    assert isinstance(batch.get('i'), Sequence)
+    assert len(batch.get('i')) == len(batch)
     for i in range(len(batch)):
-        assert batch.int_[i] == batch[i].int_
+        assert batch.get('i')[i] == batch[i].fields['i']
 
-    assert isinstance(batch.float_, Sequence)
-    assert len(batch.float_) == len(batch)
+    assert isinstance(batch.get('f'), Sequence)
+    assert len(batch.get('f')) == len(batch)
     for i in range(len(batch)):
-        assert batch.float_[i] == pytest.approx(batch[i].float_)
+        assert batch.get('f')[i] == pytest.approx(batch[i].fields['f'])
 
 
-def test_getattr_invalid_name(batch):
+def test_get_invalid_name(batch):
     with pytest.raises(AttributeError) as exc:
-        batch.foo
+        batch.get('foo')
     assert "some samples have no field 'foo'" in str(exc.value)
 
 
 def test_to_array(batch):
     arr = batch.to_array()
-    assert isinstance(arr, BatchArray)
+    assert isinstance(arr, Mapping)
 
-    assert isinstance(arr.int_, np.ndarray)
-    assert arr.int_.tolist() == list(batch.int_)
-    assert isinstance(arr.float_, np.ndarray)
-    assert arr.float_.shape[0] == len(batch)
+    assert isinstance(arr['i'], np.ndarray)
+    assert arr['i'].tolist() == list(batch.get('i'))
+    assert isinstance(arr['f'], np.ndarray)
+    assert arr['f'].shape[0] == len(batch)
     for i in range(len(batch)):
-        assert arr.float_[i] == pytest.approx(batch[i].float_)
-    assert isinstance(arr.str1, np.ndarray)
-    assert arr.str1.tolist() == list(batch.str1)
-
-
-def test_to_array_with_vocab(batch):
-    vocab = {
-        'str1': {v: i
-                 for i, v in enumerate(batch.str1)},
-        'str2': {v: i
-                 for i, v in enumerate(batch.str2)},
-    }
-    arr = batch.to_array(vocab=vocab)
-    assert arr.str1.dtype.name.startswith('int')
-    assert arr.str1.tolist() == [vocab['str1'][s.str1] for s in batch]
-    assert arr.str2.dtype.name.startswith('int')
-    assert arr.str2.tolist() == [vocab['str2'][s.str2] for s in batch]
+        assert arr['f'][i] == pytest.approx(batch[i].fields['f'])
 
 
 def test_to_array_no_common_field_names(samples):
@@ -73,8 +57,9 @@ def test_to_array_no_common_field_names(samples):
         def fields(self):
             return {'foo': 10}
 
-    samples.append(FooSample())
-    batch = Batch(samples)
+    samples_ = list(samples)
+    samples_.append(FooSample())
+    batch = Batch(samples_)
 
     with pytest.raises(RuntimeError) as exc:
         batch.to_array()
