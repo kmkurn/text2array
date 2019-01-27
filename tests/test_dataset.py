@@ -1,8 +1,8 @@
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 
 import pytest
 
-from text2array import Batches, Dataset
+from text2array import Batch, Dataset
 
 
 def test_init(samples):
@@ -41,23 +41,30 @@ class TestShuffle:
 
 def test_batch(dataset):
     bs = dataset.batch(2)
-    assert isinstance(bs, Batches)
-    assert bs.batch_size == 2
-    assert not bs.drop_last
+    assert isinstance(bs, Iterator)
+    bs_lst = list(bs)
+    assert len(bs_lst) == 3
+    assert all(isinstance(b, Batch) for b in bs_lst)
+    assert list(bs_lst[0]) == [dataset[0], dataset[1]]
+    assert list(bs_lst[1]) == [dataset[2], dataset[3]]
+    assert list(bs_lst[2]) == [dataset[4]]
 
 
 def test_batch_exactly(dataset):
     bs = dataset.batch_exactly(2)
-    assert isinstance(bs, Batches)
-    assert bs.batch_size == 2
-    assert bs.drop_last
+    assert isinstance(bs, Iterator)
+    bs_lst = list(bs)
+    assert len(bs_lst) == 2
+    assert all(isinstance(b, Batch) for b in bs_lst)
+    assert list(bs_lst[0]) == [dataset[0], dataset[1]]
+    assert list(bs_lst[1]) == [dataset[2], dataset[3]]
 
 
 def test_batch_nonpositive_batch_size(dataset):
     with pytest.raises(ValueError) as exc:
-        dataset.batch(0)
+        next(dataset.batch(0))
     assert 'batch size must be greater than 0' in str(exc.value)
 
     with pytest.raises(ValueError) as exc:
-        dataset.batch_exactly(0)
+        next(dataset.batch_exactly(0))
     assert 'batch size must be greater than 0' in str(exc.value)
