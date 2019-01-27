@@ -1,13 +1,13 @@
 from typing import Sequence
 
-from .samples import FieldValue, Sample
+from .samples import FieldValue, SampleABC
 
 
-class Batch(Sequence[Sample]):
-    def __init__(self, samples: Sequence[Sample]) -> None:
+class Batch(Sequence[SampleABC]):
+    def __init__(self, samples: Sequence[SampleABC]) -> None:
         self._samples = samples
 
-    def __getitem__(self, index) -> Sample:
+    def __getitem__(self, index) -> SampleABC:
         return self._samples[index]
 
     def __len__(self) -> int:
