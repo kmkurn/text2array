@@ -1,9 +1,9 @@
 from .batches import Batch
 from .datasets import Dataset, StreamDataset
-from .samples import Sample
+from .samples import SampleABC
 
 __all__ = [
-    Sample,
+    SampleABC,
     Batch,
     Dataset,
     StreamDataset,

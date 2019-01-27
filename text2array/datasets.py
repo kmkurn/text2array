@@ -5,10 +5,10 @@ import abc
 import random
 
 from .batches import Batch
-from .samples import Sample
+from .samples import SampleABC
 
 
-class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
+class DatasetABC(Iterable[SampleABC], metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def batch(self, batch_size: int) -> Iterator[Batch]:
         pass
@@ -28,7 +28,7 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
         return (b for b in self.batch(batch_size) if len(b) == batch_size)
 
 
-class Dataset(DatasetABC, Sequence[Sample]):
+class Dataset(DatasetABC, Sequence[SampleABC]):
     """A dataset that fits in memory (no streaming).
 
     Args:
@@ -37,13 +37,13 @@ class Dataset(DatasetABC, Sequence[Sample]):
             :obj:`slice` object.
     """
 
-    def __init__(self, samples: Sequence[Sample]) -> None:
+    def __init__(self, samples: Sequence[SampleABC]) -> None:
         if not isinstance(samples, SequenceABC):
             raise TypeError('"samples" is not a sequence')
 
         self._samples = samples
 
-    def __getitem__(self, index) -> Sample:
+    def __getitem__(self, index) -> SampleABC:
         return self._samples[index]
 
     def __len__(self) -> int:
@@ -104,13 +104,13 @@ class StreamDataset(DatasetABC):
         stream: Stream of examples the dataset should stream from.
     """
 
-    def __init__(self, stream: Iterable[Sample]) -> None:
+    def __init__(self, stream: Iterable[SampleABC]) -> None:
         if not isinstance(stream, IterableABC):
             raise TypeError('"stream" is not iterable')
 
         self._stream = stream
 
-    def __iter__(self) -> Iterator[Sample]:
+    def __iter__(self) -> Iterator[SampleABC]:
         return iter(self._stream)
 
     def batch(self, batch_size: int) -> Iterator[Batch]:

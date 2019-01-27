@@ -1,6 +1,6 @@
 import pytest
 
-from text2array import Dataset, Sample, StreamDataset
+from text2array import Dataset, SampleABC, StreamDataset
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def stream_dataset(stream):
     return StreamDataset(stream)
 
 
-class TestSample(Sample):
+class TestSample(SampleABC):
     def __init__(self, x, y):
         self.x = x
         self.y = y
