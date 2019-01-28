@@ -1,6 +1,6 @@
 from collections import Counter, OrderedDict
 from collections.abc import Sequence as SequenceABC
-from typing import Iterable, Iterator, Mapping, Optional
+from typing import Iterable, Iterator, Mapping, MutableMapping, Optional
 
 from .samples import FieldName, FieldValue, Sample
 
@@ -42,8 +42,8 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
     ) -> 'Vocab':
         """Make an instance of this class from an iterable of samples.
 
-        A vocabulary is only made for fields whose value is a string or a (nested)
-        sequence of strings. It is important that ``samples`` be a true iterable, i.e.
+        A vocabulary is only made for fields whose value is a string token or a (nested)
+        sequence of string tokens. It is important that ``samples`` be a true iterable, i.e.
         it can be iterated more than once. No exception is raised when this is violated.
 
         Args:
@@ -51,11 +51,16 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             options: Mapping from field names to dictionaries to control the creation of
                 the str-to-int mapping. Allowed dictionary keys are:
 
-                * min_count(:obj:`int`): Exclude strings occurring fewer than this number of
+                * min_count(:obj:`int`): Exclude tokens occurring fewer than this number of
                     times from the vocabulary.
-                * unk(:obj:`str`): String to represent unknown strings with. If ``None``,
-                    no unknown strings are expected. This means when querying the vocabulary
-                    with such string, an error is raised.
+                * pad(:obj:`str`): String token to represent padding tokens. If ``None``,
+                    no padding token is added to the vocabulary. Otherwise, it is the
+                    first entry in the vocabulary (index is 0).
+                * unk(:obj:`str`): String token to represent unknown tokens with. If ``None``,
+                    no unknown token is added to the vocabulary. This means when querying
+                    the vocabulary with such token, an error is raised. Otherwise, it is the
+                    first entry in the vocabulary *after* the padding token, if any (index is
+                    either 0 or 1).
 
         Returns:
             Vocabulary instance.
@@ -131,9 +136,11 @@ class _StringStore(Mapping[str, int]):
             iterable: Iterable[str],
             min_count: int = 2,
             unk: Optional[str] = '<unk>',
+            pad: Optional[str] = '<pad>',
     ) -> '_StringStore':
-        # TODO customize these tokens
-        stoi = OrderedDict([('<pad>', 0)])
+        stoi: MutableMapping[str, int] = OrderedDict()
+        if pad is not None:
+            stoi[pad] = len(stoi)
         if unk is not None:
             stoi[unk] = len(stoi)
 
