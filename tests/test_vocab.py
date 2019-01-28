@@ -80,3 +80,7 @@ class TestFromSamples():
         assert set(vocab['cs'].stoi) == set(vocab['cs'])
         for i, s in enumerate(vocab['cs']):
             assert vocab['cs'].stoi[s] == i
+
+    def test_empty_samples(self):
+        vocab = Vocab.from_samples([])
+        assert len(vocab) == 0

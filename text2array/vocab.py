@@ -24,10 +24,14 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
     # TODO mention in docstring that samples must be able to be iterated twice
     @classmethod
     def from_samples(cls, samples: Iterable[Sample]) -> 'Vocab':
-        # TODO handle when samples is empty
+        try:
+            first = cls._head(samples)
+        except StopIteration:
+            return cls({})
+
         m = {
             name: VocabEntry.from_iterable(cls._flatten(cls._get_values(samples, name)))
-            for name, value in cls._head(samples).items()
+            for name, value in first.items()
             if cls._needs_vocab(value)
         }
         return cls(m)
