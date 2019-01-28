@@ -1,6 +1,6 @@
 from collections import Counter
 from collections.abc import Sequence as SequenceABC
-from typing import Any, Iterable, Iterator, Mapping, Sequence
+from typing import Iterable, Iterator, Mapping, Sequence
 
 from .datasets import Dataset
 from .samples import FieldName, FieldValue
@@ -38,15 +38,26 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
 
     @classmethod
     def _needs_vocab(cls, val: FieldValue) -> bool:
-        if not isinstance(val, SequenceABC):
-            return isinstance(val, str)
-        assert len(val) > 0
-        return isinstance(val[0], str)
+        if isinstance(val, str):
+            return True
+        if isinstance(val, SequenceABC):
+            assert len(val) > 0
+            return cls._needs_vocab(val[0])
+        return False
 
-    @staticmethod
-    def _flatten(xss: Sequence[Sequence[Any]]) -> Iterator[Any]:
-        for xs in xss:
-            yield from xs
+    @classmethod
+    def _flatten(cls, xs):
+        if isinstance(xs, str):
+            yield xs
+            return
+
+        try:
+            iter(xs)
+        except TypeError:
+            yield xs
+        else:
+            for x in xs:
+                yield from cls._flatten(x)
 
 
 # TODO think if this class needs separate test cases
@@ -74,6 +85,9 @@ class VocabEntry(Sequence[str]):
                 break
             itos.append(v)
         return cls(itos)
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({self._itos!r})'
 
 
 class _StringStore(Mapping[str, int]):
