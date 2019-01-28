@@ -1,13 +1,25 @@
 from collections import Counter
-from typing import Iterable, Mapping, Sequence
+from typing import Iterable, Iterator, Mapping, Sequence
 
 from .datasets import Dataset
 from .samples import FieldName, FieldValue
 
 
-class Vocab:
+class Vocab(Mapping[FieldName, 'VocabEntry']):
     def __init__(self, mapping: Mapping[FieldName, 'VocabEntry']) -> None:
         self._map = mapping
+
+    def __len__(self) -> int:
+        return len(self._map)
+
+    def __iter__(self) -> Iterator[FieldName]:
+        return iter(self._map)
+
+    def __getitem__(self, name: FieldName) -> 'VocabEntry':
+        try:
+            return self._map[name]
+        except KeyError:
+            raise RuntimeError(f"no vocabulary found for field name '{name}'")
 
     @classmethod
     def from_dataset(cls, dataset: Dataset) -> 'Vocab':
@@ -18,12 +30,6 @@ class Vocab:
             if cls._needs_vocab(value)
         }
         return cls(m)
-
-    def of(self, name: str) -> 'VocabEntry':
-        try:
-            return self._map[name]
-        except KeyError:
-            raise RuntimeError(f"no vocabulary found for field name '{name}'")
 
     @staticmethod
     def _get_values(dat: Dataset, name: FieldName) -> Sequence[FieldValue]:
