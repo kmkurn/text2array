@@ -2,8 +2,7 @@ from collections import Counter
 from collections.abc import Sequence as SequenceABC
 from typing import Iterable, Iterator, Mapping, Sequence
 
-from .datasets import Dataset
-from .samples import FieldName, FieldValue
+from .samples import FieldName, FieldValue, Sample
 
 
 class Vocab(Mapping[FieldName, 'VocabEntry']):
@@ -22,19 +21,25 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
         except KeyError:
             raise RuntimeError(f"no vocabulary found for field name '{name}'")
 
+    # TODO mention in docstring that samples must be able to be iterated twice
     @classmethod
-    def from_dataset(cls, dataset: Dataset) -> 'Vocab':
-        assert len(dataset) > 0
+    def from_samples(cls, samples: Iterable[Sample]) -> 'Vocab':
+        # TODO handle when samples is empty
         m = {
-            name: VocabEntry.from_iterable(cls._flatten(cls._get_values(dataset, name)))
-            for name, value in dataset[0].items()
+            name: VocabEntry.from_iterable(cls._flatten(cls._get_values(samples, name)))
+            for name, value in cls._head(samples).items()
             if cls._needs_vocab(value)
         }
         return cls(m)
 
     @staticmethod
-    def _get_values(dat: Dataset, name: FieldName) -> Sequence[FieldValue]:
-        return [s[name] for s in dat]
+    def _head(x):
+        return next(iter(x))
+
+    # TODO return iterable
+    @staticmethod
+    def _get_values(ss: Iterable[Sample], name: FieldName) -> Sequence[FieldValue]:
+        return [s[name] for s in ss]
 
     @classmethod
     def _needs_vocab(cls, val: FieldValue) -> bool:

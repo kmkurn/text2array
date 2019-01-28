@@ -2,13 +2,13 @@ from collections.abc import Mapping, Sequence
 
 import pytest
 
-from text2array import Dataset, Vocab
+from text2array import Vocab
 
 
-class TestFromDataset():
+class TestFromSamples():
     def test_ok(self):
-        dat = Dataset([{'w': 'c'}, {'w': 'b'}, {'w': 'a'}, {'w': 'b'}, {'w': 'c'}, {'w': 'c'}])
-        vocab = Vocab.from_dataset(dat)
+        ss = [{'w': 'c'}, {'w': 'b'}, {'w': 'a'}, {'w': 'b'}, {'w': 'c'}, {'w': 'c'}]
+        vocab = Vocab.from_samples(ss)
 
         assert isinstance(vocab, Mapping)
         assert len(vocab) == 1
@@ -30,20 +30,20 @@ class TestFromDataset():
         assert vocab['w'].stoi['bar'] == vocab['w'].stoi['<unk>']
 
     def test_has_vocab_for_all_str_fields(self):
-        dat = Dataset([{'w': 'b', 't': 'b'}, {'w': 'b', 't': 'b'}])
-        vocab = Vocab.from_dataset(dat)
+        ss = [{'w': 'b', 't': 'b'}, {'w': 'b', 't': 'b'}]
+        vocab = Vocab.from_samples(ss)
         assert isinstance(vocab['t'], Sequence)
         assert isinstance(vocab['t'].stoi, Mapping)
 
     def test_no_vocab_for_non_str(self):
-        vocab = Vocab.from_dataset(Dataset([{'i': 10}, {'i': 20}]))
+        vocab = Vocab.from_samples([{'i': 10}, {'i': 20}])
         with pytest.raises(RuntimeError) as exc:
             vocab['i']
         assert "no vocabulary found for field name 'i'" in str(exc.value)
 
     def test_seq(self):
-        dat = Dataset([{'ws': ['a', 'c', 'c']}, {'ws': ['b', 'c']}, {'ws': ['b']}])
-        vocab = Vocab.from_dataset(dat)
+        ss = [{'ws': ['a', 'c', 'c']}, {'ws': ['b', 'c']}, {'ws': ['b']}]
+        vocab = Vocab.from_samples(ss)
 
         itos = '<pad> <unk> c b'.split()
 
@@ -59,14 +59,14 @@ class TestFromDataset():
             assert vocab['ws'].stoi[s] == i
 
     def test_seq_of_seq(self):
-        dat = Dataset([{
+        ss = [{
             'cs': [['c', 'd'], ['a', 'd']]
         }, {
             'cs': [['c'], ['b'], ['b', 'd']]
         }, {
             'cs': [['d', 'c']]
-        }])
-        vocab = Vocab.from_dataset(dat)
+        }]
+        vocab = Vocab.from_samples(ss)
 
         itos = '<pad> <unk> d c b'.split()
 
