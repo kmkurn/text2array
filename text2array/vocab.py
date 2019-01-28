@@ -55,13 +55,9 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
             yield xs
             return
 
-        try:
-            iter(xs)
-        except TypeError:  # pragma: no cover
-            yield xs
-        else:
-            for x in xs:
-                yield from cls._flatten(x)
+        # must be an iterable, due to how we use this function
+        for x in xs:
+            yield from cls._flatten(x)
 
 
 # TODO think if this class needs separate test cases
