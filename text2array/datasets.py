@@ -29,7 +29,7 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
         return (b for b in self.batch(batch_size) if len(b) == batch_size)
 
 
-# TODO implement Vocab class
+# TODO implement mapping with a vocab
 class Dataset(DatasetABC, Sequence[Sample]):
     """A dataset that fits in memory (no streaming).
 
