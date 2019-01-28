@@ -96,3 +96,30 @@ class TestFromSamples():
         vocab = Vocab.from_samples(ss, options={'w': dict(min_count=3)})
         assert list(vocab['w']) == ['<pad>', '<unk>', 'c']
         assert list(vocab['t']) == ['<pad>', '<unk>', 'c', 'b']
+
+    def test_no_unk(self):
+        ss = [{
+            'w': 'c',
+            't': 'c'
+        }, {
+            'w': 'b',
+            't': 'b'
+        }, {
+            'w': 'a',
+            't': 'a'
+        }, {
+            'w': 'b',
+            't': 'b'
+        }, {
+            'w': 'c',
+            't': 'c'
+        }, {
+            'w': 'c',
+            't': 'c'
+        }]
+        vocab = Vocab.from_samples(ss, options={'w': dict(unk=None)})
+        assert list(vocab['w']) == ['<pad>', 'c', 'b']
+        assert list(vocab['t']) == ['<pad>', '<unk>', 'c', 'b']
+        with pytest.raises(KeyError) as exc:
+            vocab['w']['foo']
+        assert "'foo' not found in vocabulary" in str(exc.value)
