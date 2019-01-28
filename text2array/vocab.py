@@ -50,20 +50,21 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             options: Mapping from field names to dictionaries to control the creation of
                 the str-to-int mapping. Allowed dictionary keys are:
 
-                * min_count(:obj:`int`): Exclude tokens occurring fewer than this number of
-                    times from the vocabulary.
-                * pad(:obj:`str`): String token to represent padding tokens. If ``None``,
+                * ``min_count``(:obj:`int`): Exclude tokens occurring fewer than this number
+                    of times from the vocabulary (default: 2).
+                * ``pad``(:obj:`str`): String token to represent padding tokens. If ``None``,
                     no padding token is added to the vocabulary. Otherwise, it is the
-                    first entry in the vocabulary (index is 0).
-                * unk(:obj:`str`): String token to represent unknown tokens with. If ``None``,
-                    no unknown token is added to the vocabulary. This means when querying
-                    the vocabulary with such token, an error is raised. Otherwise, it is the
-                    first entry in the vocabulary *after* the padding token, if any (index is
-                    either 0 or 1).
-                * max_size(:obj:`int`): Maximum size of the vocabulary, excluding the padding
-                    and unknown tokens. If ``None``, no limit on the vocabulary size.
-                    Otherwise, at most, only this number of most frequent tokens are included
-                    in the vocabulary.
+                    first entry in the vocabulary (index is 0) (default: ``<pad>``).
+                * ``unk``(:obj:`str`): String token to represent unknown tokens with. If
+                    ``None``, no unknown token is added to the vocabulary. This means when
+                    querying the vocabulary with such token, an error is raised. Otherwise,
+                    it is the first entry in the vocabulary *after* ``pad``, if any (index is
+                    either 0 or 1) (default: ``<unk>``).
+                * ``max_size``(:obj:`int`): Maximum size of the vocabulary, excluding ``pad``
+                    and ``unk``. If ``None``, no limit on the vocabulary size. Otherwise, at
+                    most, only this number of most frequent tokens are included in the
+                    vocabulary. Note that ``min_count`` also sets the maximum size implicitly.
+                    So, the size is limited by whichever is smaller. (default: ``None``).
 
         Returns:
             Vocabulary instance.
