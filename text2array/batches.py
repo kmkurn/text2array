@@ -1,5 +1,6 @@
 from collections.abc import Sequence as SequenceABC
-from typing import Mapping, Sequence, Set, Union, cast
+from functools import reduce
+from typing import Any, List, Mapping, Sequence, Set, Union
 
 import numpy as np
 
@@ -49,27 +50,63 @@ class Batch(Sequence[Sample]):
             raise RuntimeError('some samples have no common field names with the others')
         assert self._samples  # if `common` isn't empty, neither is `_samples`
 
-        arrs = {}
+        arr = {}
         for name in common:
-            vs = self.get(name)
-            if isinstance(vs[0], SequenceABC):
-                vs = cast(Union[Sequence[Sequence[float]], Sequence[Sequence[int]]], vs)
-                maxlen = max(len(v) for v in vs)
-                vs = self._pad(vs, maxlen, with_=pad_with)
-            arrs[name] = np.array(vs)
+            data = self.get(name)
+            # Get max length for all depths, 1st elem is batch size
+            maxlens = self._get_maxlens(data)
+            # Get padding for all depths
+            paddings = self._get_paddings(maxlens, pad_with)
+            # Pad the data
+            data = self._pad(data, maxlens, paddings, 0)
 
-        return arrs
+            arr[name] = np.array(data)
 
-    @staticmethod
-    def _pad(
-            vs: Union[Sequence[Sequence[float]], Sequence[Sequence[int]]],
-            maxlen: int,
-            with_: int = 0,
-    ) -> Union[Sequence[Sequence[float]], Sequence[Sequence[int]]]:
-        res = []
-        for v in vs:
-            v, n = list(v), len(v)
-            for _ in range(maxlen - n):
-                v.append(with_)
-            res.append(v)
+        return arr
+
+    @classmethod
+    def _get_maxlens(cls, data: Sequence[Any]) -> List[int]:
+        assert data
+
+        # Base case
+        if not isinstance(data[0], SequenceABC):
+            return [len(data)]
+
+        # Recursive case
+        maxlenss = [cls._get_maxlens(x) for x in data]
+        assert all(len(x) == len(maxlenss[0]) for x in maxlenss)
+
+        maxlens = reduce(lambda ml1, ml2: [max(l1, l2) for l1, l2 in zip(ml1, ml2)], maxlenss)
+        maxlens.insert(0, len(data))
+        return maxlens
+
+    @classmethod
+    def _get_paddings(cls, maxlens: List[int], with_: int) -> List[Union[int, List[int]]]:
+        res: list = [with_]
+        for maxlen in reversed(maxlens[1:]):
+            res.append([res[-1] for _ in range(maxlen)])
+        res.reverse()
         return res
+
+    @classmethod
+    def _pad(
+            cls,
+            data: Sequence[Any],
+            maxlens: List[int],
+            paddings: List[Union[int, List[int]]],
+            depth: int,
+    ) -> Sequence[Any]:
+        assert data
+        assert len(maxlens) == len(paddings)
+        assert depth < len(maxlens)
+
+        # Base case
+        if not isinstance(data[0], SequenceABC):
+            data_ = list(data)
+        # Recursive case
+        else:
+            data_ = [cls._pad(x, maxlens, paddings, depth + 1) for x in data]
+
+        for _ in range(maxlens[depth] - len(data)):
+            data_.append(paddings[depth])
+        return data_
