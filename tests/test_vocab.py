@@ -55,3 +55,26 @@ class TestFromDataset():
         assert set(vocab['ws'].stoi) == set(vocab['ws'])
         for i, s in enumerate(vocab['ws']):
             assert vocab['ws'].stoi[s] == i
+
+    def test_seq_of_seq(self):
+        dat = Dataset([{
+            'cs': [['c', 'd'], ['a', 'd']]
+        }, {
+            'cs': [['c'], ['b'], ['b', 'd']]
+        }, {
+            'cs': [['d', 'c']]
+        }])
+        vocab = Vocab.from_dataset(dat)
+
+        itos = '<pad> <unk> d c b'.split()
+
+        assert isinstance(vocab['cs'], Sequence)
+        assert len(vocab['cs']) == len(itos)
+        for i in range(len(itos)):
+            assert vocab['cs'][i] == itos[i]
+
+        assert isinstance(vocab['cs'].stoi, Mapping)
+        assert len(vocab['cs'].stoi) == len(vocab['cs'])
+        assert set(vocab['cs'].stoi) == set(vocab['cs'])
+        for i, s in enumerate(vocab['cs']):
+            assert vocab['cs'].stoi[s] == i
