@@ -23,6 +23,7 @@ class Batch(Sequence[Sample]):
     def __len__(self) -> int:
         return len(self._samples)
 
+    # TODO rethink if this needs to be public
     def get(self, name: str) -> Sequence[FieldValue]:
         try:
             return [s[name] for s in self._samples]
