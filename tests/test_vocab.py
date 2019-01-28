@@ -5,6 +5,7 @@ import pytest
 from text2array import Vocab
 
 
+# TODO change so vocab['w'] returns the mapping, not sequence
 class TestFromSamples():
     def test_ok(self):
         ss = [{'w': 'c'}, {'w': 'b'}, {'w': 'a'}, {'w': 'b'}, {'w': 'c'}, {'w': 'c'}]
