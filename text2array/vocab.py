@@ -36,10 +36,9 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
     def _head(x):
         return next(iter(x))
 
-    # TODO return iterable
     @staticmethod
-    def _get_values(ss: Iterable[Sample], name: FieldName) -> Sequence[FieldValue]:
-        return [s[name] for s in ss]
+    def _get_values(ss: Iterable[Sample], name: FieldName) -> Iterator[FieldValue]:
+        return (s[name] for s in ss)
 
     @classmethod
     def _needs_vocab(cls, val: FieldValue) -> bool:
