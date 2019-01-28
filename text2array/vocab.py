@@ -71,13 +71,13 @@ class _StringStore(Mapping[str, int]):
     def __init__(self, m: Mapping[str, int]) -> None:
         self._m = m
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._m)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self._m)
 
-    def __getitem__(self, s):
+    def __getitem__(self, s: str) -> int:
         try:
             return self._m[s]
         except KeyError:
