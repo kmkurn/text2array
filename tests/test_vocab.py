@@ -90,7 +90,26 @@ class TestFromSamples():
             Vocab.from_samples([{'w': []}])
         assert 'field values must not be an empty sequence' in str(exc.value)
 
-    def test_custom_min_count(self):
-        ss = [{'w': 'c'}, {'w': 'b'}, {'w': 'a'}, {'w': 'b'}, {'w': 'c'}, {'w': 'c'}]
-        vocab = Vocab.from_samples(ss, min_count=3)
+    def test_min_count(self):
+        ss = [{
+            'w': 'c',
+            't': 'c'
+        }, {
+            'w': 'b',
+            't': 'b'
+        }, {
+            'w': 'a',
+            't': 'a'
+        }, {
+            'w': 'b',
+            't': 'b'
+        }, {
+            'w': 'c',
+            't': 'c'
+        }, {
+            'w': 'c',
+            't': 'c'
+        }]
+        vocab = Vocab.from_samples(ss, ve_kwargs={'w': dict(min_count=3)})
         assert list(vocab['w']) == ['<pad>', '<unk>', 'c']
+        assert list(vocab['t']) == ['<pad>', '<unk>', 'c', 'b']

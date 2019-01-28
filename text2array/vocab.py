@@ -1,6 +1,6 @@
 from collections import Counter
 from collections.abc import Sequence as SequenceABC
-from typing import Iterable, Iterator, Mapping, Sequence
+from typing import Iterable, Iterator, Mapping, Optional, Sequence
 
 from .samples import FieldName, FieldValue, Sample
 
@@ -32,9 +32,13 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
         except KeyError:
             raise RuntimeError(f"no vocabulary found for field name '{name}'")
 
-    # TODO limit vocab size
+    # TODO limit vocab size for each field name
     @classmethod
-    def from_samples(cls, samples: Iterable[Sample], min_count: int = 2) -> 'Vocab':
+    def from_samples(
+            cls,
+            samples: Iterable[Sample],
+            ve_kwargs: Optional[Mapping[FieldName, dict]] = None,
+    ) -> 'Vocab':
         """Make an instance of this class from an iterable of samples.
 
         A vocabulary is only made for fields whose value is a string or a (nested)
@@ -43,8 +47,9 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
 
         Args:
             samples: Iterable of samples.
-            min_count: Remove from the vocabulary string field values occurring fewer
-                than this number of times.
+            ve_kwargs: Mapping from field names to dictionaries. Each dictionary is passed
+                as keyword arguments to the corresponding :meth:`VocabEntry.from_iterable`
+                call.
 
         Returns:
             Vocabulary instance.
@@ -54,9 +59,12 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
         except StopIteration:
             return cls({})
 
+        if ve_kwargs is None:
+            ve_kwargs = {}
+
         m = {
             name: VocabEntry.from_iterable(
-                cls._flatten(cls._get_values(samples, name)), min_count=min_count)
+                cls._flatten(cls._get_values(samples, name)), **ve_kwargs.get(name, {}))
             for name, value in first.items()
             if cls._needs_vocab(value)
         }
