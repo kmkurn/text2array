@@ -147,3 +147,27 @@ class TestFromSamples():
         vocab = Vocab.from_samples(ss, options={'w': dict(pad=None)})
         assert list(vocab['w']) == ['<unk>', 'c', 'b']
         assert list(vocab['t']) == ['<pad>', '<unk>', 'c', 'b']
+
+    def test_max_size(self):
+        ss = [{
+            'w': 'c',
+            't': 'c'
+        }, {
+            'w': 'b',
+            't': 'b'
+        }, {
+            'w': 'a',
+            't': 'a'
+        }, {
+            'w': 'b',
+            't': 'b'
+        }, {
+            'w': 'c',
+            't': 'c'
+        }, {
+            'w': 'c',
+            't': 'c'
+        }]
+        vocab = Vocab.from_samples(ss, options={'w': dict(max_size=1)})
+        assert list(vocab['w']) == ['<pad>', '<unk>', 'c']
+        assert list(vocab['t']) == ['<pad>', '<unk>', 'c', 'b']
