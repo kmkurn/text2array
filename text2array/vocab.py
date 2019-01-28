@@ -33,7 +33,7 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
         return cls(m)
 
     @staticmethod
-    def _head(x):
+    def _head(x: Iterable[Sample]) -> Sample:
         return next(iter(x))
 
     @staticmethod
@@ -50,7 +50,7 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
         return False
 
     @classmethod
-    def _flatten(cls, xs):
+    def _flatten(cls, xs) -> Iterator[str]:
         if isinstance(xs, str):
             yield xs
             return
