@@ -1,8 +1,9 @@
 from collections.abc import \
     Iterable as IterableABC, MutableSequence as MutableSequenceABC, Sequence as SequenceABC
-from typing import Iterable, Iterator, Sequence
+from typing import Callable, Iterable, Iterator, Sequence
 import abc
 import random
+import statistics as stat
 
 from .batches import Batch
 from .samples import Sample
@@ -50,7 +51,6 @@ class Dataset(DatasetABC, Sequence[Sample]):
     def __len__(self) -> int:
         return len(self._samples)
 
-    # TODO implement shuffle_by
     def shuffle(self) -> 'Dataset':
         """Shuffle the dataset.
 
@@ -65,6 +65,34 @@ class Dataset(DatasetABC, Sequence[Sample]):
             self._shuffle_inplace()
         else:
             self._shuffle_copy()
+        return self
+
+    def shuffle_by(self, key: Callable[[Sample], int], scale: float = 1.) -> 'Dataset':
+        """Shuffle the dataset by the given key.
+
+        This method essentially performs noisy sorting. The samples in the dataset are
+        sorted ascending by the value of the given key, plus some random noise. This random
+        noise is drawn from ``Uniform(-z, z)``, where ``z`` equals ``scale`` times the
+        standard deviation of key values. This formulation means that ``scale`` regulates
+        how noisy the sorting is. The larger it is, the more noisy the sorting becomes, i.e.
+        it resembles random shuffling more closely. In an extreme case where ``scale=0``,
+        this method just sorts the samples by ``key``. This method is useful when working
+        with text data, where we want to shuffle the dataset and also minimize padding by
+        ensuring that sentences of similar lengths are not too far apart.
+
+        Args:
+            by: Callable to get the key value of a given sample.
+            scale: Value to regulate the noise of the sorting. Must not be negative.
+
+        Returns:
+            The dataset object itself (useful for chaining).
+        """
+        if scale < 0:
+            raise ValueError('scale cannot be less than 0')
+
+        std = stat.stdev(key(s) for s in self._samples)
+        z = scale * std
+        self._samples = sorted(self._samples, key=lambda s: key(s) + random.uniform(-z, z))
         return self
 
     def batch(self, batch_size: int) -> Iterator[Batch]:
