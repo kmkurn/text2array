@@ -11,15 +11,27 @@ class Vocab:
 
     @classmethod
     def from_dataset(cls, dataset: Dataset) -> 'Vocab':
-        vals = cls._get_values(dataset, 'w')
-        return cls({'w': VocabEntry.from_iterable(vals)})
+        assert len(dataset) > 0
+        m = {
+            name: VocabEntry.from_iterable(cls._get_values(dataset, name))
+            for name, value in dataset[0].items()
+            if cls._needs_vocab(value)
+        }
+        return cls(m)
 
     def of(self, name: str) -> 'VocabEntry':
-        return self._map[name]
+        try:
+            return self._map[name]
+        except KeyError:
+            raise RuntimeError(f"no vocabulary found for field name '{name}'")
 
     @staticmethod
     def _get_values(dat: Dataset, name: FieldName) -> Sequence[FieldValue]:
         return [s[name] for s in dat]
+
+    @classmethod
+    def _needs_vocab(cls, val: FieldValue) -> bool:
+        return isinstance(val, str)
 
 
 # TODO think if this class needs separate test cases

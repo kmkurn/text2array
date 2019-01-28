@@ -40,6 +40,7 @@ class Batch(Sequence[Sample]):
             A mapping from field names to :class:`np.ndarray`s whose first
             dimension corresponds to the batch size as returned by ``__len__``.
         """
+        # TODO just assume all samples have the same keys
         common: Set[FieldName] = set()
         for s in self._samples:
             if common:
