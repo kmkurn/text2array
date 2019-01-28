@@ -51,8 +51,11 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             options: Mapping from field names to dictionaries to control the creation of
                 the str-to-int mapping. Allowed dictionary keys are:
 
-                * ``min_count`` - Exclude strings occurring fewer than this number of times
-                    from the vocabulary.
+                * min_count(:obj:`int`): Exclude strings occurring fewer than this number of
+                    times from the vocabulary.
+                * unk(:obj:`str`): String to represent unknown strings with. If ``None``,
+                    no unknown strings are expected. This means when querying the vocabulary
+                    with such string, an error is raised.
 
         Returns:
             Vocabulary instance.
@@ -103,8 +106,10 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
 
 
 class _StringStore(Mapping[str, int]):
-    def __init__(self, m: Mapping[str, int]) -> None:
+    def __init__(self, m: Mapping[str, int], unk_id: Optional[int] = None) -> None:
+        assert unk_id is None or unk_id >= 0
         self._m = m
+        self._unk_id = unk_id
 
     def __len__(self) -> int:
         return len(self._m)
@@ -116,16 +121,27 @@ class _StringStore(Mapping[str, int]):
         try:
             return self._m[s]
         except KeyError:
-            # TODO customize unk id
-            return 1
+            if self._unk_id is not None:
+                return self._unk_id
+            raise KeyError(f"'{s}' not found in vocabulary")
 
     @classmethod
-    def _from_iterable(cls, iterable: Iterable[str], min_count: int = 2) -> '_StringStore':
+    def _from_iterable(
+            cls,
+            iterable: Iterable[str],
+            min_count: int = 2,
+            unk: Optional[str] = '<unk>',
+    ) -> '_StringStore':
         # TODO customize these tokens
-        stoi = OrderedDict([('<pad>', 0), ('<unk>', 1)])
+        stoi = OrderedDict([('<pad>', 0)])
+        if unk is not None:
+            stoi[unk] = len(stoi)
+
         c = Counter(iterable)
         for s, f in c.most_common():
             if f < min_count:
                 break
             stoi[s] = len(stoi)
-        return cls(stoi)
+
+        unk_id = None if unk is None else stoi[unk]
+        return cls(stoi, unk_id=unk_id)
