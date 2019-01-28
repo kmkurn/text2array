@@ -6,18 +6,18 @@ from .samples import FieldName, FieldValue
 
 
 class Vocab(Mapping[FieldName, 'VocabEntry']):
-    def __init__(self, mapping: Mapping[FieldName, 'VocabEntry']) -> None:
-        self._map = mapping
+    def __init__(self, m: Mapping[FieldName, 'VocabEntry']) -> None:
+        self._m = m
 
     def __len__(self) -> int:
-        return len(self._map)
+        return len(self._m)
 
     def __iter__(self) -> Iterator[FieldName]:
-        return iter(self._map)
+        return iter(self._m)
 
     def __getitem__(self, name: FieldName) -> 'VocabEntry':
         try:
-            return self._map[name]
+            return self._m[name]
         except KeyError:
             raise RuntimeError(f"no vocabulary found for field name '{name}'")
 
@@ -68,18 +68,18 @@ class VocabEntry(Sequence[str]):
 
 
 class _StringStore(Mapping[str, int]):
-    def __init__(self, mapping: Mapping[str, int]) -> None:
-        self._map = mapping
+    def __init__(self, m: Mapping[str, int]) -> None:
+        self._m = m
 
     def __len__(self):
-        return len(self._map)
+        return len(self._m)
 
     def __iter__(self):
-        return iter(self._map)
+        return iter(self._m)
 
     def __getitem__(self, s):
         try:
-            return self._map[s]
+            return self._m[s]
         except KeyError:
             return 1
 
