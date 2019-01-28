@@ -32,8 +32,9 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
         except KeyError:
             raise RuntimeError(f"no vocabulary found for field name '{name}'")
 
+    # TODO limit vocab size
     @classmethod
-    def from_samples(cls, samples: Iterable[Sample]) -> 'Vocab':
+    def from_samples(cls, samples: Iterable[Sample], min_count: int = 2) -> 'Vocab':
         """Make an instance of this class from an iterable of samples.
 
         A vocabulary is only made for fields whose value is a string or a (nested)
@@ -42,6 +43,8 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
 
         Args:
             samples: Iterable of samples.
+            min_count: Remove from the vocabulary string field values occurring fewer
+                than this number of times.
 
         Returns:
             Vocabulary instance.
@@ -52,7 +55,8 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
             return cls({})
 
         m = {
-            name: VocabEntry.from_iterable(cls._flatten(cls._get_values(samples, name)))
+            name: VocabEntry.from_iterable(
+                cls._flatten(cls._get_values(samples, name)), min_count=min_count)
             for name, value in first.items()
             if cls._needs_vocab(value)
         }
@@ -112,11 +116,13 @@ class VocabEntry(Sequence[str]):
         return self._stoi
 
     @classmethod
-    def from_iterable(cls, iterable: Iterable[str]) -> 'VocabEntry':
+    def from_iterable(cls, iterable: Iterable[str], min_count: int = 2) -> 'VocabEntry':
         """Make an instance of this class from an iterable of strings.
 
         Args:
             iterable: Iterable of strings.
+            min_count: Remove from the vocabulary strings occurring fewer than this number
+                of times.
 
         Returns:
             Vocab entry instance.
@@ -125,8 +131,7 @@ class VocabEntry(Sequence[str]):
         itos = ['<pad>', '<unk>']
         c = Counter(iterable)
         for v, f in c.most_common():
-            # TODO customize this min count
-            if f < 2:
+            if f < min_count:
                 break
             itos.append(v)
         return cls(itos)
