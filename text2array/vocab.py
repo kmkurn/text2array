@@ -49,7 +49,8 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
         if isinstance(val, str):
             return True
         if isinstance(val, SequenceABC):
-            assert len(val) > 0
+            if not val:
+                raise ValueError('field values must not be an empty sequence')
             return cls._needs_vocab(val[0])
         return False
 

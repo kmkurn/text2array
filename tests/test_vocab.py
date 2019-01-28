@@ -84,3 +84,8 @@ class TestFromSamples():
     def test_empty_samples(self):
         vocab = Vocab.from_samples([])
         assert len(vocab) == 0
+
+    def test_empty_field_values(self):
+        with pytest.raises(ValueError) as exc:
+            Vocab.from_samples([{'w': []}])
+        assert 'field values must not be an empty sequence' in str(exc.value)
