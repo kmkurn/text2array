@@ -123,3 +123,27 @@ class TestFromSamples():
         with pytest.raises(KeyError) as exc:
             vocab['w']['foo']
         assert "'foo' not found in vocabulary" in str(exc.value)
+
+    def test_no_pad(self):
+        ss = [{
+            'w': 'c',
+            't': 'c'
+        }, {
+            'w': 'b',
+            't': 'b'
+        }, {
+            'w': 'a',
+            't': 'a'
+        }, {
+            'w': 'b',
+            't': 'b'
+        }, {
+            'w': 'c',
+            't': 'c'
+        }, {
+            'w': 'c',
+            't': 'c'
+        }]
+        vocab = Vocab.from_samples(ss, options={'w': dict(pad=None)})
+        assert list(vocab['w']) == ['<unk>', 'c', 'b']
+        assert list(vocab['t']) == ['<pad>', '<unk>', 'c', 'b']
