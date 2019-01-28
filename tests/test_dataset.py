@@ -20,23 +20,65 @@ def test_init_samples_non_sequence():
 
 
 class TestShuffle:
-    @pytest.fixture
-    def tuple_dataset(self, samples):
-        return Dataset(tuple(samples))
-
-    def assert_shuffle(self, dataset):
+    def test_mutable_seq(self, setup_rng, dataset):
         before = list(dataset)
         retval = dataset.shuffle()
         after = list(dataset)
-
         assert retval is dataset
-        assert before != after and len(before) == len(after) and all(x in after for x in before)
+        assert_shuffled(before, after)
 
-    def test_mutable_seq(self, setup_rng, dataset):
-        self.assert_shuffle(dataset)
+    def test_immutable_seq(self, setup_rng, samples):
+        dat = Dataset(tuple(samples))
+        before = list(dat)
+        retval = dat.shuffle()
+        after = list(dat)
+        assert retval is dat
+        assert_shuffled(before, after)
 
-    def test_immutable_seq(self, setup_rng, tuple_dataset):
-        self.assert_shuffle(tuple_dataset)
+
+class TestShuffleBy:
+    @staticmethod
+    def make_dataset():
+        return Dataset([{
+            'is': [1, 2, 3]
+        }, {
+            'is': [1]
+        }, {
+            'is': [1, 2]
+        }, {
+            'is': [1, 2, 3, 4, 5]
+        }, {
+            'is': [1, 2, 3, 4]
+        }])
+
+    @staticmethod
+    def key(sample):
+        return len(sample['is'])
+
+    def test_ok(self, setup_rng):
+        dat = self.make_dataset()
+        before = list(dat)
+        retval = dat.shuffle_by(self.key)
+        after = list(dat)
+        assert retval is dat
+        assert_shuffled(before, after)
+
+    def test_zero_scale(self, setup_rng):
+        dat = self.make_dataset()
+        before = list(dat)
+        dat.shuffle_by(self.key, scale=0.)
+        after = list(dat)
+        assert sorted(before, key=self.key) == after
+
+    def test_negative_scale(self, setup_rng):
+        dat = self.make_dataset()
+        with pytest.raises(ValueError) as exc:
+            dat.shuffle_by(self.key, scale=-1)
+        assert 'scale cannot be less than 0' in str(exc.value)
+
+
+def assert_shuffled(before, after):
+    assert before != after and len(before) == len(after) and all(x in after for x in before)
 
 
 def test_batch(dataset):
