@@ -37,6 +37,7 @@ class TestShuffle:
 
 
 class TestShuffleBy:
+    # TODO make this a class variable
     @staticmethod
     def make_dataset():
         return Dataset([{
