@@ -85,6 +85,7 @@ class VocabEntry(Sequence[str]):
         itos = ['<pad>', '<unk>']
         c = Counter(iterable)
         for v, f in c.most_common():
+            # TODO customize this min count
             if f < 2:
                 break
             itos.append(v)
@@ -108,6 +109,7 @@ class _StringStore(Mapping[str, int]):
         try:
             return self._m[s]
         except KeyError:
+            # TODO customize unk id
             return 1
 
     @classmethod
