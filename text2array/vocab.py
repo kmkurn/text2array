@@ -6,6 +6,17 @@ from .samples import FieldName, FieldValue, Sample
 
 
 class Vocab(Mapping[FieldName, 'VocabEntry']):
+    """Vocabulary containing the mapping from string field values to their integer indices.
+
+    A vocabulary does not hold the mapping directly, but rather it stores a mapping from
+    field names to :class:`VocabEntry` objects. These objects are the one actually holding
+    the str-to-int mapping for that particular field name. In other words, the actual
+    vocabulary is stored in :class:`VocabEntry` and namespaced by this :class:`Vocab` object.
+
+    Args:
+        m: Mapping from :obj:`FieldName` to its :class:`VocabEntry`.
+    """
+
     def __init__(self, m: Mapping[FieldName, 'VocabEntry']) -> None:
         self._m = m
 
@@ -21,9 +32,20 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
         except KeyError:
             raise RuntimeError(f"no vocabulary found for field name '{name}'")
 
-    # TODO mention in docstring that samples must be able to be iterated twice
     @classmethod
     def from_samples(cls, samples: Iterable[Sample]) -> 'Vocab':
+        """Make an instance of this class from an iterable of samples.
+
+        A vocabulary is only made for fields whose value is a string or a (nested)
+        sequence of strings. It is important that ``samples`` be a true iterable, i.e.
+        it can be iterated more than once. No exception is raised when this is violated.
+
+        Args:
+            samples: Iterable of samples.
+
+        Returns:
+            Vocabulary instance.
+        """
         try:
             first = cls._head(samples)
         except StopIteration:
@@ -67,6 +89,12 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
 
 # TODO think if this class needs separate test cases
 class VocabEntry(Sequence[str]):
+    """Vocabulary entry that holds the actual str-to-int/int-to-str mapping.
+
+    Args:
+        strings: Sequence of distinct strings that serves as the int-to-str mapping.
+    """
+
     def __init__(self, strings: Sequence[str]) -> None:
         # TODO maybe force strings to have no duplicates?
         self._itos = strings
@@ -80,10 +108,19 @@ class VocabEntry(Sequence[str]):
 
     @property
     def stoi(self) -> Mapping[str, int]:
+        """The str-to-int mapping."""
         return self._stoi
 
     @classmethod
     def from_iterable(cls, iterable: Iterable[str]) -> 'VocabEntry':
+        """Make an instance of this class from an iterable of strings.
+
+        Args:
+            iterable: Iterable of strings.
+
+        Returns:
+            Vocab entry instance.
+        """
         # TODO customize these tokens
         itos = ['<pad>', '<unk>']
         c = Counter(iterable)
