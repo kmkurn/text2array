@@ -33,7 +33,6 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
         except KeyError:
             raise KeyError(f"no vocabulary found for field name '{name}'")
 
-    # TODO limit vocab size for each field name
     @classmethod
     def from_samples(
             cls,
@@ -61,6 +60,10 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
                     the vocabulary with such token, an error is raised. Otherwise, it is the
                     first entry in the vocabulary *after* the padding token, if any (index is
                     either 0 or 1).
+                * max_size(:obj:`int`): Maximum size of the vocabulary, excluding the padding
+                    and unknown tokens. If ``None``, no limit on the vocabulary size.
+                    Otherwise, at most, only this number of most frequent tokens are included
+                    in the vocabulary.
 
         Returns:
             Vocabulary instance.
@@ -137,6 +140,7 @@ class _StringStore(Mapping[str, int]):
             min_count: int = 2,
             unk: Optional[str] = '<unk>',
             pad: Optional[str] = '<pad>',
+            max_size: Optional[int] = None,
     ) -> '_StringStore':
         stoi: MutableMapping[str, int] = OrderedDict()
         if pad is not None:
@@ -144,9 +148,10 @@ class _StringStore(Mapping[str, int]):
         if unk is not None:
             stoi[unk] = len(stoi)
 
+        n = len(stoi)
         c = Counter(iterable)
         for s, f in c.most_common():
-            if f < min_count:
+            if f < min_count or (max_size is not None and len(stoi) - n >= max_size):
                 break
             stoi[s] = len(stoi)
 
