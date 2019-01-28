@@ -53,7 +53,7 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
 
         try:
             iter(xs)
-        except TypeError:
+        except TypeError:  # pragma: no cover
             yield xs
         else:
             for x in xs:

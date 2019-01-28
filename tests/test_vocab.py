@@ -9,10 +9,12 @@ class TestFromDataset():
     def test_ok(self):
         dat = Dataset([{'w': 'c'}, {'w': 'b'}, {'w': 'a'}, {'w': 'b'}, {'w': 'c'}, {'w': 'c'}])
         vocab = Vocab.from_dataset(dat)
+
         assert isinstance(vocab, Mapping)
+        assert len(vocab) == 1
+        assert list(vocab) == ['w']
 
         itos = '<pad> <unk> c b'.split()
-
         assert isinstance(vocab['w'], Sequence)
         assert len(vocab['w']) == len(itos)
         for i in range(len(itos)):
