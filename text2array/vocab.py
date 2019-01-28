@@ -1,23 +1,24 @@
-from collections import Counter
+from collections import Counter, OrderedDict
 from collections.abc import Sequence as SequenceABC
-from typing import Iterable, Iterator, Mapping, Optional, Sequence
+from typing import Iterable, Iterator, Mapping, Optional
 
 from .samples import FieldName, FieldValue, Sample
 
 
-class Vocab(Mapping[FieldName, 'VocabEntry']):
-    """Vocabulary containing the mapping from string field values to their integer indices.
+class Vocab(Mapping[FieldName, Mapping[str, int]]):
+    """Namespaced vocabulary storing the mapping from field names to their actual vocabulary.
 
-    A vocabulary does not hold the mapping directly, but rather it stores a mapping from
-    field names to :class:`VocabEntry` objects. These objects are the one actually holding
-    the str-to-int mapping for that particular field name. In other words, the actual
-    vocabulary is stored in :class:`VocabEntry` and namespaced by this :class:`Vocab` object.
+    A vocabulary does not hold the str-to-int mapping directly, but rather it stores a mapping
+    from field names to the corresponding str-to-int mappings. These mappings are the actual
+    vocabulary for that particular field name. In other words, the actual vocabulary for each
+    field name is namespaced by the field name and all of them are handled this :class:`Vocab`
+    object.
 
     Args:
-        m: Mapping from :obj:`FieldName` to its :class:`VocabEntry`.
+        m: Mapping from :obj:`FieldName` to its str-to-int mapping.
     """
 
-    def __init__(self, m: Mapping[FieldName, 'VocabEntry']) -> None:
+    def __init__(self, m: Mapping[FieldName, Mapping[str, int]]) -> None:
         self._m = m
 
     def __len__(self) -> int:
@@ -26,18 +27,18 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
     def __iter__(self) -> Iterator[FieldName]:
         return iter(self._m)
 
-    def __getitem__(self, name: FieldName) -> 'VocabEntry':
+    def __getitem__(self, name: FieldName) -> Mapping[str, int]:
         try:
             return self._m[name]
         except KeyError:
-            raise RuntimeError(f"no vocabulary found for field name '{name}'")
+            raise KeyError(f"no vocabulary found for field name '{name}'")
 
     # TODO limit vocab size for each field name
     @classmethod
     def from_samples(
             cls,
             samples: Iterable[Sample],
-            ve_kwargs: Optional[Mapping[FieldName, dict]] = None,
+            options: Optional[Mapping[FieldName, dict]] = None,
     ) -> 'Vocab':
         """Make an instance of this class from an iterable of samples.
 
@@ -47,9 +48,11 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
 
         Args:
             samples: Iterable of samples.
-            ve_kwargs: Mapping from field names to dictionaries. Each dictionary is passed
-                as keyword arguments to the corresponding :meth:`VocabEntry.from_iterable`
-                call.
+            options: Mapping from field names to dictionaries to control the creation of
+                the str-to-int mapping. Allowed dictionary keys are:
+
+                * ``min_count`` - Exclude strings occurring fewer than this number of times
+                    from the vocabulary.
 
         Returns:
             Vocabulary instance.
@@ -59,12 +62,12 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
         except StopIteration:
             return cls({})
 
-        if ve_kwargs is None:
-            ve_kwargs = {}
+        if options is None:
+            options = {}
 
         m = {
-            name: VocabEntry.from_iterable(
-                cls._flatten(cls._get_values(samples, name)), **ve_kwargs.get(name, {}))
+            name: _StringStore._from_iterable(
+                cls._flatten(cls._get_values(samples, name)), **options.get(name, {}))
             for name, value in first.items()
             if cls._needs_vocab(value)
         }
@@ -99,55 +102,6 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
             yield from cls._flatten(x)
 
 
-# TODO think if this class needs separate test cases
-class VocabEntry(Sequence[str]):
-    """Vocabulary entry that holds the actual str-to-int/int-to-str mapping.
-
-    Args:
-        strings: Sequence of distinct strings that serves as the int-to-str mapping.
-    """
-
-    def __init__(self, strings: Sequence[str]) -> None:
-        # TODO maybe force strings to have no duplicates?
-        self._itos = strings
-        self._stoi = _StringStore.from_itos(strings)
-
-    def __len__(self) -> int:
-        return len(self._itos)
-
-    def __getitem__(self, index) -> str:
-        return self._itos[index]
-
-    @property
-    def stoi(self) -> Mapping[str, int]:
-        """The str-to-int mapping."""
-        return self._stoi
-
-    @classmethod
-    def from_iterable(cls, iterable: Iterable[str], min_count: int = 2) -> 'VocabEntry':
-        """Make an instance of this class from an iterable of strings.
-
-        Args:
-            iterable: Iterable of strings.
-            min_count: Remove from the vocabulary strings occurring fewer than this number
-                of times.
-
-        Returns:
-            Vocab entry instance.
-        """
-        # TODO customize these tokens
-        itos = ['<pad>', '<unk>']
-        c = Counter(iterable)
-        for v, f in c.most_common():
-            if f < min_count:
-                break
-            itos.append(v)
-        return cls(itos)
-
-    def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({self._itos!r})'
-
-
 class _StringStore(Mapping[str, int]):
     def __init__(self, m: Mapping[str, int]) -> None:
         self._m = m
@@ -166,7 +120,12 @@ class _StringStore(Mapping[str, int]):
             return 1
 
     @classmethod
-    def from_itos(cls, itos: Sequence[str]) -> '_StringStore':
-        assert len(set(itos)) == len(itos), 'itos cannot have duplicate strings'
-        stoi = {s: i for i, s in enumerate(itos)}
+    def _from_iterable(cls, iterable: Iterable[str], min_count: int = 2) -> '_StringStore':
+        # TODO customize these tokens
+        stoi = OrderedDict([('<pad>', 0), ('<unk>', 1)])
+        c = Counter(iterable)
+        for s, f in c.most_common():
+            if f < min_count:
+                break
+            stoi[s] = len(stoi)
         return cls(stoi)
