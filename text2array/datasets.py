@@ -93,10 +93,8 @@ class Dataset(DatasetABC, Sequence[Sample]):
             self._samples[j] = temp
 
     def _shuffle_copy(self) -> None:
-        shuf_indices = list(range(len(self._samples)))
-        random.shuffle(shuf_indices)
-        shuf_samples = [self._samples[i] for i in shuf_indices]
-        self._samples = shuf_samples
+        self._samples = list(self._samples)
+        self._shuffle_inplace()
 
 
 class StreamDataset(DatasetABC):
