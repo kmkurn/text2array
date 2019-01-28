@@ -30,17 +30,6 @@ def test_get(batch):
     for i in range(len(batch)):
         assert batch.get('f')[i] == pytest.approx(batch[i]['f'])
 
-    assert isinstance(batch.get('is'), Sequence)
-    assert len(batch.get('is')) == len(batch)
-    for i in range(len(batch)):
-        assert list(batch.get('is')[i]) == list(batch[i]['is'])
-
-    assert isinstance(batch.get('fs'), Sequence)
-    assert len(batch.get('fs')) == len(batch)
-    for i in range(len(batch)):
-        for f1, f2 in zip(batch.get('fs')[i], batch[i]['fs']):
-            assert f1 == pytest.approx(f2)
-
 
 def test_get_invalid_name(batch):
     with pytest.raises(AttributeError) as exc:
@@ -62,23 +51,13 @@ class TestToArray:
         for i in range(len(batch)):
             assert arr['f'][i] == pytest.approx(batch[i]['f'])
 
-    def test_seq(self, batch):
-        arr = batch.to_array()
+    def test_seq(self):
+        ss = [{'is': [1, 2]}, {'is': [1]}, {'is': [1, 2, 3]}, {'is': [1, 2]}]
+        b = Batch(ss)
+        arr = b.to_array()
 
         assert isinstance(arr['is'], np.ndarray)
-        maxlen = max(len(x) for x in batch.get('is'))
-        assert arr['is'].shape == (len(batch), maxlen)
-        for r, s in zip(arr['is'], batch):
-            assert r[:len(s['is'])].tolist() == list(s['is'])
-            assert all(c == 0 for c in r[len(s['is']):])
-
-        assert isinstance(arr['fs'], np.ndarray)
-        maxlen = max(len(x) for x in batch.get('fs'))
-        assert arr['fs'].shape == (len(batch), maxlen)
-        for r, s in zip(arr['fs'], batch):
-            for c, f in zip(r, s['fs']):
-                assert c == pytest.approx(f)
-            assert all(c == pytest.approx(0, abs=1e-7) for c in r[len(s['fs']):])
+        assert arr['is'].tolist() == [[1, 2, 0], [1, 0, 0], [1, 2, 3], [1, 2, 0]]
 
     def test_seq_of_seq(self):
         ss = [
@@ -224,12 +203,16 @@ class TestToArray:
             [[1, 0], [1, 2], [1, 2]],
         ]
 
-    def test_custom_padding(self, batch):
-        arr = batch.to_array(pad_with=1)
-        for r, s in zip(arr['is'], batch):
-            assert all(c == 1 for c in r[len(s['is']):])
-        for r, s in zip(arr['fs'], batch):
-            assert all(c == pytest.approx(1) for c in r[len(s['fs']):])
+    def test_custom_padding(self):
+        ss = [{'is': [1]}, {'is': [1, 2]}]
+        b = Batch(ss)
+        arr = b.to_array(pad_with=9)
+        assert arr['is'].tolist() == [[1, 9], [1, 2]]
+
+        ss = [{'iss': [[1, 2], [1]]}, {'iss': [[1]]}]
+        b = Batch(ss)
+        arr = b.to_array(pad_with=9)
+        assert arr['iss'].tolist() == [[[1, 2], [1, 9]], [[1, 9], [9, 9]]]
 
     def test_no_common_field_names(self, samples):
         samples_ = list(samples)
