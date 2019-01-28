@@ -68,6 +68,7 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
 # TODO think if this class needs separate test cases
 class VocabEntry(Sequence[str]):
     def __init__(self, strings: Sequence[str]) -> None:
+        # TODO maybe force strings to have no duplicates?
         self._itos = strings
         self._stoi = _StringStore.from_itos(strings)
 
@@ -83,6 +84,7 @@ class VocabEntry(Sequence[str]):
 
     @classmethod
     def from_iterable(cls, iterable: Iterable[str]) -> 'VocabEntry':
+        # TODO customize these tokens
         itos = ['<pad>', '<unk>']
         c = Counter(iterable)
         for v, f in c.most_common():
