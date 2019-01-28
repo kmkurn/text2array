@@ -38,3 +38,20 @@ class TestFromDataset():
         with pytest.raises(RuntimeError) as exc:
             vocab['i']
         assert "no vocabulary found for field name 'i'" in str(exc.value)
+
+    def test_seq(self):
+        dat = Dataset([{'ws': ['a', 'c', 'c']}, {'ws': ['b', 'c']}, {'ws': ['b']}])
+        vocab = Vocab.from_dataset(dat)
+
+        itos = '<pad> <unk> c b'.split()
+
+        assert isinstance(vocab['ws'], Sequence)
+        assert len(vocab['ws']) == len(itos)
+        for i in range(len(itos)):
+            assert vocab['ws'][i] == itos[i]
+
+        assert isinstance(vocab['ws'].stoi, Mapping)
+        assert len(vocab['ws'].stoi) == len(vocab['ws'])
+        assert set(vocab['ws'].stoi) == set(vocab['ws'])
+        for i, s in enumerate(vocab['ws']):
+            assert vocab['ws'].stoi[s] == i

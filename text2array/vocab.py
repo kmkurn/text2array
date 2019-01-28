@@ -1,5 +1,6 @@
 from collections import Counter
-from typing import Iterable, Iterator, Mapping, Sequence
+from collections.abc import Sequence as SequenceABC
+from typing import Any, Iterable, Iterator, Mapping, Sequence
 
 from .datasets import Dataset
 from .samples import FieldName, FieldValue
@@ -25,7 +26,7 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
     def from_dataset(cls, dataset: Dataset) -> 'Vocab':
         assert len(dataset) > 0
         m = {
-            name: VocabEntry.from_iterable(cls._get_values(dataset, name))
+            name: VocabEntry.from_iterable(cls._flatten(cls._get_values(dataset, name)))
             for name, value in dataset[0].items()
             if cls._needs_vocab(value)
         }
@@ -37,7 +38,15 @@ class Vocab(Mapping[FieldName, 'VocabEntry']):
 
     @classmethod
     def _needs_vocab(cls, val: FieldValue) -> bool:
-        return isinstance(val, str)
+        if not isinstance(val, SequenceABC):
+            return isinstance(val, str)
+        assert len(val) > 0
+        return isinstance(val[0], str)
+
+    @staticmethod
+    def _flatten(xss: Sequence[Sequence[Any]]) -> Iterator[Any]:
+        for xs in xss:
+            yield from xs
 
 
 # TODO think if this class needs separate test cases
