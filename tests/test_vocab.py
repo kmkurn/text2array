@@ -1,25 +1,36 @@
 from collections.abc import Mapping, Sequence
 
+import pytest
+
 from text2array import Dataset, Vocab
 
 
-def test_vocab_from_dataset(samples):
+def test_vocab_from_dataset():
     ss = [{
-        'w': 'three'
+        'i': 1,
+        'w': 'three',
+        't': 'three',
     }, {
-        'w': 'two'
+        'i': 2,
+        'w': 'two',
+        't': 'two',
     }, {
-        'w': 'one'
+        'i': 3,
+        'w': 'one',
+        't': 'one',
     }, {
-        'w': 'two'
+        'i': 4,
+        'w': 'two',
+        't': 'two',
     }, {
-        'w': 'three'
+        'i': 5,
+        'w': 'three',
+        't': 'three',
     }, {
-        'w': 'three'
+        'i': 6,
+        'w': 'three',
+        't': 'three',
     }]
-    for s, s_ in zip(ss, samples):
-        s.update(s_)
-
     vocab = Vocab.from_dataset(Dataset(ss))
     itos = '<pad> <unk> three two'.split()
 
@@ -35,3 +46,9 @@ def test_vocab_from_dataset(samples):
         assert vocab.of('w').stoi[s] == i
     assert vocab.of('w').stoi['foo'] == vocab.of('w').stoi['<unk>']
     assert vocab.of('w').stoi['bar'] == vocab.of('w').stoi['<unk>']
+
+    assert isinstance(vocab.of('t'), Sequence)
+    assert isinstance(vocab.of('t').stoi, Mapping)
+    with pytest.raises(RuntimeError) as exc:
+        vocab.of('i')
+    assert "no vocabulary found for field name 'i'" in str(exc.value)
