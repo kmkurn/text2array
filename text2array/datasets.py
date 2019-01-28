@@ -28,6 +28,7 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
         return (b for b in self.batch(batch_size) if len(b) == batch_size)
 
 
+# TODO implement Vocab class
 class Dataset(DatasetABC, Sequence[Sample]):
     """A dataset that fits in memory (no streaming).
 
@@ -49,6 +50,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
     def __len__(self) -> int:
         return len(self._samples)
 
+    # TODO implement shuffle_by
     def shuffle(self) -> 'Dataset':
         """Shuffle the dataset.
 
