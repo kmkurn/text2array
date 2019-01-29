@@ -168,7 +168,7 @@ def test_apply_vocab():
     }]
 
 
-def test_apply_vocab_value_not_in_vocab():
+def test_apply_vocab_key_error():
     dat = Dataset([{'w': 'a'}])
     vocab = {'w': {'b': 0}}
     with pytest.raises(KeyError) as exc:
