@@ -169,10 +169,17 @@ def test_apply_vocab():
 
 
 def test_apply_vocab_value_not_in_vocab():
-    dat = Dataset([{'w': 'a', 'i': 10}, {'w': 'b', 'i': 11}])
-    vocab = {'w': {'a': 0}, 'i': {10: 1}}
-    dat = dat.apply_vocab(vocab)
-    assert list(dat) == [{'w': 0, 'i': 1}, {'w': 'b', 'i': 11}]
+    dat = Dataset([{'w': 'a'}])
+    vocab = {'w': {'b': 0}}
+    with pytest.raises(KeyError) as exc:
+        dat.apply_vocab(vocab)
+    assert "value 'a' not found in vocab" in str(exc.value)
+
+    dat = Dataset([{'w': 10}])
+    vocab = {'w': {11: 0}}
+    with pytest.raises(KeyError) as exc:
+        dat.apply_vocab(vocab)
+    assert "value 10 not found in vocab" in str(exc.value)
 
 
 # TODO add tests with actual vocabulary object
