@@ -119,3 +119,50 @@ def test_batch_nonpositive_batch_size(dataset):
     with pytest.raises(ValueError) as exc:
         next(dataset.batch_exactly(0))
     assert 'batch size must be greater than 0' in str(exc.value)
+
+
+def test_apply_vocab():
+    dat = Dataset([{
+        'w': 'a',
+        'ws': ['a', 'b'],
+        'cs': [['a', 'b'], ['b', 'a']],
+        'i': 10,
+        'j': 20
+    }, {
+        'w': 'b',
+        'ws': ['a', 'a'],
+        'cs': [['b', 'b'], ['b', 'a']],
+        'i': 10,
+        'j': 20
+    }])
+    vocab = {
+        'w': {
+            'a': 0,
+            'b': 1
+        },
+        'ws': {
+            'a': 2,
+            'b': 3
+        },
+        'cs': {
+            'a': 4,
+            'b': 5
+        },
+        'j': {
+            20: 2
+        }
+    }
+    dat = dat.apply_vocab(vocab)
+    assert list(dat) == [{
+        'w': 0,
+        'ws': [2, 3],
+        'cs': [[4, 5], [5, 4]],
+        'i': 10,
+        'j': 2
+    }, {
+        'w': 1,
+        'ws': [2, 2],
+        'cs': [[5, 5], [5, 4]],
+        'i': 10,
+        'j': 2
+    }]

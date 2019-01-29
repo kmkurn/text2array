@@ -1,12 +1,12 @@
 from collections.abc import \
     Iterable as IterableABC, MutableSequence as MutableSequenceABC, Sequence as SequenceABC
-from typing import Callable, Iterable, Iterator, Sequence
+from typing import Callable, Iterable, Iterator, Mapping, Sequence
 import abc
 import random
 import statistics as stat
 
 from .batches import Batch
-from .samples import Sample
+from .samples import FieldName, FieldValue, Sample
 
 
 class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
@@ -111,6 +111,30 @@ class Dataset(DatasetABC, Sequence[Sample]):
             end = begin + batch_size
             yield Batch(self._samples[begin:end])
 
+    def apply_vocab(
+            self,
+            vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]],
+    ) -> 'Dataset':
+        """Apply a vocabulary to this dataset.
+
+        Applying a vocabulary means mapping all the (nested) field values to the corresponding
+        values according to the mapping specified by the vocabulary. Field names that have
+        no entry in the vocabulary are ignored.
+
+        Args:
+            vocab: Vocabulary to apply.
+
+        Returns:
+            Dataset after application.
+        """
+        samples = []
+        for s in self._samples:
+            s_ = {}
+            for name, val in s.items():
+                s_[name] = self._apply(vocab[name], val) if name in vocab else val
+            samples.append(s_)
+        return Dataset(samples)
+
     def _shuffle_inplace(self) -> None:
         assert isinstance(self._samples, MutableSequenceABC)
         n = len(self._samples)
@@ -123,6 +147,15 @@ class Dataset(DatasetABC, Sequence[Sample]):
     def _shuffle_copy(self) -> None:
         self._samples = list(self._samples)
         self._shuffle_inplace()
+
+    @classmethod
+    def _apply(cls, vocab: Mapping[FieldValue, FieldValue], val: FieldValue) -> FieldValue:
+        # TODO handle when val not in vocab
+        if isinstance(val, str):
+            return vocab[val]
+        if isinstance(val, SequenceABC):
+            return [cls._apply(vocab, v) for v in val]
+        return vocab[val]
 
 
 class StreamDataset(DatasetABC):
