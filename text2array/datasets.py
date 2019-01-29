@@ -33,7 +33,7 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
         pass
 
     @classmethod
-    def _app_vocab_to_sample(
+    def _apply_vocab_to_sample(
             cls,
             vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]],
             sample: Sample,
@@ -45,18 +45,22 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
             except KeyError:
                 s[name] = val
             else:
-                s[name] = cls._app_vb_to_val(vb, val)
+                s[name] = cls._apply_vb_to_val(vb, val)
         return s
 
     @classmethod
-    def _app_vb_to_val(cls, vb: Mapping[FieldValue, FieldValue], val: FieldValue) -> FieldValue:
+    def _apply_vb_to_val(
+            cls,
+            vb: Mapping[FieldValue, FieldValue],
+            val: FieldValue,
+    ) -> FieldValue:
         if isinstance(val, str) or not isinstance(val, SequenceABC):
             try:
                 return vb[val]
             except KeyError:
                 raise KeyError(f'value {val!r} not found in vocab')
 
-        return [cls._app_vb_to_val(vb, v) for v in val]
+        return [cls._apply_vb_to_val(vb, v) for v in val]
 
 
 class Dataset(DatasetABC, Sequence[Sample]):
@@ -170,7 +174,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
     ) -> None:
         assert isinstance(self._samples, MutableSequenceABC)
         for i in range(len(self._samples)):
-            self._samples[i] = self._app_vocab_to_sample(vocab, self._samples[i])
+            self._samples[i] = self._apply_vocab_to_sample(vocab, self._samples[i])
 
 
 class StreamDataset(DatasetABC):
@@ -194,7 +198,7 @@ class StreamDataset(DatasetABC):
             return
 
         for s in self._stream:
-            yield self._app_vocab_to_sample(vocab, s)
+            yield self._apply_vocab_to_sample(vocab, s)
 
     def batch(self, batch_size: int) -> Iterator[Batch]:
         """Group the samples in the dataset into batches.
