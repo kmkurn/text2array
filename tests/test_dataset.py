@@ -2,7 +2,7 @@ from collections.abc import Iterator, Sequence
 
 import pytest
 
-from text2array import Batch, Dataset
+from text2array import Batch, Dataset, Vocab
 
 
 def test_init(samples):
@@ -182,4 +182,20 @@ def test_apply_vocab_key_error():
     assert "value 10 not found in vocab" in str(exc.value)
 
 
-# TODO add tests with actual vocabulary object
+def test_apply_vocab_with_vocab_object():
+    dat = Dataset([{
+        'ws': ['a', 'b'],
+        'cs': [['a', 'c'], ['c', 'b', 'c']]
+    }, {
+        'ws': ['b'],
+        'cs': [['b']]
+    }])
+    v = Vocab.from_samples(dat)
+    dat = dat.apply_vocab(v)
+    assert list(dat) == [{
+        'ws': [v['ws']['a'], v['ws']['b']],
+        'cs': [[v['cs']['a'], v['cs']['c']], [v['cs']['c'], v['cs']['b'], v['cs']['c']]]
+    }, {
+        'ws': [v['ws']['b']],
+        'cs': [[v['cs']['b']]]
+    }]
