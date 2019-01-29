@@ -118,7 +118,9 @@ class Dataset(DatasetABC, Sequence[Sample]):
 
         Applying a vocabulary means mapping all the (nested) field values to the corresponding
         values according to the mapping specified by the vocabulary. Field names that have
-        no entry in the vocabulary are ignored.
+        no entry in the vocabulary are ignored. This method applies the vocabulary in-place
+        when the dataset holds a mutable sequence of samples. Otherwise, a mutable copy of
+        samples is made.
 
         Args:
             vocab: Vocabulary to apply.
