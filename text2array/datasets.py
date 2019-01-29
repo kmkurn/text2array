@@ -114,7 +114,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
     def apply_vocab(
             self,
             vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]],
-    ) -> 'Dataset':
+    ) -> None:
         """Apply a vocabulary to this dataset.
 
         Applying a vocabulary means mapping all the (nested) field values to the corresponding
@@ -123,17 +123,19 @@ class Dataset(DatasetABC, Sequence[Sample]):
 
         Args:
             vocab: Vocabulary to apply.
-
-        Returns:
-            Dataset after application.
         """
-        samples = []
-        for s in self._samples:
-            s_ = {}
-            for name, val in s.items():
-                s_[name] = self._apply(vocab[name], val) if name in vocab else val
-            samples.append(s_)
-        return Dataset(samples)
+        ss = []
+        for s_ in self._samples:
+            s = {}
+            for name, val in s_.items():
+                try:
+                    vb = vocab[name]
+                except KeyError:
+                    s[name] = val
+                else:
+                    s[name] = self._apply(vb, val)
+            ss.append(s)
+        self._samples = ss
 
     def _shuffle_inplace(self) -> None:
         assert isinstance(self._samples, MutableSequenceABC)
