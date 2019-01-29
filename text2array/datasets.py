@@ -61,10 +61,9 @@ class Dataset(DatasetABC, Sequence[Sample]):
         Returns:
             The dataset object itself (useful for chaining).
         """
-        if isinstance(self._samples, MutableSequenceABC):
-            self._shuffle_inplace()
-        else:
-            self._shuffle_copy()
+        if not isinstance(self._samples, MutableSequenceABC):
+            self._samples = list(self._samples)
+        self._shuffle_inplace()
         return self
 
     def shuffle_by(self, key: Callable[[Sample], int], scale: float = 1.) -> 'Dataset':
@@ -136,10 +135,6 @@ class Dataset(DatasetABC, Sequence[Sample]):
             temp = self._samples[i]
             self._samples[i] = self._samples[j]
             self._samples[j] = temp
-
-    def _shuffle_copy(self) -> None:
-        self._samples = list(self._samples)
-        self._shuffle_inplace()
 
     def _apply_vocab_inplace(
             self,
