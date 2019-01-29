@@ -2,7 +2,7 @@ from collections.abc import Iterable, Iterator
 
 import pytest
 
-from text2array import Batch, StreamDataset
+from text2array import Batch, StreamDataset, Vocab
 
 
 def test_init(stream):
@@ -64,3 +64,86 @@ def test_batch_nonpositive_batch_size(stream_dataset):
     with pytest.raises(ValueError) as exc:
         next(stream_dataset.batch_exactly(0))
     assert 'batch size must be greater than 0' in str(exc.value)
+
+
+class TestApplyVocab:
+    def test_ok(self, stream_cls):
+        dat = StreamDataset(
+            stream_cls([{
+                'w': 'a',
+                'ws': ['a', 'b'],
+                'cs': [['a', 'b'], ['b', 'a']],
+                'i': 10,
+                'j': 20
+            }, {
+                'w': 'b',
+                'ws': ['a', 'a'],
+                'cs': [['b', 'b'], ['b', 'a']],
+                'i': 10,
+                'j': 20
+            }]))
+        vocab = {
+            'w': {
+                'a': 0,
+                'b': 1
+            },
+            'ws': {
+                'a': 2,
+                'b': 3
+            },
+            'cs': {
+                'a': 4,
+                'b': 5
+            },
+            'j': {
+                20: 2
+            }
+        }
+        dat.apply_vocab(vocab)
+        assert list(dat) == [{
+            'w': 0,
+            'ws': [2, 3],
+            'cs': [[4, 5], [5, 4]],
+            'i': 10,
+            'j': 2
+        }, {
+            'w': 1,
+            'ws': [2, 2],
+            'cs': [[5, 5], [5, 4]],
+            'i': 10,
+            'j': 2
+        }]
+
+    def test_key_error(self, stream_cls):
+        dat = StreamDataset(stream_cls([{'w': 'a'}]))
+        vocab = {'w': {'b': 0}}
+        dat.apply_vocab(vocab)
+        with pytest.raises(KeyError) as exc:
+            list(dat)
+        assert "value 'a' not found in vocab" in str(exc.value)
+
+        dat = StreamDataset(stream_cls([{'w': 10}]))
+        vocab = {'w': {11: 0}}
+        dat.apply_vocab(vocab)
+        with pytest.raises(KeyError) as exc:
+            list(dat)
+        assert "value 10 not found in vocab" in str(exc.value)
+
+    def test_with_vocab_object(self, stream_cls):
+        dat = StreamDataset(
+            stream_cls([{
+                'ws': ['a', 'b'],
+                'cs': [['a', 'c'], ['c', 'b', 'c']]
+            }, {
+                'ws': ['b'],
+                'cs': [['b']]
+            }]))
+        v = Vocab.from_samples(dat)
+        dat.apply_vocab(v)
+        assert list(dat) == [{
+            'ws': [v['ws']['a'], v['ws']['b']],
+            'cs': [[v['cs']['a'], v['cs']['c']], [v['cs']['c'], v['cs']['b'], v['cs']['c']]]
+        }, {
+            'ws': [v['ws']['b']],
+            'cs': [[v['cs']['b']]]
+        }]
