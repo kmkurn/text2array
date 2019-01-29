@@ -153,7 +153,7 @@ class TestApplyVocab:
                 20: 2
             }
         }
-        dat = dat.apply_vocab(vocab)
+        dat.apply_vocab(vocab)
         assert list(dat) == [{
             'w': 0,
             'ws': [2, 3],
@@ -190,7 +190,7 @@ class TestApplyVocab:
             'cs': [['b']]
         }])
         v = Vocab.from_samples(dat)
-        dat = dat.apply_vocab(v)
+        dat.apply_vocab(v)
         assert list(dat) == [{
             'ws': [v['ws']['a'], v['ws']['b']],
             'cs': [[v['cs']['a'], v['cs']['c']], [v['cs']['c'], v['cs']['b'], v['cs']['c']]]
