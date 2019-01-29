@@ -181,7 +181,23 @@ class StreamDataset(DatasetABC):
         self._stream = stream
 
     def __iter__(self) -> Iterator[Sample]:
-        return iter(self._stream)
+        try:
+            vocab = self._vocab
+        except AttributeError:
+            yield from iter(self._stream)
+            return
+
+        for s_ in self._stream:
+            # TODO these lines occur in Dataset as well, refactor?
+            s = {}
+            for name, val in s_.items():
+                try:
+                    vb = vocab[name]
+                except KeyError:
+                    s[name] = val
+                else:
+                    s[name] = self._apply(vb, val)
+            yield s
 
     def batch(self, batch_size: int) -> Iterator[Batch]:
         """Group the samples in the dataset into batches.
@@ -205,3 +221,28 @@ class StreamDataset(DatasetABC):
                     exhausted = True
             if batch:
                 yield Batch(batch)
+
+    def apply_vocab(self, vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]]) -> None:
+        """Apply a vocabulary to this dataset.
+
+        Applying a vocabulary means mapping all the (nested) field values to the corresponding
+        values according to the mapping specified by the vocabulary. Field names that have
+        no entry in the vocabulary are ignored. Note that since the dataset holds a stream of
+        samples, the actual application is delayed until the dataset is iterated. Therefore,
+        ``vocab`` must still exist when that happens.
+
+        Args:
+            vocab: Vocabulary to apply.
+        """
+        self._vocab = vocab
+
+    # TODO put this in DatasetABC maybe?
+    @classmethod
+    def _apply(cls, vb: Mapping[FieldValue, FieldValue], val: FieldValue) -> FieldValue:
+        if isinstance(val, str) or not isinstance(val, SequenceABC):
+            try:
+                return vb[val]
+            except KeyError:
+                raise KeyError(f'value {val!r} not found in vocab')
+
+        return [cls._apply(vb, v) for v in val]

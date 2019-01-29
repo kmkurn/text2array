@@ -29,6 +29,11 @@ def stream_dataset(stream):
     return StreamDataset(stream)
 
 
+@pytest.fixture
+def stream_cls():
+    return Stream
+
+
 class Stream:
     def __init__(self, samples):
         self.samples = samples
