@@ -33,6 +33,22 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
         pass
 
     @classmethod
+    def _app_vocab_to_sample(
+            cls,
+            vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]],
+            sample: Sample,
+    ) -> Sample:
+        s = {}
+        for name, val in sample.items():
+            try:
+                vb = vocab[name]
+            except KeyError:
+                s[name] = val
+            else:
+                s[name] = cls._app_vb_to_val(vb, val)
+        return s
+
+    @classmethod
     def _app_vb_to_val(cls, vb: Mapping[FieldValue, FieldValue], val: FieldValue) -> FieldValue:
         if isinstance(val, str) or not isinstance(val, SequenceABC):
             try:
@@ -153,18 +169,8 @@ class Dataset(DatasetABC, Sequence[Sample]):
             vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]],
     ) -> None:
         assert isinstance(self._samples, MutableSequenceABC)
-
         for i in range(len(self._samples)):
-            s = {}
-            for name, val in self._samples[i].items():
-                try:
-                    vb = vocab[name]
-                except KeyError:
-                    s[name] = val
-                else:
-                    s[name] = self._app_vb_to_val(vb, val)
-
-            self._samples[i] = s
+            self._samples[i] = self._app_vocab_to_sample(vocab, self._samples[i])
 
 
 class StreamDataset(DatasetABC):
@@ -187,17 +193,8 @@ class StreamDataset(DatasetABC):
             yield from iter(self._stream)
             return
 
-        for s_ in self._stream:
-            # TODO these lines occur in Dataset as well, refactor?
-            s = {}
-            for name, val in s_.items():
-                try:
-                    vb = vocab[name]
-                except KeyError:
-                    s[name] = val
-                else:
-                    s[name] = self._app_vb_to_val(vb, val)
-            yield s
+        for s in self._stream:
+            yield self._app_vocab_to_sample(vocab, s)
 
     def batch(self, batch_size: int) -> Iterator[Batch]:
         """Group the samples in the dataset into batches.
