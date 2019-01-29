@@ -28,8 +28,21 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
         """
         return (b for b in self.batch(batch_size) if len(b) == batch_size)
 
+    @abc.abstractmethod
+    def apply_vocab(self, vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]]) -> None:
+        pass
 
-# TODO implement mapping with a vocab
+    @classmethod
+    def _app_vb_to_val(cls, vb: Mapping[FieldValue, FieldValue], val: FieldValue) -> FieldValue:
+        if isinstance(val, str) or not isinstance(val, SequenceABC):
+            try:
+                return vb[val]
+            except KeyError:
+                raise KeyError(f'value {val!r} not found in vocab')
+
+        return [cls._app_vb_to_val(vb, v) for v in val]
+
+
 class Dataset(DatasetABC, Sequence[Sample]):
     """A dataset that fits in memory (no streaming).
 
@@ -110,10 +123,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
             end = begin + batch_size
             yield Batch(self._samples[begin:end])
 
-    def apply_vocab(
-            self,
-            vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]],
-    ) -> None:
+    def apply_vocab(self, vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]]) -> None:
         """Apply a vocabulary to this dataset.
 
         Applying a vocabulary means mapping all the (nested) field values to the corresponding
@@ -152,19 +162,9 @@ class Dataset(DatasetABC, Sequence[Sample]):
                 except KeyError:
                     s[name] = val
                 else:
-                    s[name] = self._apply(vb, self._samples[i][name])
+                    s[name] = self._app_vb_to_val(vb, val)
 
             self._samples[i] = s
-
-    @classmethod
-    def _apply(cls, vb: Mapping[FieldValue, FieldValue], val: FieldValue) -> FieldValue:
-        if isinstance(val, str) or not isinstance(val, SequenceABC):
-            try:
-                return vb[val]
-            except KeyError:
-                raise KeyError(f'value {val!r} not found in vocab')
-
-        return [cls._apply(vb, v) for v in val]
 
 
 class StreamDataset(DatasetABC):
@@ -196,7 +196,7 @@ class StreamDataset(DatasetABC):
                 except KeyError:
                     s[name] = val
                 else:
-                    s[name] = self._apply(vb, val)
+                    s[name] = self._app_vb_to_val(vb, val)
             yield s
 
     def batch(self, batch_size: int) -> Iterator[Batch]:
@@ -235,14 +235,3 @@ class StreamDataset(DatasetABC):
             vocab: Vocabulary to apply.
         """
         self._vocab = vocab
-
-    # TODO put this in DatasetABC maybe?
-    @classmethod
-    def _apply(cls, vb: Mapping[FieldValue, FieldValue], val: FieldValue) -> FieldValue:
-        if isinstance(val, str) or not isinstance(val, SequenceABC):
-            try:
-                return vb[val]
-            except KeyError:
-                raise KeyError(f'value {val!r} not found in vocab')
-
-        return [cls._apply(vb, v) for v in val]
