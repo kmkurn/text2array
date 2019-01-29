@@ -166,3 +166,10 @@ def test_apply_vocab():
         'i': 10,
         'j': 2
     }]
+
+
+def test_apply_vocab_value_not_in_vocab():
+    dat = Dataset([{'w': 'a', 'i': 10}, {'w': 'b', 'i': 11}])
+    vocab = {'w': {'a': 0}, 'i': {10: 1}}
+    dat = dat.apply_vocab(vocab)
+    assert list(dat) == [{'w': 0, 'i': 1}, {'w': 'b', 'i': 11}]
