@@ -124,18 +124,9 @@ class Dataset(DatasetABC, Sequence[Sample]):
         Args:
             vocab: Vocabulary to apply.
         """
-        ss = []
-        for s_ in self._samples:
-            s = {}
-            for name, val in s_.items():
-                try:
-                    vb = vocab[name]
-                except KeyError:
-                    s[name] = val
-                else:
-                    s[name] = self._apply(vb, val)
-            ss.append(s)
-        self._samples = ss
+        if not isinstance(self._samples, MutableSequenceABC):
+            self._samples = list(self._samples)
+        self._apply_vocab_inplace(vocab)
 
     def _shuffle_inplace(self) -> None:
         assert isinstance(self._samples, MutableSequenceABC)
@@ -149,6 +140,24 @@ class Dataset(DatasetABC, Sequence[Sample]):
     def _shuffle_copy(self) -> None:
         self._samples = list(self._samples)
         self._shuffle_inplace()
+
+    def _apply_vocab_inplace(
+            self,
+            vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]],
+    ) -> None:
+        assert isinstance(self._samples, MutableSequenceABC)
+
+        for i in range(len(self._samples)):
+            s = {}
+            for name, val in self._samples[i].items():
+                try:
+                    vb = vocab[name]
+                except KeyError:
+                    s[name] = val
+                else:
+                    s[name] = self._apply(vb, self._samples[i][name])
+
+            self._samples[i] = s
 
     @classmethod
     def _apply(cls, vocab: Mapping[FieldValue, FieldValue], val: FieldValue) -> FieldValue:

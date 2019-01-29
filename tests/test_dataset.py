@@ -198,3 +198,18 @@ class TestApplyVocab:
             'ws': [v['ws']['b']],
             'cs': [[v['cs']['b']]]
         }]
+
+    def test_immutable_seq(self):
+        ss = [{
+            'ws': ['a', 'b'],
+            'cs': [['a', 'c'], ['c', 'b', 'c']]
+        }, {
+            'ws': ['b'],
+            'cs': [['b']]
+        }]
+        lstdat = Dataset(ss)
+        tpldat = Dataset(tuple(ss))
+        v = Vocab.from_samples(ss)
+        lstdat.apply_vocab(v)
+        tpldat.apply_vocab(v)
+        assert list(lstdat) == list(tpldat)
