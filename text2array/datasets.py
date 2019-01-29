@@ -150,12 +150,19 @@ class Dataset(DatasetABC, Sequence[Sample]):
 
     @classmethod
     def _apply(cls, vocab: Mapping[FieldValue, FieldValue], val: FieldValue) -> FieldValue:
-        # TODO handle when val not in vocab
         if isinstance(val, str):
-            return vocab[val]
+            try:
+                return vocab[val]
+            except KeyError:
+                return val
+
         if isinstance(val, SequenceABC):
             return [cls._apply(vocab, v) for v in val]
-        return vocab[val]
+
+        try:
+            return vocab[val]
+        except KeyError:
+            return val
 
 
 class StreamDataset(DatasetABC):
