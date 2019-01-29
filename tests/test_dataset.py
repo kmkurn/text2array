@@ -173,3 +173,6 @@ def test_apply_vocab_value_not_in_vocab():
     vocab = {'w': {'a': 0}, 'i': {10: 1}}
     dat = dat.apply_vocab(vocab)
     assert list(dat) == [{'w': 0, 'i': 1}, {'w': 'b', 'i': 11}]
+
+
+# TODO add tests with actual vocabulary object
