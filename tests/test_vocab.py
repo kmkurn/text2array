@@ -21,7 +21,9 @@ class TestFromSamples():
         for i, w in enumerate(itos):
             assert vocab['w'][w] == i
 
+        assert 'foo' not in vocab['w']
         assert vocab['w']['foo'] == vocab['w']['<unk>']
+        assert 'bar' not in vocab['w']
         assert vocab['w']['bar'] == vocab['w']['<unk>']
 
     def test_has_vocab_for_all_str_fields(self):
