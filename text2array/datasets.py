@@ -62,7 +62,7 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
 
 
 class Dataset(DatasetABC, Sequence[Sample]):
-    """A dataset that fits in memory (no streaming).
+    """Dataset that fits all in memory (no streaming).
 
     Args:
         samples: Sequence of samples the dataset should contain. This sequence should
@@ -90,7 +90,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
         sequence, so subsequent shuffling will be done in-place.
 
         Returns:
-            The dataset object itself (useful for chaining).
+            This dataset object (useful for chaining).
         """
         if not isinstance(self._samples, MutableSequence):
             self._samples = list(self._samples)
@@ -115,7 +115,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
             scale: Value to regulate the noise of the sorting. Must not be negative.
 
         Returns:
-            The dataset object itself (useful for chaining).
+            This dataset object (useful for chaining).
         """
         if scale < 0:
             raise ValueError('scale cannot be less than 0')
@@ -148,10 +148,10 @@ class Dataset(DatasetABC, Sequence[Sample]):
         values according to the mapping specified by the vocabulary. Field names that have
         no entry in the vocabulary are ignored. This method applies the vocabulary in-place
         when the dataset holds a mutable sequence of samples. Otherwise, a mutable copy of
-        samples is made.
+        samples is made and the vocabulary is applied on it.
 
         Args:
-            vocab: Vocabulary to apply.
+            vocab: The vocabulary to apply.
         """
         if not isinstance(self._samples, MutableSequence):
             self._samples = list(self._samples)
@@ -176,10 +176,10 @@ class Dataset(DatasetABC, Sequence[Sample]):
 
 
 class StreamDataset(DatasetABC):
-    """A dataset that streams its samples.
+    """Dataset that streams its samples.
 
     Args:
-        stream: Stream of examples the dataset should stream from.
+        stream: Stream of samples the dataset should stream from.
     """
 
     def __init__(self, stream: Iterable[Sample]) -> None:
@@ -192,7 +192,7 @@ class StreamDataset(DatasetABC):
         try:
             vocab = self._vocab
         except AttributeError:
-            yield from iter(self._stream)
+            yield from self._stream
             return
 
         for s in self._stream:
@@ -231,6 +231,6 @@ class StreamDataset(DatasetABC):
         ``vocab`` must still exist when that happens.
 
         Args:
-            vocab: Vocabulary to apply.
+            vocab: The vocabulary to apply.
         """
         self._vocab = vocab
