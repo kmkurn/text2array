@@ -6,7 +6,6 @@ from text2array import Vocab
 
 
 class TestFromSamples():
-    # TODO think about what to test in each test case
     def test_ok(self):
         ss = [{'w': 'c'}, {'w': 'b'}, {'w': 'a'}, {'w': 'b'}, {'w': 'c'}, {'w': 'c'}]
         vocab = Vocab.from_samples(ss)
@@ -34,8 +33,8 @@ class TestFromSamples():
     def test_has_vocab_for_all_str_fields(self):
         ss = [{'w': 'b', 't': 'b'}, {'w': 'b', 't': 'b'}]
         vocab = Vocab.from_samples(ss)
-        assert 'w' in vocab
-        assert 't' in vocab
+        assert vocab.get('w') is not None
+        assert vocab.get('t') is not None
 
     def test_no_vocab_for_non_str(self):
         vocab = Vocab.from_samples([{'i': 10}, {'i': 20}])
@@ -89,59 +88,21 @@ class TestFromSamples():
             't': 'c'
         }]
         vocab = Vocab.from_samples(ss, options={'w': dict(min_count=3)})
-        assert list(vocab['w']) == '<pad> <unk> c'.split()
-        assert list(vocab['t']) == '<pad> <unk> c b'.split()
+        assert 'b' not in vocab['w']
+        assert 'b' in vocab['t']
 
     def test_no_unk(self):
-        ss = [{
-            'w': 'c',
-            't': 'c'
-        }, {
-            'w': 'b',
-            't': 'b'
-        }, {
-            'w': 'a',
-            't': 'a'
-        }, {
-            'w': 'b',
-            't': 'b'
-        }, {
-            'w': 'c',
-            't': 'c'
-        }, {
-            'w': 'c',
-            't': 'c'
-        }]
-        vocab = Vocab.from_samples(ss, options={'w': dict(unk=None)})
-        assert list(vocab['w']) == '<pad> c b'.split()
-        assert list(vocab['t']) == '<pad> <unk> c b'.split()
+        vocab = Vocab.from_samples([{'w': 'a', 't': 'a'}], options={'w': dict(unk=None)})
+        assert '<unk>' not in vocab['w']
+        assert '<unk>' in vocab['t']
         with pytest.raises(KeyError) as exc:
             vocab['w']['foo']
         assert "'foo' not found in vocabulary" in str(exc.value)
 
     def test_no_pad(self):
-        ss = [{
-            'w': 'c',
-            't': 'c'
-        }, {
-            'w': 'b',
-            't': 'b'
-        }, {
-            'w': 'a',
-            't': 'a'
-        }, {
-            'w': 'b',
-            't': 'b'
-        }, {
-            'w': 'c',
-            't': 'c'
-        }, {
-            'w': 'c',
-            't': 'c'
-        }]
-        vocab = Vocab.from_samples(ss, options={'w': dict(pad=None)})
-        assert list(vocab['w']) == '<unk> c b'.split()
-        assert list(vocab['t']) == '<pad> <unk> c b'.split()
+        vocab = Vocab.from_samples([{'w': 'a', 't': 'a'}], options={'w': dict(pad=None)})
+        assert '<pad>' not in vocab['w']
+        assert '<pad>' in vocab['t']
 
     def test_max_size(self):
         ss = [{
@@ -164,8 +125,8 @@ class TestFromSamples():
             't': 'c'
         }]
         vocab = Vocab.from_samples(ss, options={'w': dict(max_size=1)})
-        assert list(vocab['w']) == '<pad> <unk> c'.split()
-        assert list(vocab['t']) == '<pad> <unk> c b'.split()
+        assert 'b' not in vocab['w']
+        assert 'b' in vocab['t']
 
     def test_iterator_is_passed(self):
         ss = [{
