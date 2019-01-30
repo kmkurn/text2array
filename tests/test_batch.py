@@ -33,6 +33,10 @@ class TestToArray:
         for i in range(len(batch)):
             assert arr['f'][i] == pytest.approx(batch[i]['f'])
 
+    def test_empty(self):
+        b = Batch([])
+        assert not b.to_array()
+
     def test_seq(self):
         ss = [{'is': [1, 2]}, {'is': [1]}, {'is': [1, 2, 3]}, {'is': [1, 2]}]
         b = Batch(ss)
@@ -195,12 +199,3 @@ class TestToArray:
         b = Batch(ss)
         arr = b.to_array(pad_with=9)
         assert arr['iss'].tolist() == [[[1, 2], [1, 9]], [[1, 9], [9, 9]]]
-
-    def test_no_common_field_names(self, samples):
-        samples_ = list(samples)
-        samples_.append({'foo': 10})
-        batch = Batch(samples_)
-
-        with pytest.raises(RuntimeError) as exc:
-            batch.to_array()
-        assert 'some samples have no common field names with the others' in str(exc.value)

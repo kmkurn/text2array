@@ -39,20 +39,11 @@ class Batch(Sequence[Sample]):
             A mapping from field names to :class:`np.ndarray`s whose first
             dimension corresponds to the batch size as returned by ``__len__``.
         """
-        # TODO just assume all samples have the same keys
-        common: Set[FieldName] = set()
-        for s in self._samples:
-            if common:
-                common.intersection_update(s)
-            else:
-                common = set(s)
-
-        if not common:
-            raise RuntimeError('some samples have no common field names with the others')
-        assert self._samples  # if `common` isn't empty, neither is `_samples`
+        if not self._samples:
+            return {}
 
         arr = {}
-        for name in common:
+        for name in self._samples[0].keys():
             data = self._get(name)
             # Get max length for all depths, 1st elem is batch size
             maxlens = self._get_maxlens(data)
