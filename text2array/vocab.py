@@ -5,6 +5,7 @@ from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, Optio
 from .samples import FieldName, FieldValue, Sample
 
 
+# TODO use typing classes for isinstance check
 class Vocab(Mapping[FieldName, Mapping[str, int]]):
     """Namespaced vocabulary storing the mapping from field names to their actual vocabulary.
 
