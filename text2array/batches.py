@@ -1,6 +1,6 @@
 from collections.abc import Sequence as SequenceABC
 from functools import reduce
-from typing import Any, List, Mapping, Sequence, Set, Union
+from typing import Any, List, Mapping, Sequence, Union
 
 import numpy as np
 
