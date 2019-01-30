@@ -16,8 +16,7 @@ class TestFromSamples():
         with pytest.raises(KeyError):
             vocab['ws']
 
-        # TODO for non-sequential field, maybe no padding?
-        itos = '<pad> <unk> c b'.split()
+        itos = '<unk> c b'.split()
         assert isinstance(vocab['w'], Mapping)
         assert len(vocab['w']) == len(itos)
         assert list(vocab['w']) == itos
@@ -100,7 +99,7 @@ class TestFromSamples():
         assert "'foo' not found in vocabulary" in str(exc.value)
 
     def test_no_pad(self):
-        vocab = Vocab.from_samples([{'w': 'a', 't': 'a'}], options={'w': dict(pad=None)})
+        vocab = Vocab.from_samples([{'w': ['a'], 't': ['a']}], options={'w': dict(pad=None)})
         assert '<pad>' not in vocab['w']
         assert '<pad>' in vocab['t']
 
