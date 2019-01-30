@@ -23,12 +23,6 @@ class Batch(Sequence[Sample]):
     def __len__(self) -> int:
         return len(self._samples)
 
-    def _get(self, name: str) -> Sequence[FieldValue]:
-        try:
-            return [s[name] for s in self._samples]
-        except KeyError:
-            raise AttributeError(f"some samples have no field '{name}'")
-
     def to_array(self, pad_with: int = 0) -> Mapping[FieldName, np.ndarray]:
         """Convert the batch into :class:`np.ndarray`.
 
@@ -44,7 +38,7 @@ class Batch(Sequence[Sample]):
 
         arr = {}
         for name in self._samples[0].keys():
-            data = self._get(name)
+            data = self._get_values(name)
             # Get max length for all depths, 1st elem is batch size
             maxlens = self._get_maxlens(data)
             # Get padding for all depths
@@ -55,6 +49,12 @@ class Batch(Sequence[Sample]):
             arr[name] = np.array(data)
 
         return arr
+
+    def _get_values(self, name: str) -> Sequence[FieldValue]:
+        try:
+            return [s[name] for s in self._samples]
+        except KeyError:
+            raise KeyError(f"some samples have no field '{name}'")
 
     @classmethod
     def _get_maxlens(cls, data: Sequence[Any]) -> List[int]:
