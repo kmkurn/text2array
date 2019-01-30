@@ -23,8 +23,7 @@ class Batch(Sequence[Sample]):
     def __len__(self) -> int:
         return len(self._samples)
 
-    # TODO make this private
-    def get(self, name: str) -> Sequence[FieldValue]:
+    def _get(self, name: str) -> Sequence[FieldValue]:
         try:
             return [s[name] for s in self._samples]
         except KeyError:
@@ -54,7 +53,7 @@ class Batch(Sequence[Sample]):
 
         arr = {}
         for name in common:
-            data = self.get(name)
+            data = self._get(name)
             # Get max length for all depths, 1st elem is batch size
             maxlens = self._get_maxlens(data)
             # Get padding for all depths
