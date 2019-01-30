@@ -135,6 +135,9 @@ class _StringStore(Mapping[str, int]):
                 return self._unk_id
             raise KeyError(f"'{s}' not found in vocabulary")
 
+    def __contains__(self, s) -> bool:
+        return s in self._m
+
     @classmethod
     def _from_iterable(
             cls,
