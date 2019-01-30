@@ -6,6 +6,7 @@ from text2array import Vocab
 
 
 class TestFromSamples():
+    # TODO check all possible methods of a mapping?
     def test_ok(self):
         ss = [{'w': 'c'}, {'w': 'b'}, {'w': 'a'}, {'w': 'b'}, {'w': 'c'}, {'w': 'c'}]
         vocab = Vocab.from_samples(ss)
