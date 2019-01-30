@@ -199,3 +199,9 @@ class TestToArray:
         b = Batch(ss)
         arr = b.to_array(pad_with=9)
         assert arr['iss'].tolist() == [[[1, 2], [1, 9]], [[1, 9], [9, 9]]]
+
+    def test_missing_field(self):
+        b = Batch([{'a': 10}, {'b': 20}])
+        with pytest.raises(KeyError) as exc:
+            b.to_array()
+        assert "some samples have no field 'a'" in str(exc.value)
