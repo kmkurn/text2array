@@ -174,3 +174,8 @@ class TestFromSamples():
         vocab = Vocab.from_samples(ss, options={'w': dict(max_size=1)})
         assert list(vocab['w']) == ['<pad>', '<unk>', 'c']
         assert list(vocab['t']) == ['<pad>', '<unk>', 'c', 'b']
+
+    def test_iterator_is_passed(self):
+        ss = [{'ws': ['a', 'a']}, {'ws': ['b', 'b']}]
+        vocab = Vocab.from_samples(iter(ss))
+        assert 'a' in vocab['ws']

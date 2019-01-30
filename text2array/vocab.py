@@ -1,6 +1,6 @@
-from collections import Counter, OrderedDict
+from collections import Counter, OrderedDict, defaultdict
 from collections.abc import Sequence as SequenceABC
-from typing import Iterable, Iterator, Mapping, MutableMapping, Optional
+from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, Optional
 
 from .samples import FieldName, FieldValue, Sample
 
@@ -48,7 +48,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
         Args:
             samples: Iterable of samples.
             options: Mapping from field names to dictionaries to control the creation of
-                the str-to-int mapping. Allowed dictionary keys are:
+                the str-to-int mapping. Recognized dictionary keys are:
 
                 * ``min_count``(:obj:`int`): Exclude tokens occurring fewer than this number
                     of times from the vocabulary (default: 2).
@@ -69,30 +69,40 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
         Returns:
             Vocabulary instance.
         """
-        # TODO don't waste the first
-        try:
-            first = cls._head(samples)
-        except StopIteration:
-            return cls({})
-
         if options is None:
             options = {}
 
-        m = {
-            name: _StringStore._from_iterable(
-                cls._flatten(cls._get_values(samples, name)), **options.get(name, {}))
-            for name, value in first.items()
-            if cls._needs_vocab(value)
-        }
+        counter: Dict[FieldName, CounterT[str]] = defaultdict(Counter)
+        for s in samples:
+            for name, value in s.items():
+                if cls._needs_vocab(value):
+                    counter[name].update(cls._flatten(value))
+
+        m = {}
+        for name, c in counter.items():
+            store: dict = OrderedDict()
+            opts = options.get(name, {})
+
+            # Padding and unknown tokens
+            pad = opts.get('pad', '<pad>')
+            unk = opts.get('unk', '<unk>')
+            if pad is not None:
+                store[pad] = len(store)
+            if unk is not None:
+                store[unk] = len(store)
+
+            min_count = opts.get('min_count', 2)
+            max_size = opts.get('max_size')
+            n = len(store)
+            for tok, freq in c.most_common():
+                if freq < min_count or (max_size is not None and len(store) - n >= max_size):
+                    break
+                store[tok] = len(store)
+
+            unk_id = None if unk is None else store[unk]
+            m[name] = _StringStore(store, unk_id=unk_id)
+
         return cls(m)
-
-    @staticmethod
-    def _head(x: Iterable[Sample]) -> Sample:
-        return next(iter(x))
-
-    @staticmethod
-    def _get_values(ss: Iterable[Sample], name: FieldName) -> Iterator[FieldValue]:
-        return (s[name] for s in ss)
 
     @classmethod
     def _needs_vocab(cls, val: FieldValue) -> bool:
@@ -137,28 +147,3 @@ class _StringStore(Mapping[str, int]):
 
     def __contains__(self, s) -> bool:
         return s in self._m
-
-    @classmethod
-    def _from_iterable(
-            cls,
-            iterable: Iterable[str],
-            min_count: int = 2,
-            unk: Optional[str] = '<unk>',
-            pad: Optional[str] = '<pad>',
-            max_size: Optional[int] = None,
-    ) -> '_StringStore':
-        stoi: MutableMapping[str, int] = OrderedDict()
-        if pad is not None:
-            stoi[pad] = len(stoi)
-        if unk is not None:
-            stoi[unk] = len(stoi)
-
-        n = len(stoi)
-        c = Counter(iterable)
-        for s, f in c.most_common():
-            if f < min_count or (max_size is not None and len(stoi) - n >= max_size):
-                break
-            stoi[s] = len(stoi)
-
-        unk_id = None if unk is None else stoi[unk]
-        return cls(stoi, unk_id=unk_id)
