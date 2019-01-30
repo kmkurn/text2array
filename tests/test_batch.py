@@ -1,4 +1,4 @@
-from collections.abc import Mapping, Sequence
+from typing import Mapping, Sequence
 
 import numpy as np
 import pytest
@@ -14,24 +14,37 @@ def test_init(samples):
         assert b[i] == samples[i]
 
 
-@pytest.fixture
-def batch(samples):
-    return Batch(samples)
-
-
 class TestToArray:
-    def test_ok(self, batch):
-        arr = batch.to_array()
+    def test_ok(self):
+        ss = [{
+            'i': 4,
+            'f': 0.67
+        }, {
+            'i': 2,
+            'f': 0.89
+        }, {
+            'i': 3,
+            'f': 0.23
+        }, {
+            'i': 5,
+            'f': 0.11
+        }, {
+            'i': 3,
+            'f': 0.22
+        }]
+        b = Batch(ss)
+        arr = b.to_array()
         assert isinstance(arr, Mapping)
+        assert len(arr) == 2
+        assert set(arr) == set(['i', 'f'])
 
         assert isinstance(arr['i'], np.ndarray)
-        assert arr['i'].shape == (len(batch), )
-        assert arr['i'].tolist() == [s['i'] for s in batch]
+        assert arr['i'].shape == (len(b), )
+        assert arr['i'].tolist() == [s['i'] for s in b]
 
         assert isinstance(arr['f'], np.ndarray)
-        assert arr['f'].shape == (len(batch), )
-        for i in range(len(batch)):
-            assert arr['f'][i] == pytest.approx(batch[i]['f'])
+        assert arr['f'].shape == (len(b), )
+        assert arr['f'].tolist() == [pytest.approx(s['f']) for s in b]
 
     def test_empty(self):
         b = Batch([])
