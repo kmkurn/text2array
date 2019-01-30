@@ -1,6 +1,6 @@
 from collections import Counter, OrderedDict, defaultdict
 from collections.abc import Sequence as SequenceABC
-from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, Optional
+from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, Optional, Set
 
 from .samples import FieldName, FieldValue, Sample
 
@@ -54,7 +54,9 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
                     of times from the vocabulary (default: 2).
                 * ``pad``(:obj:`str`): String token to represent padding tokens. If ``None``,
                     no padding token is added to the vocabulary. Otherwise, it is the
-                    first entry in the vocabulary (index is 0) (default: ``<pad>``).
+                    first entry in the vocabulary (index is 0). Note that if the field has no
+                    sequential values, no padding is added. String field values are *not*
+                    considered sequential (default: ``<pad>``).
                 * ``unk``(:obj:`str`): String token to represent unknown tokens with. If
                     ``None``, no unknown token is added to the vocabulary. This means when
                     querying the vocabulary with such token, an error is raised. Otherwise,
@@ -73,10 +75,13 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             options = {}
 
         counter: Dict[FieldName, CounterT[str]] = defaultdict(Counter)
+        seqfield: Set[FieldName] = set()
         for s in samples:
             for name, value in s.items():
                 if cls._needs_vocab(value):
                     counter[name].update(cls._flatten(value))
+                if isinstance(value, SequenceABC) and not isinstance(value, str):
+                    seqfield.add(name)
 
         m = {}
         for name, c in counter.items():
@@ -86,7 +91,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             # Padding and unknown tokens
             pad = opts.get('pad', '<pad>')
             unk = opts.get('unk', '<unk>')
-            if pad is not None:
+            if name in seqfield and pad is not None:
                 store[pad] = len(store)
             if unk is not None:
                 store[unk] = len(store)
