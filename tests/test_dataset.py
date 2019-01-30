@@ -1,4 +1,4 @@
-from collections.abc import Iterator, Sequence
+from typing import Iterator, Sequence
 
 import pytest
 
@@ -8,7 +8,7 @@ from text2array import Batch, Dataset, Vocab
 def test_init(samples):
     dat = Dataset(samples)
     assert isinstance(dat, Sequence)
-    assert len(dat) == 5
+    assert len(dat) == len(samples)
     for i in range(len(dat)):
         assert dat[i] == samples[i]
 
@@ -37,21 +37,11 @@ class TestShuffle:
 
 
 class TestShuffleBy:
-    dataset = Dataset([{
-        'is': [1, 2, 3]
-    }, {
-        'is': [1]
-    }, {
-        'is': [1, 2]
-    }, {
-        'is': [1, 2, 3, 4, 5]
-    }, {
-        'is': [1, 2, 3, 4]
-    }])
+    dataset = Dataset([{'i': 3}, {'i': 1}, {'i': 2}, {'i': 5}, {'i': 4}])
 
     @staticmethod
     def key(sample):
-        return len(sample['is'])
+        return sample['i']
 
     def test_ok(self, setup_rng):
         dat = self.dataset
@@ -78,15 +68,16 @@ def assert_shuffled(before, after):
     assert before != after and len(before) == len(after) and all(x in after for x in before)
 
 
-def test_batch(dataset):
-    bs = dataset.batch(2)
+def test_batch():
+    dat = Dataset([{'i': 3}, {'i': 1}, {'i': 2}, {'i': 5}, {'i': 4}])
+    bs = dat.batch(2)
     assert isinstance(bs, Iterator)
     bs_lst = list(bs)
     assert len(bs_lst) == 3
     assert all(isinstance(b, Batch) for b in bs_lst)
-    assert list(bs_lst[0]) == [dataset[0], dataset[1]]
-    assert list(bs_lst[1]) == [dataset[2], dataset[3]]
-    assert list(bs_lst[2]) == [dataset[4]]
+    assert list(bs_lst[0]) == [dat[0], dat[1]]
+    assert list(bs_lst[1]) == [dat[2], dat[3]]
+    assert list(bs_lst[2]) == [dat[4]]
 
 
 def test_batch_size_evenly_divides(dataset):
@@ -97,14 +88,15 @@ def test_batch_size_evenly_divides(dataset):
         assert list(bs_lst[i]) == [dataset[i]]
 
 
-def test_batch_exactly(dataset):
-    bs = dataset.batch_exactly(2)
+def test_batch_exactly():
+    dat = Dataset([{'i': 3}, {'i': 1}, {'i': 2}, {'i': 5}, {'i': 4}])
+    bs = dat.batch_exactly(2)
     assert isinstance(bs, Iterator)
     bs_lst = list(bs)
     assert len(bs_lst) == 2
     assert all(isinstance(b, Batch) for b in bs_lst)
-    assert list(bs_lst[0]) == [dataset[0], dataset[1]]
-    assert list(bs_lst[1]) == [dataset[2], dataset[3]]
+    assert list(bs_lst[0]) == [dat[0], dat[1]]
+    assert list(bs_lst[1]) == [dat[2], dat[3]]
 
 
 def test_batch_nonpositive_batch_size(dataset):
@@ -164,7 +156,7 @@ class TestApplyVocab:
             'j': 2
         }]
 
-    def test_key_error(self):
+    def test_value_not_in_vocab(self):
         dat = Dataset([{'w': 'a'}])
         vocab = {'w': {'b': 0}}
         with pytest.raises(KeyError) as exc:
@@ -195,14 +187,8 @@ class TestApplyVocab:
             'cs': [[v['cs']['b']]]
         }]
 
-    def test_immutable_seq(self):
-        ss = [{
-            'ws': ['a', 'b'],
-            'cs': [['a', 'c'], ['c', 'b', 'c']]
-        }, {
-            'ws': ['b'],
-            'cs': [['b']]
-        }]
+    def test_immutable_seq(self, samples):
+        ss = samples
         lstdat = Dataset(ss)
         tpldat = Dataset(tuple(ss))
         v = Vocab.from_samples(ss)
