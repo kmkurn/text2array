@@ -1,4 +1,3 @@
-from collections.abc import Sequence as SequenceABC
 from functools import reduce
 from typing import Any, List, Mapping, Sequence, Union
 
@@ -61,7 +60,7 @@ class Batch(Sequence[Sample]):
         assert data
 
         # Base case
-        if not isinstance(data[0], SequenceABC):
+        if not isinstance(data[0], Sequence):
             return [len(data)]
 
         # Recursive case
@@ -93,7 +92,7 @@ class Batch(Sequence[Sample]):
         assert depth < len(maxlens)
 
         # Base case
-        if not isinstance(data[0], SequenceABC):
+        if not isinstance(data[0], Sequence):
             data_ = list(data)
         # Recursive case
         else:

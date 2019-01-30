@@ -1,11 +1,10 @@
 from collections import Counter, OrderedDict, defaultdict
-from collections.abc import Sequence as SequenceABC
-from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, Optional, Set
+from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
+    Optional, Sequence, Set
 
 from .samples import FieldName, FieldValue, Sample
 
 
-# TODO use typing classes for isinstance check
 class Vocab(Mapping[FieldName, Mapping[str, int]]):
     """Namespaced vocabulary storing the mapping from field names to their actual vocabulary.
 
@@ -81,7 +80,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             for name, value in s.items():
                 if cls._needs_vocab(value):
                     counter[name].update(cls._flatten(value))
-                if isinstance(value, SequenceABC) and not isinstance(value, str):
+                if isinstance(value, Sequence) and not isinstance(value, str):
                     seqfield.add(name)
 
         m = {}
@@ -114,7 +113,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
     def _needs_vocab(cls, val: FieldValue) -> bool:
         if isinstance(val, str):
             return True
-        if isinstance(val, SequenceABC):
+        if isinstance(val, Sequence):
             if not val:
                 raise ValueError('field values must not be an empty sequence')
             return cls._needs_vocab(val[0])
