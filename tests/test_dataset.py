@@ -37,27 +37,24 @@ class TestShuffle:
 
 
 class TestShuffleBy:
-    # TODO make this a class variable
-    @staticmethod
-    def make_dataset():
-        return Dataset([{
-            'is': [1, 2, 3]
-        }, {
-            'is': [1]
-        }, {
-            'is': [1, 2]
-        }, {
-            'is': [1, 2, 3, 4, 5]
-        }, {
-            'is': [1, 2, 3, 4]
-        }])
+    dataset = Dataset([{
+        'is': [1, 2, 3]
+    }, {
+        'is': [1]
+    }, {
+        'is': [1, 2]
+    }, {
+        'is': [1, 2, 3, 4, 5]
+    }, {
+        'is': [1, 2, 3, 4]
+    }])
 
     @staticmethod
     def key(sample):
         return len(sample['is'])
 
     def test_ok(self, setup_rng):
-        dat = self.make_dataset()
+        dat = self.dataset
         before = list(dat)
         retval = dat.shuffle_by(self.key)
         after = list(dat)
@@ -65,16 +62,15 @@ class TestShuffleBy:
         assert_shuffled(before, after)
 
     def test_zero_scale(self, setup_rng):
-        dat = self.make_dataset()
+        dat = self.dataset
         before = list(dat)
         dat.shuffle_by(self.key, scale=0.)
         after = list(dat)
         assert sorted(before, key=self.key) == after
 
     def test_negative_scale(self, setup_rng):
-        dat = self.make_dataset()
         with pytest.raises(ValueError) as exc:
-            dat.shuffle_by(self.key, scale=-1)
+            self.dataset.shuffle_by(self.key, scale=-1)
         assert 'scale cannot be less than 0' in str(exc.value)
 
 
