@@ -69,6 +69,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
         Returns:
             Vocabulary instance.
         """
+        # TODO don't waste the first
         try:
             first = cls._head(samples)
         except StopIteration:
