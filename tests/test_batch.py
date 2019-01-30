@@ -19,24 +19,6 @@ def batch(samples):
     return Batch(samples)
 
 
-def test_get(batch):
-    assert isinstance(batch.get('i'), Sequence)
-    assert len(batch.get('i')) == len(batch)
-    for i in range(len(batch)):
-        assert batch.get('i')[i] == batch[i]['i']
-
-    assert isinstance(batch.get('f'), Sequence)
-    assert len(batch.get('f')) == len(batch)
-    for i in range(len(batch)):
-        assert batch.get('f')[i] == pytest.approx(batch[i]['f'])
-
-
-def test_get_invalid_name(batch):
-    with pytest.raises(AttributeError) as exc:
-        batch.get('foo')
-    assert "some samples have no field 'foo'" in str(exc.value)
-
-
 class TestToArray:
     def test_ok(self, batch):
         arr = batch.to_array()
@@ -44,7 +26,7 @@ class TestToArray:
 
         assert isinstance(arr['i'], np.ndarray)
         assert arr['i'].shape == (len(batch), )
-        assert arr['i'].tolist() == list(batch.get('i'))
+        assert arr['i'].tolist() == [s['i'] for s in batch]
 
         assert isinstance(arr['f'], np.ndarray)
         assert arr['f'].shape == (len(batch), )
