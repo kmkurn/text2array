@@ -6,6 +6,7 @@ from text2array import Vocab
 
 
 class TestFromSamples():
+    # TODO think about what to test in each test case
     def test_ok(self):
         ss = [{'w': 'c'}, {'w': 'b'}, {'w': 'a'}, {'w': 'b'}, {'w': 'c'}, {'w': 'c'}]
         vocab = Vocab.from_samples(ss)
@@ -16,6 +17,7 @@ class TestFromSamples():
         with pytest.raises(KeyError):
             vocab['ws']
 
+        # TODO for non-sequential field, maybe no padding?
         itos = '<pad> <unk> c b'.split()
         assert isinstance(vocab['w'], Mapping)
         assert len(vocab['w']) == len(itos)
