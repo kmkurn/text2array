@@ -1,6 +1,4 @@
-from collections.abc import \
-    Iterable as IterableABC, MutableSequence as MutableSequenceABC, Sequence as SequenceABC
-from typing import Callable, Iterable, Iterator, Mapping, Sequence
+from typing import Callable, Iterable, Iterator, Mapping, MutableSequence, Sequence
 import abc
 import random
 import statistics as stat
@@ -54,7 +52,7 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
             vb: Mapping[FieldValue, FieldValue],
             val: FieldValue,
     ) -> FieldValue:
-        if isinstance(val, str) or not isinstance(val, SequenceABC):
+        if isinstance(val, str) or not isinstance(val, Sequence):
             try:
                 return vb[val]
             except KeyError:
@@ -73,7 +71,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
     """
 
     def __init__(self, samples: Sequence[Sample]) -> None:
-        if not isinstance(samples, SequenceABC):
+        if not isinstance(samples, Sequence):
             raise TypeError('"samples" is not a sequence')
 
         self._samples = samples
@@ -94,7 +92,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
         Returns:
             The dataset object itself (useful for chaining).
         """
-        if not isinstance(self._samples, MutableSequenceABC):
+        if not isinstance(self._samples, MutableSequence):
             self._samples = list(self._samples)
         self._shuffle_inplace()
         return self
@@ -155,12 +153,12 @@ class Dataset(DatasetABC, Sequence[Sample]):
         Args:
             vocab: Vocabulary to apply.
         """
-        if not isinstance(self._samples, MutableSequenceABC):
+        if not isinstance(self._samples, MutableSequence):
             self._samples = list(self._samples)
         self._apply_vocab_inplace(vocab)
 
     def _shuffle_inplace(self) -> None:
-        assert isinstance(self._samples, MutableSequenceABC)
+        assert isinstance(self._samples, MutableSequence)
         n = len(self._samples)
         for i in range(n):
             j = random.randrange(n)
@@ -172,7 +170,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
             self,
             vocab: Mapping[FieldName, Mapping[FieldValue, FieldValue]],
     ) -> None:
-        assert isinstance(self._samples, MutableSequenceABC)
+        assert isinstance(self._samples, MutableSequence)
         for i in range(len(self._samples)):
             self._samples[i] = self._apply_vocab_to_sample(vocab, self._samples[i])
 
@@ -185,7 +183,7 @@ class StreamDataset(DatasetABC):
     """
 
     def __init__(self, stream: Iterable[Sample]) -> None:
-        if not isinstance(stream, IterableABC):
+        if not isinstance(stream, Iterable):
             raise TypeError('"stream" is not iterable')
 
         self._stream = stream
