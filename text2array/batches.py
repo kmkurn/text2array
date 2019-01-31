@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Any, List, Mapping, Sequence, Union
+from typing import List, Mapping, Sequence, Union
 
 import numpy as np
 
@@ -61,20 +61,20 @@ class Batch(Sequence[Sample]):
             raise KeyError(f"some samples have no field '{name}'")
 
     @classmethod
-    def _get_maxlens(cls, data: Sequence[Any]) -> List[int]:
-        assert data
+    def _get_maxlens(cls, values: Sequence[FieldValue]) -> List[int]:
+        assert values
 
         # Base case
-        if isinstance(data[0], str) or not isinstance(data[0], Sequence):
-            return [len(data)]
+        if isinstance(values[0], str) or not isinstance(values[0], Sequence):
+            return [len(values)]
 
         # Recursive case
-        maxlenss = [cls._get_maxlens(x) for x in data]
+        maxlenss = [cls._get_maxlens(x) for x in values]
         if not all(len(x) == len(maxlenss[0]) for x in maxlenss):
             raise cls._InconsistentDepthError
 
         maxlens = reduce(lambda ml1, ml2: [max(l1, l2) for l1, l2 in zip(ml1, ml2)], maxlenss)
-        maxlens.insert(0, len(data))
+        maxlens.insert(0, len(values))
         return maxlens
 
     @classmethod
@@ -88,25 +88,25 @@ class Batch(Sequence[Sample]):
     @classmethod
     def _pad(
             cls,
-            data: Sequence[Any],
+            values: Sequence[FieldValue],
             maxlens: List[int],
             paddings: List[Union[int, List[int]]],
             depth: int,
-    ) -> Sequence[Any]:
-        assert data
+    ) -> Sequence[FieldValue]:
+        assert values
         assert len(maxlens) == len(paddings)
         assert depth < len(maxlens)
 
         # Base case
-        if isinstance(data[0], str) or not isinstance(data[0], Sequence):
-            data_ = list(data)
+        if isinstance(values[0], str) or not isinstance(values[0], Sequence):
+            values_ = list(values)
         # Recursive case
         else:
-            data_ = [cls._pad(x, maxlens, paddings, depth + 1) for x in data]
+            values_ = [cls._pad(x, maxlens, paddings, depth + 1) for x in values]
 
-        for _ in range(maxlens[depth] - len(data)):
-            data_.append(paddings[depth])
-        return data_
+        for _ in range(maxlens[depth] - len(values)):
+            values_.append(paddings[depth])
+        return values_
 
     class _InconsistentDepthError(Exception):
         pass
