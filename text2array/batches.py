@@ -37,13 +37,18 @@ class Batch(Sequence[Sample]):
 
         arr = {}
         for name in self._samples[0].keys():
-            data = self._get_values(name)
+            values = self._get_values(name)
+
             # Get max length for all depths, 1st elem is batch size
-            maxlens = self._get_maxlens(data)
+            try:
+                maxlens = self._get_maxlens(values)
+            except self._InconsistentDepthError:
+                raise ValueError(f"field '{name}' has inconsistent nesting depth")
+
             # Get padding for all depths
             paddings = self._get_paddings(maxlens, pad_with)
-            # Pad the data
-            data = self._pad(data, maxlens, paddings, 0)
+            # Pad the values
+            data = self._pad(values, maxlens, paddings, 0)
 
             arr[name] = np.array(data)
 
@@ -65,7 +70,8 @@ class Batch(Sequence[Sample]):
 
         # Recursive case
         maxlenss = [cls._get_maxlens(x) for x in data]
-        assert all(len(x) == len(maxlenss[0]) for x in maxlenss)
+        if not all(len(x) == len(maxlenss[0]) for x in maxlenss):
+            raise cls._InconsistentDepthError
 
         maxlens = reduce(lambda ml1, ml2: [max(l1, l2) for l1, l2 in zip(ml1, ml2)], maxlenss)
         maxlens.insert(0, len(data))
@@ -101,3 +107,6 @@ class Batch(Sequence[Sample]):
         for _ in range(maxlens[depth] - len(data)):
             data_.append(paddings[depth])
         return data_
+
+    class _InconsistentDepthError(Exception):
+        pass

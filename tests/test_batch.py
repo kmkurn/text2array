@@ -218,3 +218,9 @@ class TestToArray:
         with pytest.raises(KeyError) as exc:
             b.to_array()
         assert "some samples have no field 'a'" in str(exc.value)
+
+    def test_inconsistent_depth(self):
+        b = Batch([{'ws': [1, 2]}, {'ws': [[1, 2], [3, 4]]}])
+        with pytest.raises(ValueError) as exc:
+            b.to_array()
+        assert "field 'ws' has inconsistent nesting depth" in str(exc.value)
