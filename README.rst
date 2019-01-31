@@ -12,10 +12,10 @@ Installation
 
 **text2array** requires at least Python 3.6 and can be installed via pip::
 
-    pip install text2array
+    $ pip install text2array
 
-Usage overview
---------------
+Overview
+--------
 
 .. code-block:: python
 
@@ -63,8 +63,8 @@ Usage overview
     >>> arr['ws']
     array([[2, 1, 3]])
 
-Detailed tutorial
------------------
+Tutorial
+--------
 
 Sample
 ++++++
@@ -284,3 +284,26 @@ you'd want to apply the vocabulary beforehand to ensure all values contain only 
 
 Note that ``to_array`` returns a ``Mapping[FieldName, np.ndarray]`` object, and sequential
 fields are automatically padded.
+
+Contributing
+------------
+
+Pull requests are welcome! To start contributing, make sure to install all the dependencies.
+
+::
+
+    $ pip install -r requirements.txt
+
+Next, setup the pre-commit hook.
+
+::
+
+    $ ln -s ../../pre-commit.sh .git/hooks/pre-commit
+
+Tests and the linter can be run with ``pytest`` and ``flake8`` respectively. The latter also
+runs ``mypy`` for type checking.
+
+License
+-------
+
+MIT
