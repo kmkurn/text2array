@@ -5,7 +5,7 @@ text2array
 
 **text2array** helps you process your NLP text dataset into Numpy ndarray objects that are
 ready to use for e.g. neural network inputs. **text2array** handles data shuffling,
-batching, padding, converting into arrays. Say goodbye to these tedious works!
+batching, padding, and converting into arrays. Say goodbye to these tedious works!
 
 Installation
 ------------
@@ -70,15 +70,15 @@ Sample
 ++++++
 
 ``Sample`` is just a ``Mapping[FieldName, FieldValue]``, where ``FieldName = str`` and
-``FieldValue = Union[float, int, Sequence['FieldValue']``. It is easiest to use a ``dict``
-to represent a sample, but you can essentially use any object you like as long as it
-implements ``Mapping[FieldName, FieldValue]`` (which can be ensured by subclassing from
-this type).
+``FieldValue = Union[float, int, str, Sequence['FieldValue']``. It is easiest to use a
+``dict`` to represent a sample, but you can essentially use any object you like as long
+as it implements ``Mapping[FieldName, FieldValue]`` (which can be ensured by subclassing
+from this type).
 
 Dataset
 +++++++
 
-There are actually 2 classes for a dataset. ``Dataset`` is what you'd use normally. It
+There are actually 2 classes for a dataset. ``Dataset`` is what you would normally use. It
 implements ``Sequence[Sample]`` so it requires all the samples to fit in the memory. To
 create a ``Dataset`` object, pass an object of type ``Sequence[Sample]`` as an argument.
 
@@ -120,7 +120,7 @@ instantiate, pass an ``Iterable[Sample]`` object.
     >>> list(dataset)
     [{'ws': ['john', 'talks']}, {'ws': ['john', 'loves', 'mary']}, {'ws': ['mary']}]
 
-Note that because ``StreamDataset`` is an iterable, you can't ask for its length nor access
+Because ``StreamDataset`` is an iterable, you can't ask for its length nor access
 by index, but it can be iterated over.
 
 Shuffling dataset
@@ -147,9 +147,9 @@ The example above shuffles the dataset but also tries to keep samples with simil
 closer. This is useful for NLP where we want to shuffle but also minimize padding in each
 batch. If a very short sample ends up in the same batch as a very long one, there would be
 a lot of wasted entries for padding. Sorting noisily by length can help mitigate this issue.
-This approach is inspired by `AllenNLP <https://github.com/allenai/allennlp>`_. Note that
-both ``shuffle`` and ``shuffle_by`` returns the dataset object itself so method chaining
-is possible.
+This approach is inspired by `AllenNLP <https://github.com/allenai/allennlp>`_. Both
+``shuffle`` and ``shuffle_by`` returns the dataset object itself so method chaining
+is possible. See the docstring for more details.
 
 Batching dataset
 ^^^^^^^^^^^^^^^^
@@ -174,8 +174,8 @@ as an argument.
 
 The method returns an ``Iterator[Batch]`` object so it can be iterated only once. If you want
 the batches to have exactly the same size, i.e. dropping the last one if it's smaller than
-batch size, use ``batch_exactly`` instead. The two methods are also available for
-``StreamDataset``. Note that before batching, you might want to map all those strings
+the batch size, use ``batch_exactly`` instead. The two methods are also available for
+``StreamDataset``. Before batching, you might want to map all those strings
 into integer IDs first, which is explained in the next section.
 
 Applying vocabulary
@@ -207,7 +207,7 @@ explained with an example.
 
 Note that the vocabulary is only applied to fields whose name is contained in the
 vocabulary. Although not shown above, the vocabulary application still works even if
-the field value is a deeply nested sequence. Note that ``apply_vocab`` is available
+the field value is a deeply nested sequence. Method ``apply_vocab`` is available
 for ``StreamDataset`` as well.
 
 Vocabulary
@@ -218,6 +218,7 @@ from a dataset. The ``Vocab`` class can be used for this purpose.
 
 .. code-block:: python
 
+    >>> from text2array import Vocab
     >>> samples = [
     ...   {'ws': ['john', 'talks'], 'i': 10, 'label': 'pos'},
     ...   {'ws': ['john', 'loves', 'mary'], 'i': 20, 'label': 'pos'},
@@ -249,13 +250,13 @@ Batch
 
 Both ``batch`` and ``batch_exactly`` methods return ``Iterator[Batch]`` where ``Batch``
 implements ``Sequence[Sample]``. This is true even for ``StreamDataset``. So, although
-all samples may not all fit in the memory, a batch of them should. Given a ``Batch``
-object, it can be converted into Numpy's ndarray by ``to_array`` method. Note that normally
+samples may not all fit in the memory, a batch of them should. Given a ``Batch``
+object, it can be converted into Numpy's ndarray by ``to_array`` method. Normally,
 you'd want to apply the vocabulary beforehand to ensure all values contain only ints or floats.
 
 .. code-block:: python
 
-    >>> from text2array import Dataset
+    >>> from text2array import Dataset, Vocab
     >>> samples = [
     ...   {'ws': ['john', 'talks'], 'i': 10, 'label': 'pos'},
     ...   {'ws': ['john', 'loves', 'mary'], 'i': 20, 'label': 'pos'},
