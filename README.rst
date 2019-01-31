@@ -130,7 +130,7 @@ Shuffling dataset
 accessible by index. So, only ``Dataset`` can be shuffled. There are 2 ways to shuffle.
 First, using ``shuffle`` method, which shuffles the dataset randomly without any
 constraints. Second, using ``shuffle_by`` which accepts a ``Callable[[Sample], int]``
-and use that to shuffle by performing a noisy sorting::
+and use that to shuffle by performing a noisy sorting.
 
 .. code-block:: python
 
@@ -155,7 +155,7 @@ Batching dataset
 ^^^^^^^^^^^^^^^^
 
 To split up a dataset into batches, use the ``batch`` method, which takes the batch size
-as an argument. ::
+as an argument.
 
 .. code-block:: python
 
@@ -183,7 +183,7 @@ Applying vocabulary
 
 A vocabulary should implement ``Mapping[FieldName, Mapping[FieldValue, FieldValue]]``.
 Then, call ``apply_vocab`` method with the vocabulary as an argument. This is best
-explained with an example. ::
+explained with an example.
 
 .. code-block:: python
 
@@ -207,7 +207,8 @@ explained with an example. ::
 
 Note that the vocabulary is only applied to fields whose name is contained in the
 vocabulary. Although not shown above, the vocabulary application still works even if
-the field value is a deeply nested sequence.
+the field value is a deeply nested sequence. Note that ``apply_vocab`` is available
+for ``StreamDataset`` as well.
 
 Vocabulary
 ++++++++++
@@ -223,8 +224,8 @@ from a dataset. The ``Vocab`` class can be used for this purpose.
     ...   {'ws': ['mary'], 'i': 30, 'label': 'neg'}
     ... ]
     >>> vocab = Vocab.from_samples(samples)
-    >>> list(vocab.keys())
-    ['ws', 'label']
+    >>> vocab.keys()
+    dict_keys(['ws', 'label'])
     >>> dict(vocab['ws'])
     {'<pad>': 0, '<unk>': 1, 'john': 2, 'mary': 3}
     >>> dict(vocab['label'])
@@ -242,3 +243,43 @@ There are several things to note:
 ``Vocab.from_samples`` actually accepts an ``Iterable[Sample]``, which means a ``Dataset``
 or a ``StreamDataset`` can be passed as well. See the docstring to see other arguments
 that it accepts to customize vocabulary creation.
+
+Batch
++++++
+
+Both ``batch`` and ``batch_exactly`` methods return ``Iterator[Batch]`` where ``Batch``
+implements ``Sequence[Sample]``. This is true even for ``StreamDataset``. So, although
+all samples may not all fit in the memory, a batch of them should. Given a ``Batch``
+object, it can be converted into Numpy's ndarray by ``to_array`` method. Note that normally
+you'd want to apply the vocabulary beforehand to ensure all values contain only ints or floats.
+
+.. code-block:: python
+
+    >>> from text2array import Dataset
+    >>> samples = [
+    ...   {'ws': ['john', 'talks'], 'i': 10, 'label': 'pos'},
+    ...   {'ws': ['john', 'loves', 'mary'], 'i': 20, 'label': 'pos'},
+    ...   {'ws': ['mary'], 'i': 30, 'label': 'neg'}
+    ... ]
+    >>> dataset = Dataset(samples)
+    >>> vocab = Vocab.from_samples(dataset)
+    >>> dict(vocab['ws'])
+    {'<pad>': 0, '<unk>': 1, 'john': 2, 'mary': 3}
+    >>> dict(vocab['label'])
+    {'<unk>': 0, 'pos': 1}
+    >>> dataset.apply_vocab(vocab)
+    >>> batches = dataset.batch(2)
+    >>> batch = next(batches)
+    >>> arr = batch.to_array()
+    >>> arr.keys()
+    dict_keys(['ws', 'i', 'label'])
+    >>> arr['ws']
+    array([[2, 1, 0],
+           [2, 1, 3]])
+    >>> arr['i']
+    array([10, 20])
+    >>> arr['label']
+    array([1, 1])
+
+Note that ``to_array`` returns a ``Mapping[FieldName, np.ndarray]`` object, and sequential
+fields are automatically padded.
