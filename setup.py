@@ -3,7 +3,6 @@ from setuptools import setup, find_packages
 
 readme = Path(__file__).resolve().parent / 'README.rst'
 
-# TODO release v0.0.1
 setup(
     name='text2array',
     version='0.0.1',
