@@ -65,7 +65,7 @@ class Batch(Sequence[Sample]):
         assert data
 
         # Base case
-        if not isinstance(data[0], Sequence):
+        if isinstance(data[0], str) or not isinstance(data[0], Sequence):
             return [len(data)]
 
         # Recursive case
@@ -98,7 +98,7 @@ class Batch(Sequence[Sample]):
         assert depth < len(maxlens)
 
         # Base case
-        if not isinstance(data[0], Sequence):
+        if isinstance(data[0], str) or not isinstance(data[0], Sequence):
             data_ = list(data)
         # Recursive case
         else:

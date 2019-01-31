@@ -224,3 +224,9 @@ class TestToArray:
         with pytest.raises(ValueError) as exc:
             b.to_array()
         assert "field 'ws' has inconsistent nesting depth" in str(exc.value)
+
+    def test_str(self):
+        b = Batch([{'w': 'a'}, {'w': 'b'}])
+        arr = b.to_array()
+        assert isinstance(arr['w'], np.ndarray)
+        assert arr['w'].tolist() == ['a', 'b']
