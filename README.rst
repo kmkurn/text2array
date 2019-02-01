@@ -3,6 +3,9 @@ text2array
 
 *Convert your NLP text dataset to arrays!*
 
+.. image:: https://badge.fury.io/py/text2array.svg
+   :target: https://badge.fury.io/py/text2array
+
 .. image:: https://travis-ci.org/kmkurn/text2array.svg?branch=master
    :target: https://travis-ci.org/kmkurn/text2array
 
