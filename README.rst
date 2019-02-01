@@ -39,8 +39,12 @@ Overview
     >>> list(vocab['ws'])
     ['<pad>', '<unk>', 'john', 'mary']
     >>> # 'talks' and 'loves' are out-of-vocabulary because they occur only once
+    >>> 'john' in vocab['ws']
+    True
     >>> vocab['ws']['john']
     2
+    >>> 'talks' in vocab['ws']
+    False
     >>> vocab['ws']['talks']  # unknown word is mapped to '<unk>'
     1
     >>>
@@ -56,12 +60,12 @@ Overview
     >>> batch = next(batches)
     >>> arr = batch.to_array()
     >>> arr['ws']
-    array([[2, 1],
-           [3, 0]])
+    array([[3, 0, 0],
+           [2, 1, 3]])
     >>> batch = next(batches)
     >>> arr = batch.to_array()
     >>> arr['ws']
-    array([[2, 1, 3]])
+    array([[2, 1]])
 
 Tutorial
 --------
@@ -231,6 +235,8 @@ from a dataset. The ``Vocab`` class can be used for this purpose.
     {'<pad>': 0, '<unk>': 1, 'john': 2, 'mary': 3}
     >>> dict(vocab['label'])
     {'<unk>': 0, 'pos': 1}
+    >>> 'john' in vocab['ws'], 'talks' in vocab['ws']
+    (True, False)
     >>> vocab['ws']['john'], vocab['ws']['talks']
     (2, 1)
 
@@ -283,7 +289,53 @@ you'd want to apply the vocabulary beforehand to ensure all values contain only 
     array([1, 1])
 
 Note that ``to_array`` returns a ``Mapping[FieldName, np.ndarray]`` object, and sequential
-fields are automatically padded.
+fields are automatically padded. One of the nice things is that the field can be deeply
+nested and the padding just works!
+
+.. code-block::
+
+    >>> from pprint import pprint
+    >>> from text2array import Dataset, Vocab
+    >>> samples = [
+    ...   {'ws': ['john', 'talks'], 'cs': [list('john'), list('talks')]},
+    ...   {'ws': ['john', 'loves', 'mary'], 'cs': [list('john'), list('loves'), list('mary')]},
+    ...   {'ws': ['mary'], 'cs': [list('mary')]}
+    ... ]
+    >>> dataset = Dataset(samples)
+    >>> vocab = Vocab.from_samples(dataset)
+    >>> dataset.apply_vocab(vocab)
+    >>> dict(vocab['ws'])
+    {'<pad>': 0, '<unk>': 1, 'john': 2, 'mary': 3}
+    >>> pprint(dict(vocab['cs']))
+    {'<pad>': 0,
+     '<unk>': 1,
+     'a': 3,
+     'h': 5,
+     'j': 4,
+     'l': 7,
+     'm': 9,
+     'n': 6,
+     'o': 2,
+     'r': 10,
+     's': 8,
+     'y': 11}
+    >>> batches = dat.batch(2)
+    >>> batch = next(batches)
+    >>> arr = batch.to_array()
+    >>> arr['ws']
+    array([[2, 1, 0],
+           [2, 1, 3]])
+    >>> arr['cs']
+    array([[[ 4,  2,  5,  6,  0],
+            [ 1,  3,  7,  1,  8],
+            [ 0,  0,  0,  0,  0]],
+
+           [[ 4,  2,  5,  6,  0],
+            [ 7,  2,  1,  1,  8],
+            [ 9,  3, 10, 11,  0]]])
+
+So, you can go crazy and have a field representing a document hierarchically as paragraphs,
+sentences, words, and characters, and it will be padded correctly.
 
 Contributing
 ------------
