@@ -3,6 +3,9 @@ text2array
 
 *Convert your NLP text dataset to arrays!*
 
+.. image:: https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg
+   :target: http://spacemacs.org
+
 **text2array** helps you process your NLP text dataset into Numpy ndarray objects that are
 ready to use for e.g. neural network inputs. **text2array** handles data shuffling,
 batching, padding, and converting into arrays. Say goodbye to these tedious works!
