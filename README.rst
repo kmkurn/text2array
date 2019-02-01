@@ -355,6 +355,12 @@ Pull requests are welcome! To start contributing, make sure to install all the d
 
     $ pip install -r requirements.txt
 
+Then install this library as editable package.
+
+::
+
+    $ pip install -e .
+
 Next, setup the pre-commit hook.
 
 ::
