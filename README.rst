@@ -1,7 +1,7 @@
 text2array
 ==========
 
-*Convert your NLP text dataset to arrays!*
+*Convert your NLP text data to arrays!*
 
 .. image:: https://badge.fury.io/py/text2array.svg
    :target: https://badge.fury.io/py/text2array
