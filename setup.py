@@ -3,6 +3,8 @@ from setuptools import setup, find_packages
 
 readme = Path(__file__).resolve().parent / 'README.rst'
 
+# TODO setup travis
+# TODO coveralls.io
 setup(
     name='text2array',
     version='0.0.1',
