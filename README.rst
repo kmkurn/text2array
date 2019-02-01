@@ -3,6 +3,12 @@ text2array
 
 *Convert your NLP text dataset to arrays!*
 
+.. image:: https://travis-ci.org/kmkurn/text2array.svg?branch=master
+   :target: https://travis-ci.org/kmkurn/text2array
+
+.. image:: https://coveralls.io/repos/github/kmkurn/text2array/badge.svg?branch=master
+   :target: https://coveralls.io/github/kmkurn/text2array?branch=master
+
 .. image:: https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg
    :target: http://spacemacs.org
 
