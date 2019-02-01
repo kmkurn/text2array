@@ -292,7 +292,7 @@ Note that ``to_array`` returns a ``Mapping[FieldName, np.ndarray]`` object, and 
 fields are automatically padded. One of the nice things is that the field can be deeply
 nested and the padding just works!
 
-.. code-block::
+.. code-block:: python
 
     >>> from pprint import pprint
     >>> from text2array import Dataset, Vocab
