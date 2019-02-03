@@ -10,7 +10,8 @@ class Batch(Sequence[Sample]):
     """A class to represent a single batch.
 
     Args:
-        samples: Sequence of samples this batch should contain.
+        samples (~typing.Sequence[Sample]): Sequence of samples this batch
+            should contain.
     """
 
     def __init__(self, samples: Sequence[Sample]) -> None:
@@ -23,13 +24,13 @@ class Batch(Sequence[Sample]):
         return len(self._samples)
 
     def to_array(self, pad_with: int = 0) -> Mapping[FieldName, np.ndarray]:
-        """Convert the batch into :class:`~numpy.ndarray`.
+        """Convert the batch into `~numpy.ndarray`.
 
         Args:
             pad_with: Pad sequential field values with this number.
 
         Returns:
-            A mapping from field names to :class:`~numpy.ndarray` s whose first
+            A mapping from field names to `~numpy.ndarray` s whose first
             dimension corresponds to the batch size as returned by `len`.
         """
         if not self._samples:

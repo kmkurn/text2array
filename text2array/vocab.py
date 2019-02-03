@@ -15,7 +15,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
     object.
 
     Args:
-        m: Mapping from :obj:`FieldName` to its str-to-int mapping.
+        m: Mapping from field names to its str-to-int mapping.
     """
 
     def __init__(self, m: Mapping[FieldName, Mapping[str, int]]) -> None:
@@ -46,7 +46,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
         it can be iterated more than once. No exception is raised when this is violated.
 
         Args:
-            samples: Iterable of samples.
+            samples (~typing.Iterable[Sample]): Iterable of samples.
             options: Mapping from field names to dictionaries to control the creation of
                 the str-to-int mapping. Recognized dictionary keys are:
 
@@ -69,7 +69,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
                   So, the size is limited by whichever is smaller. (default: ``None``).
 
         Returns:
-            Vocabulary instance.
+            Vocab: Vocabulary instance.
         """
         if options is None:
             options = {}

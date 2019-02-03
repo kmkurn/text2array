@@ -22,7 +22,7 @@ class DatasetABC(Iterable[Sample], metaclass=abc.ABCMeta):
             batch_size: Number of samples in each batch.
 
         Returns:
-            The iterator of batches.
+            ~typing.Iterator[Batch]: The iterator of batches.
         """
         return (b for b in self.batch(batch_size) if len(b) == batch_size)
 
@@ -65,9 +65,9 @@ class Dataset(DatasetABC, Sequence[Sample]):
     """Dataset that fits all in memory (no streaming).
 
     Args:
-        samples: Sequence of samples the dataset should contain. This sequence should
-            support indexing by a positive/negative index of type `int` or a
-            `slice` object.
+        samples (~typing.Sequence[Sample]): Sequence of samples the dataset
+            should contain. This sequence should support indexing by a
+            positive/negative index of type `int` or a `slice` object.
     """
 
     def __init__(self, samples: Sequence[Sample]) -> None:
@@ -90,7 +90,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
         sequence, so subsequent shuffling will be done in-place.
 
         Returns:
-            This dataset object (useful for chaining).
+            Dataset: This dataset object (useful for chaining).
         """
         if not isinstance(self._samples, MutableSequence):
             self._samples = list(self._samples)
@@ -111,11 +111,12 @@ class Dataset(DatasetABC, Sequence[Sample]):
         minimize padding by ensuring that sentences of similar lengths are not too far apart.
 
         Args:
-            by: Callable to get the key value of a given sample.
+            key (typing.Callable[[Sample], int]): Callable to get the key value of a
+                given sample.
             scale: Value to regulate the noise of the sorting. Must not be negative.
 
         Returns:
-            This dataset object (useful for chaining).
+            Dataset: This dataset object (useful for chaining).
         """
         if scale < 0:
             raise ValueError('scale cannot be less than 0')
@@ -132,7 +133,7 @@ class Dataset(DatasetABC, Sequence[Sample]):
             batch_size: Maximum number of samples in each batch.
 
         Returns:
-            The iterator of batches.
+            ~typing.Iterator[Batch]: The iterator of batches.
         """
         if batch_size <= 0:
             raise ValueError('batch size must be greater than 0')
@@ -151,7 +152,8 @@ class Dataset(DatasetABC, Sequence[Sample]):
         samples is made and the vocabulary is applied on it.
 
         Args:
-            vocab: The vocabulary to apply.
+            vocab (~typing.Mapping[FieldName, ~typing.Mapping[FieldValue, FieldValue]]): The
+                vocabulary to apply.
         """
         if not isinstance(self._samples, MutableSequence):
             self._samples = list(self._samples)
@@ -179,7 +181,8 @@ class StreamDataset(DatasetABC):
     """Dataset that streams its samples.
 
     Args:
-        stream: Stream of samples the dataset should stream from.
+        stream (~typing.Iterable[Sample]): Stream of samples the dataset
+            should stream from.
     """
 
     def __init__(self, stream: Iterable[Sample]) -> None:
@@ -205,7 +208,7 @@ class StreamDataset(DatasetABC):
             batch_size: Maximum number of samples in each batch.
 
         Returns:
-            The iterator of batches.
+            ~typing.Iterator[Batch]: The iterator of batches.
         """
         if batch_size <= 0:
             raise ValueError('batch size must be greater than 0')
@@ -231,6 +234,7 @@ class StreamDataset(DatasetABC):
         ``vocab`` must still exist when that happens.
 
         Args:
-            vocab: The vocabulary to apply.
+            vocab (~typing.Mapping[FieldName, ~typing.Mapping[FieldValue, FieldValue]]): The
+                vocabulary to apply.
         """
         self._vocab = vocab
