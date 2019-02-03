@@ -23,14 +23,14 @@ class Batch(Sequence[Sample]):
         return len(self._samples)
 
     def to_array(self, pad_with: int = 0) -> Mapping[FieldName, np.ndarray]:
-        """Convert the batch into :class:`np.ndarray`.
+        """Convert the batch into :class:`~numpy.ndarray`.
 
         Args:
             pad_with: Pad sequential field values with this number.
 
         Returns:
-            A mapping from field names to :class:`np.ndarray`s whose first
-            dimension corresponds to the batch size as returned by ``__len__``.
+            A mapping from field names to :class:`~numpy.ndarray` s whose first
+            dimension corresponds to the batch size as returned by `len`.
         """
         if not self._samples:
             return {}

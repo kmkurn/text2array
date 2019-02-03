@@ -66,8 +66,8 @@ class Dataset(DatasetABC, Sequence[Sample]):
 
     Args:
         samples: Sequence of samples the dataset should contain. This sequence should
-            support indexing by a positive/negative index of type :obj:`int` or a
-            :obj:`slice` object.
+            support indexing by a positive/negative index of type `int` or a
+            `slice` object.
     """
 
     def __init__(self, samples: Sequence[Sample]) -> None:
@@ -101,14 +101,14 @@ class Dataset(DatasetABC, Sequence[Sample]):
         """Shuffle the dataset by the given key.
 
         This method essentially performs noisy sorting. The samples in the dataset are
-        sorted ascending by the value of the given key, plus some random noise. This random
-        noise is drawn from ``Uniform(-z, z)``, where ``z`` equals ``scale`` times the
-        standard deviation of key values. This formulation means that ``scale`` regulates
-        how noisy the sorting is. The larger it is, the more noisy the sorting becomes, i.e.
-        it resembles random shuffling more closely. In an extreme case where ``scale=0``,
-        this method just sorts the samples by ``key``. This method is useful when working
-        with text data, where we want to shuffle the dataset and also minimize padding by
-        ensuring that sentences of similar lengths are not too far apart.
+        sorted ascending by the value of the given key, plus some random noise
+        :math:`\epsilon \sim` Uniform :math:`(-z, z)`, where :math:`z` equals ``scale``
+        times the standard deviation of key values. This formulation means that ``scale``
+        regulates how noisy the sorting is. The larger it is, the more noisy the sorting
+        becomes, i.e. it resembles random shuffling more closely. In an extreme case
+        where ``scale=0``, this method just sorts the samples by ``key``. This method is
+        useful when working with text data, where we want to shuffle the dataset and also
+        minimize padding by ensuring that sentences of similar lengths are not too far apart.
 
         Args:
             by: Callable to get the key value of a given sample.
