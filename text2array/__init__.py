@@ -5,7 +5,7 @@ __all__ = [
     'StreamDataset',
     'Vocab',
 ]
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 from .batches import Batch
 from .datasets import Dataset, StreamDataset
