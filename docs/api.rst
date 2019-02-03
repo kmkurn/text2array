@@ -8,6 +8,9 @@ Type aliases
 * ``FieldName = str``
 * ``FieldValue = Union[float, int, str, Sequence[FieldValue]``
 
+Classes
+-------
+
 .. autoclass:: text2array.datasets.DatasetABC
 
 .. currentmodule:: text2array
