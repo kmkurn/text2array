@@ -9,6 +9,9 @@ text2array
 .. image:: https://travis-ci.org/kmkurn/text2array.svg?branch=master
    :target: https://travis-ci.org/kmkurn/text2array
 
+.. image:: https://readthedocs.org/projects/text2array/badge/?version=latest
+   :target: https://text2array.readthedocs.io/en/latest/?badge=latest
+
 .. image:: https://coveralls.io/repos/github/kmkurn/text2array/badge.svg?branch=master
    :target: https://coveralls.io/github/kmkurn/text2array?branch=master
 
