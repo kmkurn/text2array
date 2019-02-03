@@ -27,7 +27,7 @@ setup(
     ],
     packages=find_packages(),
     install_requires=[
-        'numpy ~=1.16.0',
+        'numpy',
     ],
     python_requires='>=3.6, <4',
 )
