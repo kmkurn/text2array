@@ -22,17 +22,10 @@ text2array
 ready to use for e.g. neural network inputs. **text2array** handles data shuffling,
 batching, padding, and converting into arrays. Say goodbye to these tedious works!
 
-Installation
-============
-
-**text2array** requires at least Python 3.6 and can be installed via pip::
-
-    $ pip install text2array
-
 Documentation
 =============
 
-https://text2array.readthedocs.io/en/latest/
+https://text2array.readthedocs.io/
 
 Contributing
 ============
