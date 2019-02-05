@@ -4,6 +4,8 @@ text2array
 *Convert your NLP text data to arrays!*
 
 .. image:: https://img.shields.io/pypi/pyversions/text2array.svg?style=flat
+   :target: https://img.shields.io/pypi/pyversions/text2array.svg?style=flat
+   :alt: Python versions
 
 .. image:: https://badge.fury.io/py/text2array.svg
    :target: https://badge.fury.io/py/text2array
