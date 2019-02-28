@@ -5,11 +5,12 @@ __all__ = [
     'StreamDataset',
     'Vocab',
     'BatchIterator',
+    'ShuffleIterator',
 ]
 __version__ = '0.0.4'
 
 from .batches import Batch
 from .datasets import Dataset, StreamDataset
-from .iterators import BatchIterator
 from .samples import Sample
+from .iterators import BatchIterator, ShuffleIterator
 from .vocab import Vocab
