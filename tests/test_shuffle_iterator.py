@@ -2,33 +2,33 @@ from typing import Iterable, Sized
 
 import pytest
 
-from text2array import Dataset, ShuffleIterator
+from text2array import ShuffleIterator
 
 
-def test_init(setup_rng, dataset):
-    iter_ = ShuffleIterator(dataset)
+def test_init(setup_rng, samples):
+    iter_ = ShuffleIterator(samples)
     assert isinstance(iter_, Sized)
-    assert len(iter_) == len(dataset)
+    assert len(iter_) == len(samples)
     assert isinstance(iter_, Iterable)
-    assert_shuffled(list(dataset), list(iter_))
+    assert_shuffled(samples, list(iter_))
 
 
 def test_init_kwargs(setup_rng):
-    dat = Dataset([{'i': 3}, {'i': 1}, {'i': 2}, {'i': 5}, {'i': 4}])
-    iter_ = ShuffleIterator(dat, key=lambda s: s['i'], scale=2)
-    assert_shuffled(list(dat), list(iter_))
+    ss = [{'i': 3}, {'i': 1}, {'i': 2}, {'i': 5}, {'i': 4}]
+    iter_ = ShuffleIterator(ss, key=lambda s: s['i'], scale=2)
+    assert_shuffled(ss, list(iter_))
 
 
 def test_init_zero_scale(setup_rng):
-    dat = Dataset([{'i': 3}, {'i': 1}, {'i': 2}, {'i': 5}, {'i': 4}])
+    ss = [{'i': 3}, {'i': 1}, {'i': 2}, {'i': 5}, {'i': 4}]
     key = lambda s: s['i']
-    iter_ = ShuffleIterator(dat, key=key, scale=0)
-    assert sorted(list(dat), key=key) == list(iter_)
+    iter_ = ShuffleIterator(ss, key=key, scale=0)
+    assert sorted(ss, key=key) == list(iter_)
 
 
-def test_init_negative_scale(setup_rng, dataset):
+def test_init_negative_scale(setup_rng, samples):
     with pytest.raises(ValueError) as exc:
-        ShuffleIterator(dataset, scale=-1)
+        ShuffleIterator(samples, scale=-1)
     assert 'scale cannot be less than 0' in str(exc.value)
 
 
