@@ -1,6 +1,6 @@
-from typing import Iterable, Iterator, Sized
+from typing import Callable, Iterable, Iterator, Optional, Sized
 
-from text2array import Batch, Dataset
+from text2array import Batch, Dataset, Sample
 
 
 # TODO accept iterable of samples?
@@ -19,3 +19,29 @@ class BatchIterator(Iterable[Batch], Sized):
 
     def __iter__(self) -> Iterator[Batch]:
         return self._dat.batch(self._bsz)
+
+
+# TODO accept sequence of samples?
+class ShuffleIterator(Iterable[Sample], Sized):
+    def __init__(
+            self,
+            dataset: Dataset,
+            key: Optional[Callable[[Sample], int]] = None,
+            scale: float = 1.0,
+    ) -> None:
+        if scale < 0:
+            raise ValueError('scale cannot be less than 0')
+
+        self._dat = dataset
+        self._key = key
+        self._scale = scale
+
+    def __len__(self) -> int:
+        return len(self._dat)
+
+    def __iter__(self) -> Iterator[Sample]:
+        if self._key is None:
+            self._dat.shuffle()
+        else:
+            self._dat.shuffle_by(self._key, scale=self._scale)
+        return iter(self._dat)
