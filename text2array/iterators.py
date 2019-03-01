@@ -64,7 +64,12 @@ class ShuffleIterator(Iterable[Sample], Sized):
         random.shuffle(self._samples)
 
     def _shuffle_by(self, key: Callable[[Sample], int], scale: float) -> None:
-        # TODO generate noises once and use those
         std = stat.stdev(key(s) for s in self._samples)
         z = scale * std
-        self._samples = sorted(self._samples, key=lambda s: key(s) + random.uniform(-z, z))
+
+        noises = [random.uniform(-z, z) for _ in range(len(self._samples))]
+        indices = list(range(len(self._samples)))
+        indices.sort(key=lambda i: key(self._samples[i]) + noises[i])
+        shuf_samples = [self._samples[i] for i in indices]
+
+        self._samples = shuf_samples
