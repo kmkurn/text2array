@@ -6,6 +6,33 @@ from text2array import Batch, Sample
 
 
 class BatchIterator(Iterable[Batch], Sized):
+    """Iterator that produces batches of samples.
+
+    Example:
+
+        >>> from text2array import BatchIterator
+        >>> samples = [
+        ...   {'ws': ['a']},
+        ...   {'ws': ['a', 'b']},
+        ...   {'ws': ['b', 'b']},
+        ... ]
+        >>> iter_ = BatchIterator(samples, batch_size=2)
+        >>> for b in iter_:
+        ...   print(list(b))
+        ...
+        [{'ws': ['a']}, {'ws': ['a', 'b']}]
+        [{'ws': ['b', 'b']}]
+
+    Args:
+        samples (~typing.Iterable[Sample]): Iterable of samples to batch.
+        batch_size: Maximum number of samples in each batch.
+
+    Note:
+        When ``samples`` is an instance of `~typing.Sized`, this iterator can
+        be passed to `len` to get the number of batches. Otherwise, a `TypeError`
+        is raised.
+    """
+
     def __init__(self, samples: Iterable[Sample], batch_size: int = 1) -> None:
         if batch_size <= 0:
             raise ValueError('batch size must be greater than 0')
@@ -36,6 +63,42 @@ class BatchIterator(Iterable[Batch], Sized):
 
 
 class ShuffleIterator(Iterable[Sample], Sized):
+    """Iterator that shuffles the samples before iterating.
+
+    When ``key`` is not given, this iterator performs ordinary shuffling using
+    `random.shuffle`. Otherwise, a noisy sorting is performed. The samples are
+    sorted ascending by the value of the given key, plus some random noise
+    :math:`\epsilon \sim` Uniform :math:`(-z, z)`, where :math:`z` equals ``scale``
+    times the standard deviation of key values. This formulation means that ``scale``
+    regulates how noisy the sorting is. The larger it is, the more noisy the sorting
+    becomes, i.e. it resembles random shuffling more closely. In an extreme case
+    where ``scale=0``, this method just sorts the samples by ``key``. This method is
+    useful when working with text data, where we want to shuffle the dataset and also
+    minimize padding by ensuring that sentences of similar lengths are not too far apart.
+
+    Example:
+
+        >>> from text2array import ShuffleIterator
+        >>> samples = [
+        ...   {'ws': ['a', 'b', 'b']},
+        ...   {'ws': ['a']},
+        ...   {'ws': ['a', 'a', 'b', 'b', 'b', 'b']},
+        ... ]
+        >>> iter_ = ShuffleIterator(samples, key=lambda s: len(s['ws']))
+        >>> for s in iter_:
+        ...   print(s)
+        ...
+        {'ws': ['a']}
+        {'ws': ['a', 'a', 'b', 'b', 'b', 'b']}
+        {'ws': ['a', 'b', 'b']}
+
+    Args:
+        samples (~typing.Sequence[Sample]): Sequence of samples to shuffle and iterate over.
+        key (typing.Callable[[Sample], int]): Callable to get the key value of a
+            given sample.
+        scale: Value to regulate the noise of the sorting. Must not be negative.
+    """
+
     def __init__(
             self,
             samples: Sequence[Sample],
