@@ -33,6 +33,9 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
         except KeyError:
             raise KeyError(f"no vocabulary found for field name '{name}'")
 
+    def apply_to(self, samples: Iterable[Sample]) -> Iterable[Sample]:
+        return _VocabAppliedSamples(self, samples)
+
     @classmethod
     def from_samples(
             cls,
@@ -128,6 +131,41 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
         # must be an iterable, due to how we use this function
         for x in xs:
             yield from cls._flatten(x)
+
+    def _apply_to_sample(self, sample: Sample) -> Sample:
+        s = {}
+        for name, val in sample.items():
+            try:
+                vb = self[name]
+            except KeyError:
+                s[name] = val
+            else:
+                s[name] = self._apply_vb_to_val(vb, val)
+        return s
+
+    @classmethod
+    def _apply_vb_to_val(
+            cls,
+            vb: Mapping[FieldValue, FieldValue],
+            val: FieldValue,
+    ) -> FieldValue:
+        if isinstance(val, str) or not isinstance(val, Sequence):
+            try:
+                return vb[val]
+            except KeyError:
+                raise KeyError(f'value {val!r} not found in vocab')
+
+        return [cls._apply_vb_to_val(vb, v) for v in val]
+
+
+class _VocabAppliedSamples(Iterable[Sample]):
+    def __init__(self, vocab: Vocab, samples: Iterable[Sample]) -> None:
+        self._vocab = vocab
+        self._samples = samples
+
+    def __iter__(self) -> Iterator[Sample]:
+        for s in self._samples:
+            yield self._vocab._apply_to_sample(s)
 
 
 class _StringStore(Mapping[str, int]):
