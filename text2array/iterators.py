@@ -2,13 +2,13 @@ from typing import Callable, Iterable, Iterator, Optional, Sequence, Sized
 import random
 import statistics as stat
 
-from text2array import Batch, Dataset, Sample
+from text2array import Batch, Sample
 
 
-# TODO accept iterable of samples?
+# TODO check nonpositive batch size
 class BatchIterator(Iterable[Batch], Sized):
-    def __init__(self, dataset: Dataset, batch_size: int = 1) -> None:
-        self._dat = dataset
+    def __init__(self, samples: Iterable[Sample], batch_size: int = 1) -> None:
+        self._samples = samples
         self._bsz = batch_size
 
     @property
@@ -16,11 +16,21 @@ class BatchIterator(Iterable[Batch], Sized):
         return self._bsz
 
     def __len__(self) -> int:
-        n, b = len(self._dat), self._bsz
+        n = len(self._samples)  # type: ignore
+        b = self._bsz
         return n // b + (1 if n % b != 0 else 0)
 
     def __iter__(self) -> Iterator[Batch]:
-        return self._dat.batch(self._bsz)
+        it, exhausted = iter(self._samples), False
+        while not exhausted:
+            batch: list = []
+            while not exhausted and len(batch) < self._bsz:
+                try:
+                    batch.append(next(it))
+                except StopIteration:
+                    exhausted = True
+            if batch:
+                yield Batch(batch)
 
 
 class ShuffleIterator(Iterable[Sample], Sized):
