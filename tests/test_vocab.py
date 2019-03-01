@@ -1,4 +1,4 @@
-from typing import Mapping
+from typing import Iterable, Mapping
 
 import pytest
 
@@ -142,3 +142,27 @@ class TestFromSamples():
         assert 'b' in vocab['ws']
         assert 'c' in vocab['ws']
         assert 'c' in vocab['w']
+
+
+def test_apply_to_samples():
+    ss = [{'ws': ['a', 'c', 'c'], 'i': 1}, {'ws': ['b', 'c'], 'i': 2}, {'ws': ['b'], 'i': 3}]
+    vocab = Vocab({'ws': {'a': 1, 'b': 2, 'c': 3}})
+    ss_ = vocab.apply_to(ss)
+    assert isinstance(ss_, Iterable)
+    assert list(ss_) == [{'ws': [1, 3, 3], 'i': 1}, {'ws': [2, 3], 'i': 2}, {'ws': [2], 'i': 3}]
+
+
+def test_apply_to_stream(stream_cls):
+    ss = stream_cls([{'ws': ['a', 'c', 'c']}, {'ws': ['b', 'c']}, {'ws': ['b']}])
+    vocab = Vocab({'ws': {'a': 1, 'b': 2, 'c': 3}})
+    ss_ = vocab.apply_to(ss)
+    assert isinstance(ss_, Iterable)
+    assert list(ss_) == [{'ws': [1, 3, 3]}, {'ws': [2, 3]}, {'ws': [2]}]
+
+
+def test_apply_to_value_not_found():
+    ss = [{'ws': ['a']}]
+    vocab = Vocab({'ws': {'b': 2}})
+    with pytest.raises(KeyError) as exc:
+        list(vocab.apply_to(ss))
+    assert "value 'a' not found in vocab" in str(exc.value)
