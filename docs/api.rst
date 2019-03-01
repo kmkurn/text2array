@@ -11,13 +11,7 @@ Type aliases
 Classes
 -------
 
-.. autoclass:: text2array.datasets.DatasetABC
-
 .. currentmodule:: text2array
-
-.. autoclass:: Dataset
-
-.. autoclass:: StreamDataset
 
 .. autoclass:: BatchIterator
 
