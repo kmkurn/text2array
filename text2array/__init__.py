@@ -5,7 +5,7 @@ __all__ = [
     'BatchIterator',
     'ShuffleIterator',
 ]
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 from .batches import Batch
 from .samples import Sample
