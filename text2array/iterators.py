@@ -5,9 +5,11 @@ import statistics as stat
 from text2array import Batch, Sample
 
 
-# TODO check nonpositive batch size
 class BatchIterator(Iterable[Batch], Sized):
     def __init__(self, samples: Iterable[Sample], batch_size: int = 1) -> None:
+        if batch_size <= 0:
+            raise ValueError('batch size must be greater than 0')
+
         self._samples = samples
         self._bsz = batch_size
 
