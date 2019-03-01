@@ -19,6 +19,10 @@ Classes
 
 .. autoclass:: StreamDataset
 
+.. autoclass:: BatchIterator
+
+.. autoclass:: ShuffleIterator
+
 .. autoclass:: Batch
 
 .. autoclass:: Vocab
