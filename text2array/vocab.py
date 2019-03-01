@@ -34,6 +34,19 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             raise KeyError(f"no vocabulary found for field name '{name}'")
 
     def apply_to(self, samples: Iterable[Sample]) -> Iterable[Sample]:
+        """Apply this vocabulary to the given samples.
+
+        Applying a vocabulary means mapping all the (nested) field values to the corresponding
+        values according to the mapping specified by the vocabulary. Field names that have
+        no entry in the vocabulary are ignored. Note that the actual application is not
+        performed until the resulting iterable is iterated over.
+
+        Args:
+            samples (~typing.Iterable[Sample]): Apply vocabulary to these samples.
+
+        Returns:
+            ~typing.Iterable[Sample]: Samples to which the vocabulary has been applied.
+        """
         return _VocabAppliedSamples(self, samples)
 
     @classmethod
