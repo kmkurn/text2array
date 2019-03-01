@@ -10,23 +10,15 @@ Overview
 
 .. code-block:: python
 
-    >>> from text2array import Dataset, Vocab
-    >>>
     >>> samples = [
     ...   {'ws': ['john', 'talks']},
     ...   {'ws': ['john', 'loves', 'mary']},
     ...   {'ws': ['mary']}
     ... ]
     >>>
-    >>> # Create a Dataset
-    >>> dataset = Dataset(samples)
-    >>> len(dataset)
-    3
-    >>> dataset[1]
-    {'ws': ['john', 'loves', 'mary']}
-    >>>
     >>> # Create a Vocab
-    >>> vocab = Vocab.from_samples(dataset)
+    >>> from text2array import Vocab
+    >>> vocab = Vocab.from_samples(samples)
     >>> list(vocab['ws'])
     ['<pad>', '<unk>', 'john', 'mary']
     >>> # 'talks' and 'loves' are out-of-vocabulary because they occur only once
@@ -39,21 +31,25 @@ Overview
     >>> vocab['ws']['talks']  # unknown word is mapped to '<unk>'
     1
     >>>
-    >>> # Applying vocab to the dataset
-    >>> list(dataset)
+    >>> # Applying vocab to samples
+    >>> samples
     [{'ws': ['john', 'talks']}, {'ws': ['john', 'loves', 'mary']}, {'ws': ['mary']}]
-    >>> dataset.apply_vocab(vocab)
-    >>> list(dataset)
+    >>> samples = list(vocab.apply_to(samples))
+    >>> list(samples)
     [{'ws': [2, 1]}, {'ws': [2, 1, 3]}, {'ws': [3]}]
     >>>
     >>> # Shuffle, create batches of size 2, convert to array
-    >>> batches = dataset.shuffle().batch(2)
-    >>> batch = next(batches)
+    >>> from text2array import BatchIterator, ShuffleIterator
+    >>> iterator = BatchIterator(ShuffleIterator(samples), batch_size=2)
+    >>> len(iterator)
+    2
+    >>> it = iter(iterator)
+    >>> batch = next(it)
     >>> arr = batch.to_array()
     >>> arr['ws']
     array([[3, 0, 0],
            [2, 1, 3]])
-    >>> batch = next(batches)
+    >>> batch = next(it)
     >>> arr = batch.to_array()
     >>> arr['ws']
     array([[2, 1]])
