@@ -33,3 +33,9 @@ def test_init_kwargs():
     assert list(bs[0]) == [ss[0], ss[1]]
     assert list(bs[1]) == [ss[2], ss[3]]
     assert list(bs[2]) == [ss[4]]
+
+
+def test_init_nonpositive_batch_size(samples):
+    with pytest.raises(ValueError) as exc:
+        BatchIterator(samples, batch_size=0)
+    assert 'batch size must be greater than 0' in str(exc.value)
