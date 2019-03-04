@@ -92,6 +92,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
 
         counter: Dict[FieldName, CounterT[str]] = defaultdict(Counter)
         seqfield: Set[FieldName] = set()
+        # TODO use tqdm here
         for s in samples:
             for name, value in s.items():
                 if cls._needs_vocab(value):
