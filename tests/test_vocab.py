@@ -1,14 +1,18 @@
 from typing import Iterable, Mapping
 
+from tqdm import tqdm
 import pytest
 
 from text2array import Vocab
 
 
 class TestFromSamples():
+    def from_samples(self, ss, **kwargs):
+        return Vocab.from_samples(ss, pbar=tqdm(disable=True), **kwargs)
+
     def test_ok(self):
         ss = [{'w': 'c'}, {'w': 'b'}, {'w': 'a'}, {'w': 'b'}, {'w': 'c'}, {'w': 'c'}]
-        vocab = Vocab.from_samples(ss)
+        vocab = self.from_samples(ss)
 
         assert isinstance(vocab, Mapping)
         assert len(vocab) == 1
@@ -31,19 +35,19 @@ class TestFromSamples():
 
     def test_has_vocab_for_all_str_fields(self):
         ss = [{'w': 'b', 't': 'b'}, {'w': 'b', 't': 'b'}]
-        vocab = Vocab.from_samples(ss)
+        vocab = self.from_samples(ss)
         assert vocab.get('w') is not None
         assert vocab.get('t') is not None
 
     def test_no_vocab_for_non_str(self):
-        vocab = Vocab.from_samples([{'i': 10}, {'i': 20}])
+        vocab = self.from_samples([{'i': 10}, {'i': 20}])
         with pytest.raises(KeyError) as exc:
             vocab['i']
         assert "no vocabulary found for field name 'i'" in str(exc.value)
 
     def test_seq(self):
         ss = [{'ws': ['a', 'c', 'c']}, {'ws': ['b', 'c']}, {'ws': ['b']}]
-        vocab = Vocab.from_samples(ss)
+        vocab = self.from_samples(ss)
         assert list(vocab['ws']) == '<pad> <unk> c b'.split()
 
     def test_seq_of_seq(self):
@@ -54,16 +58,16 @@ class TestFromSamples():
         }, {
             'cs': [['d', 'c']]
         }]
-        vocab = Vocab.from_samples(ss)
+        vocab = self.from_samples(ss)
         assert list(vocab['cs']) == '<pad> <unk> d c b'.split()
 
     def test_empty_samples(self):
-        vocab = Vocab.from_samples([])
+        vocab = self.from_samples([])
         assert not vocab
 
     def test_empty_field_values(self):
         with pytest.raises(ValueError) as exc:
-            Vocab.from_samples([{'w': []}])
+            self.from_samples([{'w': []}])
         assert 'field values must not be an empty sequence' in str(exc.value)
 
     def test_min_count(self):
@@ -86,12 +90,12 @@ class TestFromSamples():
             'w': 'c',
             't': 'c'
         }]
-        vocab = Vocab.from_samples(ss, options={'w': dict(min_count=3)})
+        vocab = self.from_samples(ss, options={'w': dict(min_count=3)})
         assert 'b' not in vocab['w']
         assert 'b' in vocab['t']
 
     def test_no_unk(self):
-        vocab = Vocab.from_samples([{'w': 'a', 't': 'a'}], options={'w': dict(unk=None)})
+        vocab = self.from_samples([{'w': 'a', 't': 'a'}], options={'w': dict(unk=None)})
         assert '<unk>' not in vocab['w']
         assert '<unk>' in vocab['t']
         with pytest.raises(KeyError) as exc:
@@ -99,7 +103,7 @@ class TestFromSamples():
         assert "'foo' not found in vocabulary" in str(exc.value)
 
     def test_no_pad(self):
-        vocab = Vocab.from_samples([{'w': ['a'], 't': ['a']}], options={'w': dict(pad=None)})
+        vocab = self.from_samples([{'w': ['a'], 't': ['a']}], options={'w': dict(pad=None)})
         assert '<pad>' not in vocab['w']
         assert '<pad>' in vocab['t']
 
@@ -123,7 +127,7 @@ class TestFromSamples():
             'w': 'c',
             't': 'c'
         }]
-        vocab = Vocab.from_samples(ss, options={'w': dict(max_size=1)})
+        vocab = self.from_samples(ss, options={'w': dict(max_size=1)})
         assert 'b' not in vocab['w']
         assert 'b' in vocab['t']
 
@@ -138,7 +142,7 @@ class TestFromSamples():
             'ws': ['c'],
             'w': 'c'
         }]
-        vocab = Vocab.from_samples(iter(ss))
+        vocab = self.from_samples(iter(ss))
         assert 'b' in vocab['ws']
         assert 'c' in vocab['ws']
         assert 'c' in vocab['w']
