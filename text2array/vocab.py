@@ -66,6 +66,8 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
 
         Args:
             samples (~typing.Iterable[Sample]): Iterable of samples.
+            pbar: Instance of `tqdm <https://pypi.org/project/tqdm>`_ for displaying
+                a progress bar.
             options: Mapping from field names to dictionaries to control the creation of
                 the str-to-int mapping. Recognized dictionary keys are:
 
