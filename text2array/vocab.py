@@ -2,6 +2,8 @@ from collections import Counter, OrderedDict, defaultdict
 from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
     Optional, Sequence, Set
 
+from tqdm import tqdm
+
 from .samples import FieldName, FieldValue, Sample
 
 
@@ -53,6 +55,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
     def from_samples(
             cls,
             samples: Iterable[Sample],
+            pbar: Optional[tqdm] = None,
             options: Optional[Mapping[FieldName, dict]] = None,
     ) -> 'Vocab':
         """Make an instance of this class from an iterable of samples.
@@ -87,18 +90,21 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
         Returns:
             Vocab: Vocabulary instance.
         """
+        if pbar is None:  # pragma: no cover
+            pbar = tqdm(samples, desc='Counting', unit='sample')
         if options is None:
             options = {}
 
         counter: Dict[FieldName, CounterT[str]] = defaultdict(Counter)
         seqfield: Set[FieldName] = set()
-        # TODO use tqdm here
         for s in samples:
             for name, value in s.items():
                 if cls._needs_vocab(value):
                     counter[name].update(cls._flatten(value))
                 if isinstance(value, Sequence) and not isinstance(value, str):
                     seqfield.add(name)
+            pbar.update()
+        pbar.close()
 
         m = {}
         for name, c in counter.items():
