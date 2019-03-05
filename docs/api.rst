@@ -13,10 +13,22 @@ Classes
 
 .. currentmodule:: text2array
 
+BatchIterator
+^^^^^^^^^^^^^
+
 .. autoclass:: BatchIterator
+
+ShuffleIterator
+^^^^^^^^^^^^^^^
 
 .. autoclass:: ShuffleIterator
 
+Batch
+^^^^^
+
 .. autoclass:: Batch
+
+Vocab
+^^^^^
 
 .. autoclass:: Vocab
