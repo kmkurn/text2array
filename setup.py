@@ -30,6 +30,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'numpy',
+        'tqdm ~=4.31.1',
     ],
     python_requires='>=3.6, <4',
 )
