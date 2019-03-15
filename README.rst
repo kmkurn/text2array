@@ -24,7 +24,7 @@ text2array
    :alt: Code coverage
 
 .. image:: https://img.shields.io/pypi/l/text2array.svg?style=flat
-   :target: https://choosealicense.com/licenses/mit/
+   :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License
 
 .. image:: https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg
@@ -47,19 +47,19 @@ Pull requests are welcome! To start contributing, make sure to install all the d
 
 ::
 
-    $ pip install -r requirements.txt
+    pip install -r requirements.txt
 
 Then install this library as editable package.
 
 ::
 
-    $ pip install -e .
+    pip install -e .
 
 Next, setup the pre-commit hook.
 
 ::
 
-    $ ln -s ../../pre-commit.sh .git/hooks/pre-commit
+    ln -s ../../pre-commit.sh .git/hooks/pre-commit
 
 Tests and the linter can be run with ``pytest`` and ``flake8`` respectively. The latter also
 runs ``mypy`` for type checking.
@@ -67,4 +67,4 @@ runs ``mypy`` for type checking.
 License
 =======
 
-MIT
+Apache License, Version 2.0
