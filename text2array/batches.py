@@ -37,11 +37,17 @@ class Batch(Sequence[Sample]):
     def __len__(self) -> int:
         return len(self._samples)
 
-    def to_array(self, pad_with: int = 0) -> Mapping[FieldName, np.ndarray]:
+    def to_array(
+            self,
+            pad_with: Union[int, Mapping[FieldName, int]] = 0,
+    ) -> Mapping[FieldName, np.ndarray]:
         """Convert the batch into `~numpy.ndarray`.
 
         Args:
-            pad_with: Pad sequential field values with this number.
+            pad_with: Pad sequential field values with this number. Can
+                also be a mapping from field names to padding number for
+                that field. Fields whose name is not in the mapping will
+                be padded with zeros.
 
         Returns:
             A mapping from field names to `~numpy.ndarray` s whose first
@@ -50,8 +56,14 @@ class Batch(Sequence[Sample]):
         if not self._samples:
             return {}
 
+        field_names = self._samples[0].keys()
+
+        pad_dict = pad_with
+        if isinstance(pad_dict, int):
+            pad_dict = {name: pad_with for name in field_names}
+
         arr = {}
-        for name in self._samples[0].keys():
+        for name in field_names:
             values = self._get_values(name)
 
             # Get max length for all depths, 1st elem is batch size
@@ -61,7 +73,7 @@ class Batch(Sequence[Sample]):
                 raise ValueError(f"field '{name}' has inconsistent nesting depth")
 
             # Get padding for all depths
-            paddings = self._get_paddings(maxlens, pad_with)
+            paddings = self._get_paddings(maxlens, pad_dict.get(name, 0))
             # Pad the values
             data = self._pad(values, maxlens, paddings, 0)
 

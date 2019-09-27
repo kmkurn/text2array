@@ -213,6 +213,13 @@ class TestToArray:
         arr = b.to_array(pad_with=9)
         assert arr['iss'].tolist() == [[[1, 2], [1, 9]], [[1, 9], [9, 9]]]
 
+    def test_pad_with_dict(self):
+        ss = [{'is': [1], 'iss': [[1, 2], [1]]}, {'is': [1, 2], 'iss': [[1]]}]
+        b = Batch(ss)
+        arr = b.to_array(pad_with=dict(iss=9))
+        assert arr['is'].tolist() == [[1, 0], [1, 2]]
+        assert arr['iss'].tolist() == [[[1, 2], [1, 9]], [[1, 9], [9, 9]]]
+
     def test_missing_field(self):
         b = Batch([{'a': 10}, {'b': 20}])
         with pytest.raises(KeyError) as exc:
