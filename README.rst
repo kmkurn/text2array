@@ -70,4 +70,4 @@ License
 Apache License, Version 2.0
 
 
-_flit: https://pypi.org/project/flit/
+.. _flit: https://pypi.org/project/flit/
