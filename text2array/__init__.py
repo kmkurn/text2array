@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Convert your NLP text data to arrays!"""
 
+__version__ = '0.0.9'
 __all__ = [
     'Sample',
     'Batch',
@@ -19,7 +21,6 @@ __all__ = [
     'BatchIterator',
     'ShuffleIterator',
 ]
-__version__ = '0.0.9'
 
 from .batches import Batch
 from .samples import Sample

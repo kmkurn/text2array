@@ -43,19 +43,19 @@ https://text2array.readthedocs.io
 Contributing
 ============
 
-Pull requests are welcome! To start contributing, make sure to install all the dependencies.
+Pull requests are welcome! To start contributing, first install flit_.
 
 ::
 
-    pip install -r requirements.txt
+    pip install flit
 
-Then install this library as editable package.
+Next, install this library and its dependencies in development mode.
 
 ::
 
-    pip install -e .
+    flit install --symlink
 
-Next, setup the pre-commit hook.
+Lastly, setup the pre-commit hook.
 
 ::
 
@@ -68,3 +68,6 @@ License
 =======
 
 Apache License, Version 2.0
+
+
+_flit: https://pypi.org/project/flit/
