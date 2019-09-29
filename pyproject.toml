@@ -22,7 +22,7 @@ classifiers = [
 
 [tool.flit.metadata.requires-extra]
 test = ["pytest ~=4.1.1", "pytest-cov"]
-doc = ["Sphinx ~=1.8.3"]
+doc = ["Sphinx ~=1.8.3", "sphinx_rtd_theme", "sphinx-autodoc-typehints ~=1.6.0"]
 dev = ["flake8", "flake8-mypy", "yapf"]
 
 [tool.flit.metadata.urls]
