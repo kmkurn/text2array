@@ -1,4 +1,5 @@
 from typing import Mapping, Sequence
+from unittest.mock import Mock
 
 import numpy as np
 import pytest
@@ -237,3 +238,10 @@ class TestToArray:
         arr = b.to_array()
         assert isinstance(arr['w'], np.ndarray)
         assert arr['w'].tolist() == ['a', 'b']
+
+    def test_custom_array_constructor(self):
+        mock_arr_fn = Mock(return_value='dummy_arr')
+        b = Batch([{'ws': [1, 2, 3]}, {'ws': [1, 2]}])
+        arr = b.to_array(array_fn=mock_arr_fn)
+        assert mock_arr_fn.assert_called
+        assert arr['ws'] == mock_arr_fn.return_value
