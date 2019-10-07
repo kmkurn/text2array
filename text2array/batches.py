@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from functools import reduce
-from typing import List, Mapping, Sequence, Union
+from typing import List, Mapping, Sequence, Union, cast
 
 import numpy as np
 
@@ -63,9 +63,10 @@ class Batch(Sequence[Sample]):
 
         field_names = self._samples[0].keys()
 
-        pad_dict = pad_with
-        if isinstance(pad_dict, int):
+        if isinstance(pad_with, int):
             pad_dict = {name: pad_with for name in field_names}
+        else:
+            pad_dict = cast(dict, pad_with)
 
         arr = {}
         for name in field_names:
