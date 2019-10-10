@@ -77,7 +77,7 @@ class BatchIterator(Iterable[Batch], Sized):
 
 
 class ShuffleIterator(Iterable[Sample], Sized):
-    """Iterator that shuffles the samples before iterating.
+    r"""Iterator that shuffles the samples before iterating.
 
     When ``key`` is not given, this iterator performs ordinary shuffling using
     `random.shuffle`. Otherwise, a noisy sorting is performed. The samples are
@@ -133,20 +133,22 @@ class ShuffleIterator(Iterable[Sample], Sized):
         if self._key is None:
             self._shuffle()
         else:
-            self._shuffle_by(self._key, self._scale)
+            self._shuffle_by_key()
         return iter(self._samples)
 
     def _shuffle(self) -> None:
         self._samples = list(self._samples)
         random.shuffle(self._samples)
 
-    def _shuffle_by(self, key: Callable[[Sample], int], scale: float) -> None:
-        std = stat.stdev(key(s) for s in self._samples)
-        z = scale * std
+    def _shuffle_by_key(self) -> None:
+        assert self._key is not None
+
+        std = stat.stdev(self._key(s) for s in self._samples)
+        z = self._scale * std
 
         noises = [random.uniform(-z, z) for _ in range(len(self._samples))]
         indices = list(range(len(self._samples)))
-        indices.sort(key=lambda i: key(self._samples[i]) + noises[i])
+        indices.sort(key=lambda i: self._key(self._samples[i]) + noises[i])  # type: ignore
         shuf_samples = [self._samples[i] for i in indices]
 
         self._samples = shuf_samples
