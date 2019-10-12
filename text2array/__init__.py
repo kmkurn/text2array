@@ -13,7 +13,7 @@
 # limitations under the License.
 """Convert your NLP text data to arrays!"""
 
-__version__ = '0.0.11'
+__version__ = '0.0.12'
 __all__ = [
     'Sample',
     'Batch',
