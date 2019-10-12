@@ -7,7 +7,8 @@ from text2array import Vocab
 
 
 class TestFromSamples():
-    def from_samples(self, ss, **kwargs):
+    @staticmethod
+    def from_samples(ss, **kwargs):
         return Vocab.from_samples(ss, pbar=tqdm(disable=True), **kwargs)
 
     def test_ok(self):
@@ -170,3 +171,17 @@ def test_apply_to_value_not_found():
     with pytest.raises(KeyError) as exc:
         list(vocab.apply_to(ss))
     assert "value 'a' not found in vocab" in str(exc.value)
+
+
+def test_eq_not_same():
+    ss = [{'ws': ['b', 'c']}, {'ws': ['c', 'c', 'b']}]
+    vocab1 = TestFromSamples.from_samples(ss, options={'ws': {'pad': None, 'unk': None}})
+    vocab2 = TestFromSamples.from_samples(ss, options={'ws': {'unk': None}})
+    assert vocab1 != vocab2
+
+
+def test_eq_with_dict():
+    ss = [{'ws': ['b', 'c']}, {'ws': ['c', 'c', 'b']}]
+    vocab1 = TestFromSamples.from_samples(ss, options={'ws': {'pad': None, 'unk': None}})
+    vocab2 = Vocab({'ws': {'c': 0, 'b': 1}})
+    assert vocab1 != vocab2

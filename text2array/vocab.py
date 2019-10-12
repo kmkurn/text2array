@@ -226,3 +226,8 @@ class _StringStore(Mapping[str, int]):
 
     def __contains__(self, s) -> bool:
         return s in self._m
+
+    def __eq__(self, o) -> bool:
+        if not isinstance(o, _StringStore):
+            return False
+        return self._m == o._m and self._unk_id == o._unk_id
