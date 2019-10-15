@@ -2,9 +2,9 @@ import pytest
 
 
 @pytest.fixture
-def setup_rng():
-    import random
-    random.seed(42)
+def rng():
+    from random import Random
+    return Random(42)
 
 
 @pytest.fixture

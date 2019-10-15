@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from random import Random
 from typing import Callable, Iterable, Iterator, Optional, Sequence, Sized
-import random
 import statistics as stat
 
 from text2array import Batch, Sample
@@ -46,7 +46,6 @@ class BatchIterator(Iterable[Batch], Sized):
         be passed to `len` to get the number of batches. Otherwise, a `TypeError`
         is raised.
     """
-
     def __init__(self, samples: Iterable[Sample], batch_size: int = 1) -> None:
         if batch_size <= 0:
             raise ValueError('batch size must be greater than 0')
@@ -111,20 +110,25 @@ class ShuffleIterator(Iterable[Sample], Sized):
         key (typing.Callable[[Sample], int]): Callable to get the key value of a
             given sample.
         scale: Value to regulate the noise of the sorting. Must not be negative.
+        rng: Random number generator to use for shuffling. Set this to ensure reproducibility.
+            If not given, an instance of `~random.Random` with the default seed is used.
     """
-
     def __init__(
             self,
             samples: Sequence[Sample],
             key: Optional[Callable[[Sample], int]] = None,
             scale: float = 1.0,
+            rng: Optional[Random] = None,
     ) -> None:
         if scale < 0:
             raise ValueError('scale cannot be less than 0')
+        if rng is None:  # pragma: no cover
+            rng = Random()
 
         self._samples = samples
         self._key = key
         self._scale = scale
+        self._rng = rng
 
     def __len__(self) -> int:
         return len(self._samples)
@@ -138,7 +142,7 @@ class ShuffleIterator(Iterable[Sample], Sized):
 
     def _shuffle(self) -> None:
         self._samples = list(self._samples)
-        random.shuffle(self._samples)
+        self._rng.shuffle(self._samples)
 
     def _shuffle_by_key(self) -> None:
         assert self._key is not None
@@ -146,7 +150,7 @@ class ShuffleIterator(Iterable[Sample], Sized):
         std = stat.stdev(self._key(s) for s in self._samples)
         z = self._scale * std
 
-        noises = [random.uniform(-z, z) for _ in range(len(self._samples))]
+        noises = [self._rng.uniform(-z, z) for _ in range(len(self._samples))]
         indices = list(range(len(self._samples)))
         indices.sort(key=lambda i: self._key(self._samples[i]) + noises[i])  # type: ignore
         shuf_samples = [self._samples[i] for i in indices]
