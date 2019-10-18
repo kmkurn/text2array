@@ -28,7 +28,7 @@ can be used for this purpose.
     ...   {'ws': ['john', 'loves', 'mary'], 'i': 20, 'label': 'pos'},
     ...   {'ws': ['mary'], 'i': 30, 'label': 'neg'}
     ... ]
-    >>> vocab = Vocab.from_samples(samples)
+    >>> vocab = Vocab.from_samples(samples, options=dict(ws=dict(min_count=2)))
     >>> vocab.keys()
     dict_keys(['ws', 'label'])
     >>> dict(vocab['ws'])
@@ -43,7 +43,6 @@ can be used for this purpose.
 There are several things to note:
 
 #. Vocabularies are only created for fields which contain `str` values.
-#. Words that occur only once are not included in the vocabulary.
 #. Non-sequence fields do not have a padding token in the vocabulary.
 #. Out-of-vocabulary words are assigned a single ID for unknown words.
 
@@ -139,7 +138,7 @@ padded, **no matter how deeply nested they are**.
    ...   {'ws': ['john', 'loves', 'mary'], 'cs': [list('john'), list('loves'), list('mary')]},
    ...   {'ws': ['mary'], 'cs': [list('mary')]}
    ... ]
-   >>> vocab = Vocab.from_samples(samples)
+   >>> vocab = Vocab.from_samples(samples, options=dict(ws=dict(min_count=2)))
    >>> samples = list(vocab.apply_to(samples))
    >>> dict(vocab['ws'])
    {'<pad>': 0, '<unk>': 1, 'john': 2, 'mary': 3}

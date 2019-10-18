@@ -86,7 +86,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
                 the str-to-int mapping. Recognized dictionary keys are:
 
                 * ``min_count`` (`int`): Exclude tokens occurring fewer than this number
-                  of times from the vocabulary (default: 2).
+                  of times from the vocabulary (default: 1).
                 * ``pad`` (`str`): String token to represent padding tokens. If ``None``,
                   no padding token is added to the vocabulary. Otherwise, it is the
                   first entry in the vocabulary (index is 0). Note that if the field has no
@@ -135,7 +135,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             if unk is not None:
                 store[unk] = len(store)
 
-            min_count = opts.get('min_count', 2)
+            min_count = opts.get('min_count', 1)
             max_size = opts.get('max_size')
             n = len(store)
             for tok, freq in c.most_common():

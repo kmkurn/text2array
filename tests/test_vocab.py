@@ -21,7 +21,7 @@ class TestFromSamples():
         with pytest.raises(KeyError):
             vocab['ws']
 
-        itos = '<unk> c b'.split()
+        itos = '<unk> c b a'.split()
         assert isinstance(vocab['w'], Mapping)
         assert len(vocab['w']) == len(itos)
         assert list(vocab['w']) == itos
@@ -49,7 +49,7 @@ class TestFromSamples():
     def test_seq(self):
         ss = [{'ws': ['a', 'c', 'c']}, {'ws': ['b', 'c']}, {'ws': ['b']}]
         vocab = self.from_samples(ss)
-        assert list(vocab['ws']) == '<pad> <unk> c b'.split()
+        assert list(vocab['ws']) == '<pad> <unk> c b a'.split()
 
     def test_seq_of_seq(self):
         ss = [{
@@ -60,7 +60,7 @@ class TestFromSamples():
             'cs': [['d', 'c']]
         }]
         vocab = self.from_samples(ss)
-        assert list(vocab['cs']) == '<pad> <unk> d c b'.split()
+        assert list(vocab['cs']) == '<pad> <unk> d c b a'.split()
 
     def test_empty_samples(self):
         vocab = self.from_samples([])
@@ -92,8 +92,12 @@ class TestFromSamples():
             't': 'c'
         }]
         vocab = self.from_samples(ss, options={'w': dict(min_count=3)})
+        assert 'a' not in vocab['w']
         assert 'b' not in vocab['w']
+        assert 'c' in vocab['w']
+        assert 'a' in vocab['t']
         assert 'b' in vocab['t']
+        assert 'c' in vocab['t']
 
     def test_no_unk(self):
         vocab = self.from_samples([{'w': 'a', 't': 'a'}], options={'w': dict(unk=None)})
@@ -129,8 +133,12 @@ class TestFromSamples():
             't': 'c'
         }]
         vocab = self.from_samples(ss, options={'w': dict(max_size=1)})
+        assert 'a' not in vocab['w']
         assert 'b' not in vocab['w']
+        assert 'c' in vocab['w']
+        assert 'a' in vocab['t']
         assert 'b' in vocab['t']
+        assert 'c' in vocab['t']
 
     def test_iterator_is_passed(self):
         ss = [{
