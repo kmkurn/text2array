@@ -124,16 +124,18 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
 
         m = {}
         for name, c in counter.items():
-            store: dict = OrderedDict()
             opts = options.get(name, {})
 
             # Padding and unknown tokens
             pad = opts.get('pad', '<pad>')
             unk = opts.get('unk', '<unk>')
+            inits = []
             if name in seqfield and pad is not None:
-                store[pad] = len(store)
+                inits.append(pad)
             if unk is not None:
-                store[unk] = len(store)
+                inits.append(unk)
+
+            store = _StringStore(initials=inits, unk_token=unk)
 
             min_count = opts.get('min_count', 1)
             max_size = opts.get('max_size')
@@ -141,10 +143,8 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             for tok, freq in c.most_common():
                 if freq < min_count or (max_size is not None and len(store) - n >= max_size):
                     break
-                store[tok] = len(store)
-
-            unk_id = None if unk is None else store[unk]
-            m[name] = _StringStore(store, unk_id=unk_id)
+                store.add(tok)
+            m[name] = store
 
         return cls(m)
 
@@ -205,29 +205,44 @@ class _VocabAppliedSamples(Iterable[Sample]):
 
 
 class _StringStore(Mapping[str, int]):
-    def __init__(self, m: Mapping[str, int], unk_id: Optional[int] = None) -> None:
-        assert unk_id is None or unk_id >= 0
-        self._m = m
-        self._unk_id = unk_id
+    def __init__(
+            self,
+            initials: Optional[Sequence[str]] = None,
+            unk_token: Optional[str] = None,
+    ) -> None:
+        if initials is None:
+            initials = []
+
+        self._initials = initials
+        self._unk_token = unk_token
+
+        self._store: Dict[str, int] = OrderedDict()
+        for s in initials:
+            self.add(s)
+
+    def add(self, s: str) -> None:
+        if s not in self:
+            self._store[s] = len(self)
 
     def __len__(self) -> int:
-        return len(self._m)
+        return len(self._store)
 
     def __iter__(self) -> Iterator[str]:
-        return iter(self._m)
+        return iter(self._store)
 
     def __getitem__(self, s: str) -> int:
         try:
-            return self._m[s]
+            return self._store[s]
         except KeyError:
-            if self._unk_id is not None:
-                return self._unk_id
+            if self._unk_token is not None:
+                # TODO handle if unk token not in store
+                return self._store[self._unk_token]
             raise KeyError(f"'{s}' not found in vocabulary")
 
     def __contains__(self, s) -> bool:
-        return s in self._m
+        return s in self._store
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, _StringStore):
             return False
-        return self._m == o._m and self._unk_id == o._unk_id
+        return list(self) == list(o)
