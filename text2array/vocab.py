@@ -14,14 +14,14 @@
 
 from collections import Counter, OrderedDict, UserDict, defaultdict
 from typing import Any, Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
-    Optional, Sequence, Set, Union
+    MutableMapping, Optional, Sequence, Set, Union
 
 from tqdm import tqdm
 
 from .samples import FieldName, FieldValue, Sample
 
 
-class Vocab(UserDict, Mapping[FieldName, Union[Mapping[str, int], Mapping[int, str]]]):
+class Vocab(UserDict, MutableMapping[FieldName, Union[Mapping[str, int], Mapping[int, str]]]):
     """Namespaced vocabulary storing the mapping from field names to their actual vocabularies.
 
     This class does not hold the str-to-int (or int-to-str) mapping directly, but rather it
