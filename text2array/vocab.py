@@ -22,7 +22,7 @@ from .samples import FieldName, FieldValue, Sample
 
 
 class Vocab(UserDict, MutableMapping[FieldName, Union[Mapping[str, int], Mapping[int, str]]]):
-    """Namespaced vocabulary storing the mapping from field names to their actual vocabularies.
+    """A dictionary that maps field names to their actual vocabularies.
 
     This class does not hold the str-to-int (or int-to-str) mapping directly, but rather it
     stores a mapping from field names to the corresponding str-to-int (or int-to-str) mappings.
