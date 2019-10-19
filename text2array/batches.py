@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from functools import reduce
-from typing import List, Mapping, Sequence, Union, cast
+from typing import Dict, List, Mapping, Sequence, Union, cast
 
 import numpy as np
 
@@ -40,8 +40,7 @@ class Batch(Sequence[Sample]):
     def to_array(
             self,
             pad_with: Union[int, Mapping[FieldName, int]] = 0,
-            array_fn=None,
-    ) -> dict:
+    ) -> Dict[FieldName, np.ndarray]:
         """Convert the batch into `~numpy.ndarray`.
 
         Args:
@@ -49,8 +48,6 @@ class Batch(Sequence[Sample]):
                 also be a mapping from field names to padding number for
                 that field. Fields whose name is not in the mapping will
                 be padded with zeros.
-            array_fn: Callable to construct the array. Defaults to
-                `numpy.array` if not given.
 
         Returns:
             A mapping from field names to arrays whose first dimension
@@ -58,8 +55,6 @@ class Batch(Sequence[Sample]):
         """
         if not self._samples:
             return {}
-        if array_fn is None:
-            array_fn = np.array
 
         field_names = self._samples[0].keys()
 
@@ -83,7 +78,7 @@ class Batch(Sequence[Sample]):
             # Pad the values
             data = self._pad(values, maxlens, paddings, 0)
 
-            arr[name] = array_fn(data)
+            arr[name] = np.array(data)
 
         return arr
 
