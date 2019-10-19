@@ -1,5 +1,4 @@
-from typing import Mapping, Sequence
-from unittest.mock import Mock
+from typing import Mapping, MutableSequence
 
 import numpy as np
 import pytest
@@ -9,7 +8,7 @@ from text2array import Batch
 
 def test_init(samples):
     b = Batch(samples)
-    assert isinstance(b, Sequence)
+    assert isinstance(b, MutableSequence)
     assert len(b) == len(samples)
     for i in range(len(b)):
         assert b[i] == samples[i]
