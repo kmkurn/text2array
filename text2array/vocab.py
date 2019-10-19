@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import Counter, OrderedDict, defaultdict
+from collections import Counter, OrderedDict, UserDict, defaultdict
 from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
     Optional, Sequence, Set
 
@@ -21,7 +21,7 @@ from tqdm import tqdm
 from .samples import FieldName, FieldValue, Sample
 
 
-class Vocab(Mapping[FieldName, Mapping[str, int]]):
+class Vocab(UserDict, Mapping[FieldName, Mapping[str, int]]):
     """Namespaced vocabulary storing the mapping from field names to their actual vocabulary.
 
     A vocabulary does not hold the str-to-int mapping directly, but rather it stores a mapping
@@ -35,17 +35,11 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
     """
 
     def __init__(self, m: Mapping[FieldName, Mapping[str, int]]) -> None:
-        self._m = m
-
-    def __len__(self) -> int:
-        return len(self._m)
-
-    def __iter__(self) -> Iterator[FieldName]:
-        return iter(self._m)
+        super().__init__(m)
 
     def __getitem__(self, name: FieldName) -> Mapping[str, int]:
         try:
-            return self._m[name]
+            return super().__getitem__(name)
         except KeyError:
             raise KeyError(f"no vocabulary found for field name '{name}'")
 
