@@ -15,10 +15,10 @@ from this type).
 Vocabulary
 ----------
 
-After creating samples, we need to build a vocabulary. A vocabulary holds the
-str-to-int (or int-to-str) mapping for each field. Building a vocabulary from scratch
-is tedious. So, it's common to build the vocabulary from the given samples. The `Vocab`
-class can be used for this purpose.
+After creating samples, we need to build a vocabulary. A vocabulary holds ordered set
+of string values for each field. Building a vocabulary from scratch is tedious. So, it's
+easier to build the vocabulary from the given samples. The `Vocab` class can be used for
+this purpose.
 
 .. doctest::
 
@@ -32,12 +32,12 @@ class can be used for this purpose.
     >>> list(vocab.keys())
     ['ws', 'label']
     >>> vocab['ws']
-    StringStore(['<pad>', '<unk>', 'john', 'mary'], unk_token='<unk>')
+    StringStore(['<pad>', '<unk>', 'john', 'mary'], default='<unk>')
     >>> vocab['label']
-    StringStore(['<unk>', 'pos', 'neg'], unk_token='<unk>')
+    StringStore(['<unk>', 'pos', 'neg'], default='<unk>')
     >>> 'john' in vocab['ws'], 'talks' in vocab['ws']
     (True, False)
-    >>> vocab['ws']['john'], vocab['ws']['talks']
+    >>> vocab['ws'].index('john'), vocab['ws'].index('talks')
     (2, 1)
 
 There are several things to note:
@@ -51,16 +51,16 @@ if all the samples fit in the memory. You can pass an iterable that streams the
 samples from disk if you like. See the documentation to see other arguments that
 it accepts to customize vocabulary creation.
 
-Applying vocabulary
-^^^^^^^^^^^^^^^^^^^
+Converting samples to indices
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once a vocabulary is built, we need to apply it to our samples. Applying a vocabulary
-means mapping all field values according to the mapping specified by the vocabulary.
-Continuing from the previous example:
+Once a vocabulary is built, we need convert our samples with it. This conversion
+means mapping all field values according to the vocabulary. Continuing from the
+previous example:
 
 .. doctest::
 
-   >>> for s in vocab.apply_to(samples):
+   >>> for s in vocab.to_indices(samples):
    ...   print(s)
    ...
    {'ws': [2, 1], 'i': 10, 'label': 1}
@@ -81,7 +81,7 @@ convert an ``Iterable[Sample]`` to ``Sequence[Sample]`` by converting it to a `l
 
 .. doctest::
 
-   >>> samples = list(vocab.apply_to(samples))  # now we have a sequence
+   >>> samples = list(vocab.to_indices(samples))  # now we have a sequence
    >>> from random import Random
    >>> from text2array import ShuffleIterator
    >>> iterator = ShuffleIterator(samples, key=lambda s: len(s['ws']), rng=Random(1234))
@@ -125,7 +125,7 @@ When iterated over, `BatchIterator` produces `Batch` objects, which will be expl
 Batch
 -----
 
-A `Batch` is just a ``Sequence[Sample]``, but it has a `~Batch.to_array` method to convert
+A `Batch` is just a ``MutableSequence[Sample]``, but it has a `~Batch.to_array` method to convert
 samples in that batch to an array. The nice thing is sequential fields are automatically
 padded, **no matter how deeply nested they are**.
 
@@ -137,7 +137,7 @@ padded, **no matter how deeply nested they are**.
    ...   {'ws': ['mary'], 'cs': [list('mary')]}
    ... ]
    >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2), 'cs': dict(min_count=2)})
-   >>> samples = list(vocab.apply_to(samples))
+   >>> samples = list(vocab.to_indices(samples))
    >>> iterator = BatchIterator(samples, batch_size=2)
    >>> it = iter(iterator)
    >>> batch = next(it)

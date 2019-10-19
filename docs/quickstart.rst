@@ -20,21 +20,21 @@ Overview
     >>> from text2array import Vocab
     >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2)})
     >>> vocab['ws']
-    StringStore(['<pad>', '<unk>', 'john', 'mary'], unk_token='<unk>')
+    StringStore(['<pad>', '<unk>', 'john', 'mary'], default='<unk>')
     >>> # 'talks' and 'loves' are out-of-vocabulary because they occur only once
     >>> 'john' in vocab['ws']
     True
-    >>> vocab['ws']['john']
+    >>> vocab['ws'].index('john')
     2
     >>> 'talks' in vocab['ws']
     False
-    >>> vocab['ws']['talks']  # unknown word is mapped to '<unk>'
+    >>> vocab['ws'].index('talks')  # unknown word is mapped to '<unk>'
     1
     >>>
     >>> # Applying vocab to samples
     >>> samples
     [{'ws': ['john', 'talks']}, {'ws': ['john', 'loves', 'mary']}, {'ws': ['mary']}]
-    >>> samples = list(vocab.apply_to(samples))
+    >>> samples = list(vocab.to_indices(samples))
     >>> list(samples)
     [{'ws': [2, 1]}, {'ws': [2, 1, 3]}, {'ws': [3]}]
     >>>
