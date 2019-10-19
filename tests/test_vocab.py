@@ -3,7 +3,7 @@ from typing import Iterable, Mapping
 from tqdm import tqdm
 import pytest
 
-from text2array import Vocab
+from text2array import StringStore, Vocab
 
 
 class TestFromSamples():
@@ -22,7 +22,7 @@ class TestFromSamples():
             vocab['ws']
 
         itos = '<unk> c b a'.split()
-        assert isinstance(vocab['w'], Mapping)
+        assert isinstance(vocab['w'], StringStore)
         assert len(vocab['w']) == len(itos)
         assert list(vocab['w']) == itos
         for i, w in enumerate(itos):

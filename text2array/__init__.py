@@ -18,6 +18,7 @@ __all__ = [
     'Sample',
     'Batch',
     'Vocab',
+    'StringStore',
     'BatchIterator',
     'ShuffleIterator',
 ]
@@ -25,4 +26,4 @@ __all__ = [
 from .batches import Batch
 from .samples import Sample
 from .iterators import BatchIterator, ShuffleIterator
-from .vocab import Vocab
+from .vocab import StringStore, Vocab

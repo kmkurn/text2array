@@ -135,7 +135,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
             if unk is not None:
                 inits.append(unk)
 
-            store = _StringStore(initials=inits, unk_token=unk)
+            store = StringStore(initials=inits, unk_token=unk)
 
             min_count = opts.get('min_count', 1)
             max_size = opts.get('max_size')
@@ -204,7 +204,7 @@ class _VocabAppliedSamples(Iterable[Sample]):
             yield self._vocab._apply_to_sample(s)
 
 
-class _StringStore(Mapping[str, int]):
+class StringStore(Mapping[str, int]):
     def __init__(
             self,
             initials: Optional[Sequence[str]] = None,
@@ -235,7 +235,6 @@ class _StringStore(Mapping[str, int]):
             return self._store[s]
         except KeyError:
             if self._unk_token is not None:
-                # TODO handle if unk token not in store
                 return self._store[self._unk_token]
             raise KeyError(f"'{s}' not found in vocabulary")
 
@@ -243,6 +242,6 @@ class _StringStore(Mapping[str, int]):
         return s in self._store
 
     def __eq__(self, o) -> bool:
-        if not isinstance(o, _StringStore):
+        if not isinstance(o, StringStore):
             return False
         return list(self) == list(o)
