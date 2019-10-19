@@ -22,6 +22,7 @@ class TestAsSequence:
 
     def test_value_not_exist(self):
         store = StringStore()
+        assert store.default is None
         with pytest.raises(ValueError) as excinfo:
             store.index('d')
         assert "cannot find 'd'" in str(excinfo.value)
@@ -46,10 +47,10 @@ class TestAsMutableSet:
         assert list(store) == list('bc')
 
 
-def test_unk():
-    store = StringStore('abb', unk_token='b')
-    assert store.unk_token == 'b'
-    assert store.index('c') == store.index(store.unk_token)
+def test_default():
+    store = StringStore('abb', default='b')
+    assert store.default == 'b'
+    assert store.index('c') == store.index(store.default)
 
 
 def test_eq():
@@ -61,5 +62,5 @@ def test_eq():
     store1.discard('c')
     assert store1 != store2
 
-    store3 = StringStore('abbccc', unk_token='b')
+    store3 = StringStore('abbccc', default='b')
     assert store2 != store3

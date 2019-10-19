@@ -20,7 +20,7 @@ class TestFromSamples():
         assert list(vocab) == ['w']
 
         assert isinstance(vocab['w'], StringStore)
-        assert vocab['w'].unk_token == '<unk>'
+        assert vocab['w'].default == '<unk>'
         assert list(vocab['w']) == '<unk> c b a'.split()
 
         vocab['ws'] = StringStore()
@@ -96,7 +96,7 @@ class TestFromSamples():
 
     def test_no_unk(self):
         vocab = self.from_samples([{'w': 'a', 't': 'a'}], options={'w': dict(unk=None)})
-        assert vocab['w'].unk_token is None
+        assert vocab['w'].default is None
         assert '<unk>' not in vocab['w']
         assert '<unk>' in vocab['t']
 

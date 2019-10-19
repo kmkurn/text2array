@@ -129,7 +129,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             if unk is not None:
                 inits.append(unk)
 
-            store = StringStore(inits, unk_token=unk)
+            store = StringStore(inits, default=unk)
 
             min_count = opts.get('min_count', 1)
             max_size = opts.get('max_size')
@@ -182,37 +182,56 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
 
 
 class StringStore(OrderedSet):
-    """An ordered collection of string.
+    """An ordered set of strings, with an optional default value for unknown strings.
 
-    This class represents an ordered collection of string. This class is also a mapping
-    whose keys and values are the strings and their indices in the ordering.
+    This class implements both `~typing.MutableSet` and `~typing.Sequence` with `str`
+    as its contents.
+
+    Example:
+
+        >>> from text2array import StringStore
+        >>> store = StringStore('abb', default='a')
+        >>> list(store)
+        ['a', 'b']
+        >>> store.add('b')
+        1
+        >>> store.add('c')
+        2
+        >>> list(store)
+        ['a', 'b', 'c']
+        >>> store.index('a')
+        0
+        >>> store.index('b')
+        1
+        >>> store.index('d')
+        0
 
     Args:
-        initials: Initial elements of the collection.
-        unk_token: Use this token as a representation of strings that do not exist in
-            the collection.
+        initial: Initial elements of the store.
+        default: Default string as a representation of unknown strings, i.e. those that
+            do not exist in the store.
     """
 
     def __init__(
             self,
             initial: Optional[Sequence[str]] = None,
-            unk_token: Optional[str] = None,
+            default: Optional[str] = None,
     ) -> None:
         super().__init__(initial)
-        self.unk_token = unk_token
+        self.default = default
 
     def index(self, s: str) -> int:
         try:
             return super().index(s)
         except KeyError:
-            if self.unk_token is not None:
-                return super().index(self.unk_token)
+            if self.default is not None:
+                return super().index(self.default)
             raise ValueError(f"cannot find '{s}'")
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, StringStore):
             return False
-        return self.unk_token == o.unk_token and super().__eq__(o)
+        return self.default == o.default and super().__eq__(o)
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({list(self)!r}, unk_token={self.unk_token!r})'
+        return f'{self.__class__.__name__}({list(self)!r}, default={self.default!r})'
