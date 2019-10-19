@@ -46,6 +46,7 @@ class BatchIterator(Iterable[Batch], Sized):
         be passed to `len` to get the number of batches. Otherwise, a `TypeError`
         is raised.
     """
+
     def __init__(self, samples: Iterable[Sample], batch_size: int = 1) -> None:
         if batch_size <= 0:
             raise ValueError('batch size must be greater than 0')
@@ -91,13 +92,14 @@ class ShuffleIterator(Iterable[Sample], Sized):
 
     Example:
 
+        >>> from random import Random
         >>> from text2array import ShuffleIterator
         >>> samples = [
         ...   {'ws': ['a', 'b', 'b']},
         ...   {'ws': ['a']},
         ...   {'ws': ['a', 'a', 'b', 'b', 'b', 'b']},
         ... ]
-        >>> iter_ = ShuffleIterator(samples, key=lambda s: len(s['ws']))
+        >>> iter_ = ShuffleIterator(samples, key=lambda s: len(s['ws']), rng=Random(1234))
         >>> for s in iter_:
         ...   print(s)
         ...
@@ -113,6 +115,7 @@ class ShuffleIterator(Iterable[Sample], Sized):
         rng: Random number generator to use for shuffling. Set this to ensure reproducibility.
             If not given, an instance of `~random.Random` with the default seed is used.
     """
+
     def __init__(
             self,
             samples: Sequence[Sample],
