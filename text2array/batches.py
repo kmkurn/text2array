@@ -30,6 +30,7 @@ class Batch(UserList, MutableSequence[Sample]):
     """
 
     def __init__(self, samples: Optional[Sequence[Sample]] = None) -> None:
+        # constructor required; see https://docs.python.org/3.6/library/collections.html#collections.UserList
         if samples is None:
             samples = []
         super().__init__(samples)
