@@ -55,7 +55,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         Returns:
             ~typing.Iterable[Sample]: Samples to which the vocabulary has been applied.
         """
-        return map(self._apply_to_sample, samples)
+        return map(self._index_sample, samples)
 
     @classmethod
     def from_samples(
@@ -129,7 +129,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             if unk is not None:
                 inits.append(unk)
 
-            store = StringStore(initials=inits, unk_token=unk)
+            store = StringStore(inits, unk_token=unk)
 
             min_count = opts.get('min_count', 1)
             max_size = opts.get('max_size')
@@ -160,29 +160,25 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         for x in xs:
             yield from cls._flatten(x)
 
-    def _apply_to_sample(self, sample: Sample) -> Sample:
+    def _index_sample(self, sample: Sample) -> Sample:
         s = {}
-        for name, val in sample.items():
+        for name, value in sample.items():
             try:
                 store = self[name]
             except KeyError:
-                s[name] = val
+                s[name] = value
             else:
-                s[name] = self._apply_store_to_val(store, val)
+                s[name] = self._index_value(store, value)
         return s
 
     @classmethod
-    def _apply_store_to_val(
-            cls,
-            store: 'StringStore',
-            val: FieldValue,
-    ) -> FieldValue:
-        if isinstance(val, str):
-            return store.index(val)
-        if not isinstance(val, Sequence):
-            return val
+    def _index_value(cls, store: 'StringStore', value: FieldValue) -> FieldValue:
+        if isinstance(value, str):
+            return store.index(value)
+        if not isinstance(value, Sequence):
+            return value
 
-        return [cls._apply_store_to_val(store, v) for v in val]
+        return [cls._index_value(store, v) for v in value]
 
 
 class StringStore(OrderedSet):
