@@ -18,21 +18,15 @@ class TestFromSamples():
         assert isinstance(vocab, MutableMapping)
         assert len(vocab) == 1
         assert list(vocab) == ['w']
-        with pytest.raises(KeyError):
-            vocab['ws']
 
-        itos = '<unk> c b a'.split()
         assert isinstance(vocab['w'], StringStore)
-        assert len(vocab['w']) == len(itos)
-        assert list(vocab['w']) == itos
-        for i, w in enumerate(itos):
-            assert w in vocab['w']
-            assert vocab['w'].index(w) == i
+        assert vocab['w'].unk_token == '<unk>'
+        assert list(vocab['w']) == '<unk> c b a'.split()
 
-        assert 'foo' not in vocab['w']
-        assert vocab['w'].index('foo') == vocab['w'].index('<unk>')
-        assert 'bar' not in vocab['w']
-        assert vocab['w'].index('bar') == vocab['w'].index('<unk>')
+        vocab['ws'] = StringStore()
+        assert set(vocab) == {'w', 'ws'}
+        del vocab['ws']
+        assert list(vocab) == ['w']
 
     def test_has_vocab_for_all_str_fields(self):
         ss = [{'w': 'b', 't': 'b'}, {'w': 'b', 't': 'b'}]
@@ -62,6 +56,7 @@ class TestFromSamples():
         vocab = self.from_samples(ss)
         assert list(vocab['cs']) == '<pad> <unk> d c b a'.split()
 
+    @pytest.mark.skip
     def test_empty_samples(self):
         vocab = self.from_samples([])
         assert not vocab
@@ -101,11 +96,9 @@ class TestFromSamples():
 
     def test_no_unk(self):
         vocab = self.from_samples([{'w': 'a', 't': 'a'}], options={'w': dict(unk=None)})
+        assert vocab['w'].unk_token is None
         assert '<unk>' not in vocab['w']
         assert '<unk>' in vocab['t']
-        with pytest.raises(KeyError) as exc:
-            vocab['w'].index('foo')
-        assert "'foo' not found in vocabulary" in str(exc.value)
 
     def test_no_pad(self):
         vocab = self.from_samples([{'w': ['a'], 't': ['a']}], options={'w': dict(pad=None)})
@@ -157,49 +150,46 @@ class TestFromSamples():
         assert 'c' in vocab['w']
 
 
-def test_apply_to_samples():
-    ss = [{'ws': ['a', 'c', 'c'], 'i': 1}, {'ws': ['b', 'c'], 'i': 2}, {'ws': ['b'], 'i': 3}]
-    vocab = Vocab({'ws': StringStore('abc')})
-    ss_ = vocab.apply_to(ss)
-    assert isinstance(ss_, Iterable)
-    assert list(ss_) == [{'ws': [0, 2, 2], 'i': 1}, {'ws': [1, 2], 'i': 2}, {'ws': [1], 'i': 3}]
+class TestToIndices:
+    def test_samples_to_indices(self):
+        ss = [{
+            'ws': ['a', 'c', 'c'],
+            'i': 1
+        }, {
+            'ws': ['b', 'c'],
+            'i': 2
+        }, {
+            'ws': ['b'],
+            'i': 3
+        }]
+        vocab = Vocab({'ws': StringStore('abc')})
+        ss_ = vocab.to_indices(ss)
+        assert isinstance(ss_, Iterable)
+        assert list(ss_) == [{
+            'ws': [0, 2, 2],
+            'i': 1
+        }, {
+            'ws': [1, 2],
+            'i': 2
+        }, {
+            'ws': [1],
+            'i': 3
+        }]
 
+    def test_stream_to_indices(self, stream_cls):
+        ss = stream_cls([{'ws': ['a', 'c', 'c']}, {'ws': ['b', 'c']}, {'ws': ['b']}])
+        vocab = Vocab({'ws': StringStore('abc')})
+        ss_ = vocab.to_indices(ss)
+        assert isinstance(ss_, Iterable)
+        assert list(ss_) == [{'ws': [0, 2, 2]}, {'ws': [1, 2]}, {'ws': [1]}]
 
-def test_apply_to_stream(stream_cls):
-    ss = stream_cls([{'ws': ['a', 'c', 'c']}, {'ws': ['b', 'c']}, {'ws': ['b']}])
-    vocab = Vocab({'ws': StringStore('abc')})
-    ss_ = vocab.apply_to(ss)
-    assert isinstance(ss_, Iterable)
-    assert list(ss_) == [{'ws': [0, 2, 2]}, {'ws': [1, 2]}, {'ws': [1]}]
+    def test_value_is_not_str(self):
+        ss = [{'ws': [0, 1, 2]}]
+        vocab = Vocab({'ws': StringStore('abc')})
+        assert list(vocab.to_indices(ss)) == ss
 
-
-def test_apply_to_value_not_found():
-    ss = [{'ws': ['a']}]
-    vocab = Vocab({'ws': StringStore('b')})
-    with pytest.raises(KeyError) as exc:
-        list(vocab.apply_to(ss))
-    assert "value 'a' not found in vocab" in str(exc.value)
-
-
-def test_eq_not_same():
-    ss = [{'ws': ['b', 'c']}, {'ws': ['c', 'c', 'b']}]
-    vocab1 = TestFromSamples.from_samples(ss, options={'ws': {'pad': None, 'unk': None}})
-    vocab2 = TestFromSamples.from_samples(ss, options={'ws': {'unk': None}})
-    assert vocab1 != vocab2
-
-
-def test_eq_with_dict():
-    ss = [{'ws': ['b', 'c']}, {'ws': ['c', 'c', 'b']}]
-    vocab1 = TestFromSamples.from_samples(ss, options={'ws': {'pad': None, 'unk': None}})
-    vocab2 = Vocab({'ws': StringStore('bc')})
-    assert vocab1 != vocab2
-
-
-@pytest.mark.skip
-def test_invert():
-    vocab = Vocab({'ws': {'c': 0, 'b': 1, 'a': 2}})
-    vocab_inv = vocab.invert()
-    assert vocab_inv is not vocab
-
-    samples = [{'ws': ['a', 'b']}, {'ws': ['b', 'c', 'c']}, {'ws': ['c']}]
-    assert list(vocab_inv.apply_to(vocab.apply_to(samples))) == samples
+    def test_value_not_found(self):
+        ss = [{'ws': ['a']}]
+        vocab = Vocab({'ws': StringStore('b')})
+        with pytest.raises(ValueError):
+            list(vocab.to_indices(ss))

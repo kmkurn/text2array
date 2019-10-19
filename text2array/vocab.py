@@ -41,7 +41,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         except KeyError:
             raise KeyError(f"no vocabulary found for field name '{name}'")
 
-    def apply_to(self, samples: Iterable[Sample]) -> Iterable[Sample]:
+    def to_indices(self, samples: Iterable[Sample]) -> Iterable[Sample]:
         """Apply this vocabulary to the given samples.
 
         Applying a vocabulary means mapping all the (nested) field values to the corresponding
@@ -56,18 +56,6 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             ~typing.Iterable[Sample]: Samples to which the vocabulary has been applied.
         """
         return map(self._apply_to_sample, samples)
-
-    def invert(self) -> 'Vocab':
-        """Invert the stored vocabularies.
-
-        Inversion here means changing from str-to-int to int-to-str and vice versa.
-        This method is useful to map from integer samples back to their string
-        representations.
-
-        Returns:
-            Vocab: New vocabulary with the mappings inverted.
-        """
-        return Vocab({name: self._invert_mapping(vb) for name, vb in self.items()})
 
     @classmethod
     def from_samples(
@@ -190,18 +178,11 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             val: FieldValue,
     ) -> FieldValue:
         if isinstance(val, str):
-            try:
-                return store.index(val)
-            except KeyError:
-                raise KeyError(f'value {val!r} not found in vocab')
+            return store.index(val)
         if not isinstance(val, Sequence):
             return val
 
         return [cls._apply_store_to_val(store, v) for v in val]
-
-    @staticmethod
-    def _invert_mapping(d: Mapping[Any, Any]) -> dict:
-        return {v: k for k, v in d.items()}
 
 
 class StringStore(OrderedSet):
