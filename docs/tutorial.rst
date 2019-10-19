@@ -29,12 +29,12 @@ class can be used for this purpose.
     ...   {'ws': ['mary'], 'i': 30, 'label': 'neg'}
     ... ]
     >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2)})
-    >>> list(vocab)
+    >>> list(vocab.keys())
     ['ws', 'label']
-    >>> dict(vocab['ws'])
-    {'<pad>': 0, '<unk>': 1, 'john': 2, 'mary': 3}
-    >>> dict(vocab['label'])
-    {'<unk>': 0, 'pos': 1, 'neg': 2}
+    >>> vocab['ws']
+    StringStore(['<pad>', '<unk>', 'john', 'mary'], unk_token='<unk>')
+    >>> vocab['label']
+    StringStore(['<unk>', 'pos', 'neg'], unk_token='<unk>')
     >>> 'john' in vocab['ws'], 'talks' in vocab['ws']
     (True, False)
     >>> vocab['ws']['john'], vocab['ws']['talks']

@@ -19,8 +19,8 @@ Overview
     >>> # Create a Vocab
     >>> from text2array import Vocab
     >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2)})
-    >>> list(vocab['ws'])
-    ['<pad>', '<unk>', 'john', 'mary']
+    >>> vocab['ws']
+    StringStore(['<pad>', '<unk>', 'john', 'mary'], unk_token='<unk>')
     >>> # 'talks' and 'loves' are out-of-vocabulary because they occur only once
     >>> 'john' in vocab['ws']
     True
