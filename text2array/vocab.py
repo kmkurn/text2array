@@ -222,20 +222,20 @@ class StringStore(OrderedSet):
             unk_token: Optional[str] = None,
     ) -> None:
         super().__init__(initials)
-        self._unk_token = unk_token
+        self.unk_token = unk_token
 
     def index(self, s: str) -> int:
         try:
             return super().index(s)
         except KeyError:
-            if self._unk_token is not None:
-                return super().index(self._unk_token)
-            raise KeyError(f"'{s}' not found in vocabulary")
+            if self.unk_token is not None:
+                return super().index(self.unk_token)
+            raise ValueError(f"cannot find '{s}'")
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, StringStore):
             return False
-        return list(self) == list(o)
+        return self.unk_token == o.unk_token and super().__eq__(o)
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({list(self)!r}, unk_token={self._unk_token!r})'
+        return f'{self.__class__.__name__}({list(self)!r}, unk_token={self.unk_token!r})'
