@@ -210,6 +210,18 @@ class StringStore(Mapping[str, int]):
     This class represents an ordered collection of string. This class is also a mapping
     whose keys and values are the strings and their indices in the ordering.
 
+    Example:
+
+        >>> from text2array import StringStore
+        >>> store = StringStore(initials=['a', 'b'], unk_token='b')
+        >>> for w in 'a b b c c c'.split():
+        ...     store.add(w)
+        ...
+        >>> list(store.items())
+        [('a', 0), ('b', 1), ('c', 2)]
+        >>> store['d']
+        1
+
     Args:
         initials: Initial elements of the collection.
         unk_token: Use this token as a representation of strings that do not exist in
