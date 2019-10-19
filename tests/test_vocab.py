@@ -193,3 +193,12 @@ def test_eq_with_dict():
     vocab1 = TestFromSamples.from_samples(ss, options={'ws': {'pad': None, 'unk': None}})
     vocab2 = Vocab({'ws': {'c': 0, 'b': 1}})
     assert vocab1 != vocab2
+
+
+def test_invert():
+    vocab = Vocab({'ws': {'c': 0, 'b': 1, 'a': 2}})
+    vocab_inv = vocab.invert()
+    assert vocab_inv is not vocab
+
+    samples = [{'ws': ['a', 'b']}, {'ws': ['b', 'c', 'c']}, {'ws': ['c']}]
+    assert list(vocab_inv.apply_to(vocab.apply_to(samples))) == samples

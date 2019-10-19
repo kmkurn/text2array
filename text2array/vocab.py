@@ -13,31 +13,32 @@
 # limitations under the License.
 
 from collections import Counter, OrderedDict, UserDict, defaultdict
-from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
-    Optional, Sequence, Set
+from typing import Any, Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
+    Optional, Sequence, Set, Union
 
 from tqdm import tqdm
 
 from .samples import FieldName, FieldValue, Sample
 
 
-class Vocab(UserDict, Mapping[FieldName, Mapping[str, int]]):
-    """Namespaced vocabulary storing the mapping from field names to their actual vocabulary.
+class Vocab(UserDict, Mapping[FieldName, Union[Mapping[str, int], Mapping[int, str]]]):
+    """Namespaced vocabulary storing the mapping from field names to their actual vocabularies.
 
-    A vocabulary does not hold the str-to-int mapping directly, but rather it stores a mapping
-    from field names to the corresponding str-to-int mappings. These mappings are the actual
-    vocabulary for that particular field name. In other words, the actual vocabulary for each
-    field name is namespaced by the field name and all of them are handled this :class:`Vocab`
-    object.
+    This class does not hold the str-to-int (or int-to-str) mapping directly, but rather it
+    stores a mapping from field names to the corresponding str-to-int (or int-to-str) mappings.
+    The latter are the actual vocabulary for that particular field name. In other words, the
+    actual vocabulary for each field name is namespaced by the field name and an instance of this
+    class handles all of them.
 
     Args:
-        m: Mapping from field names to its str-to-int mapping.
+        m: Mapping from field names to its str-to-int (or int-to-str) mapping.
     """
 
-    def __init__(self, m: Mapping[FieldName, Mapping[str, int]]) -> None:
+    def __init__(
+            self, m: Mapping[FieldName, Union[Mapping[str, int], Mapping[int, str]]]) -> None:
         super().__init__(m)
 
-    def __getitem__(self, name: FieldName) -> Mapping[str, int]:
+    def __getitem__(self, name: FieldName) -> Union[Mapping[str, int], Mapping[int, str]]:
         try:
             return super().__getitem__(name)
         except KeyError:
@@ -58,6 +59,18 @@ class Vocab(UserDict, Mapping[FieldName, Mapping[str, int]]):
             ~typing.Iterable[Sample]: Samples to which the vocabulary has been applied.
         """
         return map(self._apply_to_sample, samples)
+
+    def invert(self) -> 'Vocab':
+        """Invert the stored vocabularies.
+
+        Inversion here means changing from str-to-int to int-to-str and vice versa.
+        This method is useful to map from integer samples back to their string
+        representations.
+
+        Returns:
+            Vocab: New vocabulary with the mappings inverted.
+        """
+        return Vocab({name: self._invert_mapping(vb) for name, vb in self.items()})
 
     @classmethod
     def from_samples(
@@ -184,6 +197,10 @@ class Vocab(UserDict, Mapping[FieldName, Mapping[str, int]]):
                 raise KeyError(f'value {val!r} not found in vocab')
 
         return [cls._apply_vb_to_val(vb, v) for v in val]
+
+    @staticmethod
+    def _invert_mapping(d: Mapping[Any, Any]) -> dict:
+        return {v: k for k, v in d.items()}
 
 
 class StringStore(Mapping[str, int]):
