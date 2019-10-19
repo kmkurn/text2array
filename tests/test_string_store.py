@@ -1,6 +1,9 @@
+import pytest
+
 from text2array import StringStore
 
 
+@pytest.mark.skip
 def test_add():
     store = StringStore()
     for tok in 'a b b c c c'.split():

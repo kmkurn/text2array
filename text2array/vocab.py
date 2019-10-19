@@ -16,12 +16,13 @@ from collections import Counter, OrderedDict, UserDict, defaultdict
 from typing import Any, Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
     MutableMapping, Optional, Sequence, Set, Union
 
+from ordered_set import OrderedSet
 from tqdm import tqdm
 
 from .samples import FieldName, FieldValue, Sample
 
 
-class Vocab(UserDict, MutableMapping[FieldName, Union[Mapping[str, int], Mapping[int, str]]]):
+class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
     """A dictionary that maps field names to their actual vocabularies.
 
     This class does not hold the str-to-int (or int-to-str) mapping directly, but rather it
@@ -34,11 +35,7 @@ class Vocab(UserDict, MutableMapping[FieldName, Union[Mapping[str, int], Mapping
         m: Mapping from field names to its str-to-int (or int-to-str) mapping.
     """
 
-    def __init__(
-            self, m: Mapping[FieldName, Union[Mapping[str, int], Mapping[int, str]]]) -> None:
-        super().__init__(m)
-
-    def __getitem__(self, name: FieldName) -> Union[Mapping[str, int], Mapping[int, str]]:
+    def __getitem__(self, name: FieldName) -> 'StringStore':
         try:
             return super().__getitem__(name)
         except KeyError:
@@ -179,49 +176,39 @@ class Vocab(UserDict, MutableMapping[FieldName, Union[Mapping[str, int], Mapping
         s = {}
         for name, val in sample.items():
             try:
-                vb = self[name]
+                store = self[name]
             except KeyError:
                 s[name] = val
             else:
-                s[name] = self._apply_vb_to_val(vb, val)
+                s[name] = self._apply_store_to_val(store, val)
         return s
 
     @classmethod
-    def _apply_vb_to_val(
+    def _apply_store_to_val(
             cls,
-            vb: Mapping[FieldValue, FieldValue],
+            store: 'StringStore',
             val: FieldValue,
     ) -> FieldValue:
-        if isinstance(val, str) or not isinstance(val, Sequence):
+        if isinstance(val, str):
             try:
-                return vb[val]
+                return store.index(val)
             except KeyError:
                 raise KeyError(f'value {val!r} not found in vocab')
+        if not isinstance(val, Sequence):
+            return val
 
-        return [cls._apply_vb_to_val(vb, v) for v in val]
+        return [cls._apply_store_to_val(store, v) for v in val]
 
     @staticmethod
     def _invert_mapping(d: Mapping[Any, Any]) -> dict:
         return {v: k for k, v in d.items()}
 
 
-class StringStore(Mapping[str, int]):
+class StringStore(OrderedSet):
     """An ordered collection of string.
 
     This class represents an ordered collection of string. This class is also a mapping
     whose keys and values are the strings and their indices in the ordering.
-
-    Example:
-
-        >>> from text2array import StringStore
-        >>> store = StringStore(initials=['a', 'b'], unk_token='b')
-        >>> for w in 'a b b c c c'.split():
-        ...     store.add(w)
-        ...
-        >>> list(store.items())
-        [('a', 0), ('b', 1), ('c', 2)]
-        >>> store['d']
-        1
 
     Args:
         initials: Initial elements of the collection.
@@ -234,41 +221,16 @@ class StringStore(Mapping[str, int]):
             initials: Optional[Sequence[str]] = None,
             unk_token: Optional[str] = None,
     ) -> None:
-        if initials is None:
-            initials = []
-
-        self._initials = initials
+        super().__init__(initials)
         self._unk_token = unk_token
 
-        self._store: Dict[str, int] = OrderedDict()
-        for s in initials:
-            self.add(s)
-
-    def add(self, s: str) -> None:
-        """Add a string to the collection.
-
-        Args:
-            s: String to add.
-        """
-        if s not in self:
-            self._store[s] = len(self)
-
-    def __len__(self) -> int:
-        return len(self._store)
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._store)
-
-    def __getitem__(self, s: str) -> int:
+    def index(self, s: str) -> int:
         try:
-            return self._store[s]
+            return super().index(s)
         except KeyError:
             if self._unk_token is not None:
-                return self._store[self._unk_token]
+                return super().index(self._unk_token)
             raise KeyError(f"'{s}' not found in vocabulary")
-
-    def __contains__(self, s) -> bool:
-        return s in self._store
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, StringStore):
