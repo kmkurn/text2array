@@ -8,7 +8,7 @@ Installation
 Overview
 ========
 
-.. code-block:: python
+.. doctest::
 
     >>> samples = [
     ...   {'ws': ['john', 'talks']},
@@ -39,8 +39,9 @@ Overview
     [{'ws': [2, 1]}, {'ws': [2, 1, 3]}, {'ws': [3]}]
     >>>
     >>> # Shuffle, create batches of size 2, convert to array
+    >>> from random import Random
     >>> from text2array import BatchIterator, ShuffleIterator
-    >>> iterator = BatchIterator(ShuffleIterator(samples), batch_size=2)
+    >>> iterator = BatchIterator(ShuffleIterator(samples, rng=Random(123)), batch_size=2)
     >>> len(iterator)
     2
     >>> it = iter(iterator)

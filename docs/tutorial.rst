@@ -20,7 +20,7 @@ str-to-int (or int-to-str) mapping for each field. Building a vocabulary from sc
 is tedious. So, it's common to build the vocabulary from the given samples. The `Vocab`
 class can be used for this purpose.
 
-.. code-block:: python
+.. doctest::
 
     >>> from text2array import Vocab
     >>> samples = [
@@ -29,12 +29,12 @@ class can be used for this purpose.
     ...   {'ws': ['mary'], 'i': 30, 'label': 'neg'}
     ... ]
     >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2)})
-    >>> vocab.keys()
-    dict_keys(['ws', 'label'])
+    >>> list(vocab)
+    ['ws', 'label']
     >>> dict(vocab['ws'])
     {'<pad>': 0, '<unk>': 1, 'john': 2, 'mary': 3}
     >>> dict(vocab['label'])
-    {'<unk>': 0, 'pos': 1}
+    {'<unk>': 0, 'pos': 1, 'neg': 2}
     >>> 'john' in vocab['ws'], 'talks' in vocab['ws']
     (True, False)
     >>> vocab['ws']['john'], vocab['ws']['talks']
@@ -58,14 +58,14 @@ Once a vocabulary is built, we need to apply it to our samples. Applying a vocab
 means mapping all field values according to the mapping specified by the vocabulary.
 Continuing from the previous example:
 
-.. code-block:: python
+.. doctest::
 
    >>> for s in vocab.apply_to(samples):
    ...   print(s)
    ...
    {'ws': [2, 1], 'i': 10, 'label': 1}
    {'ws': [2, 1, 3], 'i': 20, 'label': 1}
-   {'ws': [3], 'i': 30, 'label': 0}
+   {'ws': [3], 'i': 30, 'label': 2}
 
 Iterators
 ---------
@@ -79,19 +79,20 @@ Shuffling
 To shuffle, we need to pass a ``Sequence[Sample]`` to `ShuffleIterator`. We can easily
 convert an ``Iterable[Sample]`` to ``Sequence[Sample]`` by converting it to a `list`.
 
-.. code-block:: python
+.. doctest::
 
    >>> samples = list(vocab.apply_to(samples))  # now we have a sequence
+   >>> from random import Random
    >>> from text2array import ShuffleIterator
-   >>> iterator = ShuffleIterator(samples, key=lambda s: len(s['ws']))
+   >>> iterator = ShuffleIterator(samples, key=lambda s: len(s['ws']), rng=Random(1234))
    >>> len(iterator)
    3
    >>> for s in iterator:
    ...   print(s)
    ...
-   {'ws': [2, 1], 'i': 10, 'label': 1}
-   {'ws': [3], 'i': 30, 'label': 0}
+   {'ws': [3], 'i': 30, 'label': 2}
    {'ws': [2, 1, 3], 'i': 20, 'label': 1}
+   {'ws': [2, 1], 'i': 10, 'label': 1}
 
 The iterator above shuffles the samples but also tries to keep samples with similar lengths
 closer. This is useful for NLP where we want to shuffle but also minimize padding in each
@@ -108,18 +109,16 @@ To do batching, pass an ``Iterable[Sample]`` to `BatchIterator`. Since `ShuffleI
 is an ``Iterable[Sample]``, it is thus possible passing it to perform shuffling and
 batching sequentially on each iteration.
 
-.. code-block:: python
+.. doctest::
 
-   >>> from text2array import BatchIterator, ShuffleIterator
+   >>> from text2array import Batch, BatchIterator, ShuffleIterator
    >>> iterator = ShuffleIterator(samples, key=lambda s: len(s['ws']))
    >>> iterator = BatchIterator(iterator, batch_size=2)
    >>> len(iterator)
    2
    >>> for s in iterator:
-   ...   print(s)
+   ...   assert isinstance(s, Batch)
    ...
-   <text2array.batches.Batch object at 0x10ddbc358>
-   <text2array.batches.Batch object at 0x10ddbc390>
 
 When iterated over, `BatchIterator` produces `Batch` objects, which will be explained next.
 
@@ -130,31 +129,15 @@ A `Batch` is just a ``Sequence[Sample]``, but it has a `~Batch.to_array` method 
 samples in that batch to an array. The nice thing is sequential fields are automatically
 padded, **no matter how deeply nested they are**.
 
-.. code-block:: python
+.. doctest::
 
-   >>> from pprint import pprint
    >>> samples = [
    ...   {'ws': ['john', 'talks'], 'cs': [list('john'), list('talks')]},
    ...   {'ws': ['john', 'loves', 'mary'], 'cs': [list('john'), list('loves'), list('mary')]},
    ...   {'ws': ['mary'], 'cs': [list('mary')]}
    ... ]
-   >>> vocab = Vocab.from_samples(samples, options=dict(ws=dict(min_count=2)))
+   >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2), 'cs': dict(min_count=2)})
    >>> samples = list(vocab.apply_to(samples))
-   >>> dict(vocab['ws'])
-   {'<pad>': 0, '<unk>': 1, 'john': 2, 'mary': 3}
-   >>> pprint(dict(vocab['cs']))
-   {'<pad>': 0,
-   '<unk>': 1,
-   'a': 3,
-   'h': 5,
-   'j': 4,
-   'l': 7,
-   'm': 9,
-   'n': 6,
-   'o': 2,
-   'r': 10,
-   's': 8,
-   'y': 11}
    >>> iterator = BatchIterator(samples, batch_size=2)
    >>> it = iter(iterator)
    >>> batch = next(it)
@@ -166,7 +149,7 @@ padded, **no matter how deeply nested they are**.
    array([[[ 4,  2,  5,  6,  0],
            [ 1,  3,  7,  1,  8],
            [ 0,  0,  0,  0,  0]],
-
+   <BLANKLINE>
           [[ 4,  2,  5,  6,  0],
            [ 7,  2,  1,  1,  8],
            [ 9,  3, 10, 11,  0]]])
