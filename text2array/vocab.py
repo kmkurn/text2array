@@ -23,17 +23,7 @@ from .samples import FieldName, FieldValue, Sample
 
 
 class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
-    """A dictionary that maps field names to their actual vocabularies.
-
-    This class does not hold the str-to-int (or int-to-str) mapping directly, but rather it
-    stores a mapping from field names to the corresponding str-to-int (or int-to-str) mappings.
-    The latter are the actual vocabulary for that particular field name. In other words, the
-    actual vocabulary for each field name is namespaced by the field name and an instance of this
-    class handles all of them.
-
-    Args:
-        m: Mapping from field names to its str-to-int (or int-to-str) mapping.
-    """
+    """A dictionary from field names to `StringStore` objects as the field's vocabulary."""
 
     def __getitem__(self, name: FieldName) -> 'StringStore':
         try:
@@ -42,18 +32,18 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             raise KeyError(f"no vocabulary found for field name '{name}'")
 
     def to_indices(self, samples: Iterable[Sample]) -> Iterable[Sample]:
-        """Apply this vocabulary to the given samples.
+        """Convert the given samples to indices according to this vocabulary.
 
-        Applying a vocabulary means mapping all the (nested) field values to the corresponding
-        values according to the mapping specified by the vocabulary. Field names that have
-        no entry in the vocabulary are ignored. Note that the actual application is not
-        performed until the resulting iterable is iterated over.
+        This conversion means mapping all the (nested) field values to other values
+        according to the mapping specified by the `StringStore` object of that field.
+        Field names with no entry in the vocabulary are ignored. Note that the actual
+        conversion is not performed until the resulting iterable is iterated over.
 
         Args:
-            samples (~typing.Iterable[Sample]): Apply vocabulary to these samples.
+            samples (~typing.Iterable[Sample]): Samples to convert.
 
         Returns:
-            ~typing.Iterable[Sample]: Samples to which the vocabulary has been applied.
+            ~typing.Iterable[Sample]: Converted samples.
         """
         return map(self._index_sample, samples)
 
@@ -69,15 +59,13 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         A vocabulary is only made for fields whose value is a string token or a (nested)
         sequence of string tokens. It is important that ``samples`` be a true iterable, i.e.
         it can be iterated more than once. No exception is raised when this is violated.
-        A `Vocab` object returned from this method maps field names to `StringStore`, which
-        is a mapping from `str` to `int` with minor enhancements.
 
         Args:
             samples (~typing.Iterable[Sample]): Iterable of samples.
             pbar: Instance of `tqdm <https://pypi.org/project/tqdm>`_ for displaying
                 a progress bar.
             options: Mapping from field names to dictionaries to control the creation of
-                the str-to-int mapping. Recognized dictionary keys are:
+                the vocabularies. Recognized dictionary keys are:
 
                 * ``min_count`` (`int`): Exclude tokens occurring fewer than this number
                   of times from the vocabulary (default: 1).

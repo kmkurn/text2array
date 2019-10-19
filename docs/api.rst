@@ -17,21 +17,29 @@ BatchIterator
 ^^^^^^^^^^^^^
 
 .. autoclass:: BatchIterator
+   :members:
+   :show-inheritance:
 
 ShuffleIterator
 ^^^^^^^^^^^^^^^
 
 .. autoclass:: ShuffleIterator
+   :members:
+   :show-inheritance:
 
 Batch
 ^^^^^
 
 .. autoclass:: Batch
+   :members:
+   :show-inheritance:
 
 Vocab
 ^^^^^
 
 .. autoclass:: Vocab
+   :members:
+   :show-inheritance:
 
 StringStore
 ^^^^^^^^^^^
