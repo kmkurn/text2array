@@ -205,6 +205,17 @@ class _VocabAppliedSamples(Iterable[Sample]):
 
 
 class StringStore(Mapping[str, int]):
+    """An ordered collection of string.
+
+    This class represents an ordered collection of string. This class is also a mapping
+    whose keys and values are the strings and their indices in the ordering.
+
+    Args:
+        initials: Initial elements of the collection.
+        unk_token: Use this token as a representation of strings that do not exist in
+            the collection.
+    """
+
     def __init__(
             self,
             initials: Optional[Sequence[str]] = None,
@@ -221,6 +232,11 @@ class StringStore(Mapping[str, int]):
             self.add(s)
 
     def add(self, s: str) -> None:
+        """Add a string to the collection.
+
+        Args:
+            s: String to add.
+        """
         if s not in self:
             self._store[s] = len(self)
 
