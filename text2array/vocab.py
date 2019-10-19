@@ -63,7 +63,7 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
         Returns:
             ~typing.Iterable[Sample]: Samples to which the vocabulary has been applied.
         """
-        return _VocabAppliedSamples(self, samples)
+        return map(self._apply_to_sample, samples)
 
     @classmethod
     def from_samples(
@@ -192,16 +192,6 @@ class Vocab(Mapping[FieldName, Mapping[str, int]]):
                 raise KeyError(f'value {val!r} not found in vocab')
 
         return [cls._apply_vb_to_val(vb, v) for v in val]
-
-
-class _VocabAppliedSamples(Iterable[Sample]):
-    def __init__(self, vocab: Vocab, samples: Iterable[Sample]) -> None:
-        self._vocab = vocab
-        self._samples = samples
-
-    def __iter__(self) -> Iterator[Sample]:
-        for s in self._samples:
-            yield self._vocab._apply_to_sample(s)
 
 
 class StringStore(Mapping[str, int]):
