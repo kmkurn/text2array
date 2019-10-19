@@ -66,14 +66,14 @@ class BatchIterator(Iterable[Batch], Sized):
     def __iter__(self) -> Iterator[Batch]:
         it, exhausted = iter(self._samples), False
         while not exhausted:
-            batch: list = []
+            batch = Batch()
             while not exhausted and len(batch) < self._bsz:
                 try:
                     batch.append(next(it))
                 except StopIteration:
                     exhausted = True
             if batch:
-                yield Batch(batch)
+                yield batch
 
 
 class ShuffleIterator(Iterable[Sample], Sized):

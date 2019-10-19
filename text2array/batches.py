@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import UserList
 from functools import reduce
-from typing import Dict, List, Mapping, Sequence, Union, cast
+from typing import Dict, List, Mapping, MutableSequence, Optional, Sequence, Union, cast
 
 import numpy as np
 
 from .samples import FieldName, FieldValue, Sample
 
 
-class Batch(Sequence[Sample]):
+class Batch(UserList, MutableSequence[Sample]):
     """A class to represent a single batch.
 
     Args:
@@ -28,14 +29,10 @@ class Batch(Sequence[Sample]):
             should contain.
     """
 
-    def __init__(self, samples: Sequence[Sample]) -> None:
-        self._samples = samples
-
-    def __getitem__(self, index) -> Sample:
-        return self._samples[index]
-
-    def __len__(self) -> int:
-        return len(self._samples)
+    def __init__(self, samples: Optional[Sequence[Sample]] = None) -> None:
+        if samples is None:
+            samples = []
+        super().__init__(samples)
 
     def to_array(
             self,
@@ -53,10 +50,10 @@ class Batch(Sequence[Sample]):
             A mapping from field names to arrays whose first dimension
             corresponds to the batch size as returned by `len`.
         """
-        if not self._samples:
+        if not self:
             return {}
 
-        field_names = self._samples[0].keys()
+        field_names = self[0].keys()
 
         if isinstance(pad_with, int):
             pad_dict = {name: pad_with for name in field_names}
@@ -84,7 +81,7 @@ class Batch(Sequence[Sample]):
 
     def _get_values(self, name: str) -> Sequence[FieldValue]:
         try:
-            return [s[name] for s in self._samples]
+            return [s[name] for s in self]
         except KeyError:
             raise KeyError(f"some samples have no field '{name}'")
 
