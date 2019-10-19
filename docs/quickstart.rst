@@ -18,7 +18,7 @@ Overview
     >>>
     >>> # Create a Vocab
     >>> from text2array import Vocab
-    >>> vocab = Vocab.from_samples(samples, options=dict(ws=dict(min_count=2)))
+    >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2)})
     >>> list(vocab['ws'])
     ['<pad>', '<unk>', 'john', 'mary']
     >>> # 'talks' and 'loves' are out-of-vocabulary because they occur only once

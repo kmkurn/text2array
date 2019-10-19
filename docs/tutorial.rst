@@ -7,7 +7,7 @@ Sample
 ------
 
 ``Sample`` is just a ``Mapping[FieldName, FieldValue]``, where ``FieldName = str`` and
-``FieldValue = Union[float, int, str, Sequence['FieldValue']``. It is easiest to use a
+``FieldValue = Union[float, int, str, Sequence['FieldValue']]``. It is easiest to use a
 `dict` to represent a sample, but you can essentially use any object you like as long
 as it implements ``Mapping[FieldName, FieldValue]`` (which can be ensured by subclassing
 from this type).
@@ -16,9 +16,9 @@ Vocabulary
 ----------
 
 After creating samples, we need to build a vocabulary. A vocabulary holds the
-str-to-int mapping for each field. Building a vocabulary from scratch is tedious.
-So, it's common to build the vocabulary from the given samples. The `Vocab` class
-can be used for this purpose.
+str-to-int (or int-to-str) mapping for each field. Building a vocabulary from scratch
+is tedious. So, it's common to build the vocabulary from the given samples. The `Vocab`
+class can be used for this purpose.
 
 .. code-block:: python
 
@@ -28,7 +28,7 @@ can be used for this purpose.
     ...   {'ws': ['john', 'loves', 'mary'], 'i': 20, 'label': 'pos'},
     ...   {'ws': ['mary'], 'i': 30, 'label': 'neg'}
     ... ]
-    >>> vocab = Vocab.from_samples(samples, options=dict(ws=dict(min_count=2)))
+    >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2)})
     >>> vocab.keys()
     dict_keys(['ws', 'label'])
     >>> dict(vocab['ws'])
