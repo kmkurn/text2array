@@ -274,3 +274,6 @@ class StringStore(Mapping[str, int]):
         if not isinstance(o, StringStore):
             return False
         return list(self) == list(o)
+
+    def __repr__(self) -> str:
+        return f'{self.__class__.__name__}({list(self)!r}, unk_token={self._unk_token!r})'
