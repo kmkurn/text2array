@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import Counter, OrderedDict, UserDict, defaultdict
-from typing import Any, Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
-    MutableMapping, Optional, Sequence, Set, Union
+from collections import Counter, UserDict, defaultdict
+from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
+    MutableMapping, Optional, Sequence, Set
 
 from ordered_set import OrderedSet
 from tqdm import tqdm
