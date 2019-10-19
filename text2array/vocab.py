@@ -195,10 +195,10 @@ class StringStore(OrderedSet):
 
     def __init__(
             self,
-            initials: Optional[Sequence[str]] = None,
+            initial: Optional[Sequence[str]] = None,
             unk_token: Optional[str] = None,
     ) -> None:
-        super().__init__(initials)
+        super().__init__(initial)
         self.unk_token = unk_token
 
     def index(self, s: str) -> int:
