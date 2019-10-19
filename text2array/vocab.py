@@ -84,6 +84,8 @@ class Vocab(UserDict, MutableMapping[FieldName, Union[Mapping[str, int], Mapping
         A vocabulary is only made for fields whose value is a string token or a (nested)
         sequence of string tokens. It is important that ``samples`` be a true iterable, i.e.
         it can be iterated more than once. No exception is raised when this is violated.
+        A `Vocab` object returned from this method maps field names to `StringStore`, which
+        is a mapping from `str` to `int` with minor enhancements.
 
         Args:
             samples (~typing.Iterable[Sample]): Iterable of samples.
