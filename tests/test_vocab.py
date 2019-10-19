@@ -56,11 +56,6 @@ class TestFromSamples():
         vocab = self.from_samples(ss)
         assert list(vocab['cs']) == '<pad> <unk> d c b a'.split()
 
-    @pytest.mark.skip
-    def test_empty_samples(self):
-        vocab = self.from_samples([])
-        assert not vocab
-
     def test_empty_field_values(self):
         vocab = self.from_samples([{'w': []}])
         with pytest.raises(KeyError):
@@ -176,23 +171,10 @@ class TestToIndices:
             'i': 3
         }]
 
-    def test_stream_to_indices(self, stream_cls):
-        ss = stream_cls([{'ws': ['a', 'c', 'c']}, {'ws': ['b', 'c']}, {'ws': ['b']}])
-        vocab = Vocab({'ws': StringStore('abc')})
-        ss_ = vocab.to_indices(ss)
-        assert isinstance(ss_, Iterable)
-        assert list(ss_) == [{'ws': [0, 2, 2]}, {'ws': [1, 2]}, {'ws': [1]}]
-
     def test_value_is_not_str(self):
         ss = [{'ws': [0, 1, 2]}]
         vocab = Vocab({'ws': StringStore('abc')})
         assert list(vocab.to_indices(ss)) == ss
-
-    def test_value_not_found(self):
-        ss = [{'ws': ['a']}]
-        vocab = Vocab({'ws': StringStore('b')})
-        with pytest.raises(ValueError):
-            list(vocab.to_indices(ss))
 
 
 class TestToStrings:
