@@ -147,9 +147,7 @@ class Vocab(UserDict, Mapping[FieldName, Mapping[str, int]]):
         if isinstance(val, str):
             return True
         if isinstance(val, Sequence):
-            if not val:
-                raise ValueError('field values must not be an empty sequence')
-            return cls._needs_vocab(val[0])
+            return False if not val else cls._needs_vocab(val[0])
         return False
 
     @classmethod

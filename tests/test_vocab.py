@@ -67,9 +67,9 @@ class TestFromSamples():
         assert not vocab
 
     def test_empty_field_values(self):
-        with pytest.raises(ValueError) as exc:
-            self.from_samples([{'w': []}])
-        assert 'field values must not be an empty sequence' in str(exc.value)
+        vocab = self.from_samples([{'w': []}])
+        with pytest.raises(KeyError):
+            vocab['w']
 
     def test_min_count(self):
         ss = [{
