@@ -32,3 +32,8 @@ Vocab
 ^^^^^
 
 .. autoclass:: Vocab
+
+StringStore
+^^^^^^^^^^^
+
+.. autoclass:: StringStore
