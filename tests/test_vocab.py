@@ -193,3 +193,24 @@ class TestToIndices:
         vocab = Vocab({'ws': StringStore('b')})
         with pytest.raises(ValueError):
             list(vocab.to_indices(ss))
+
+
+class TestToStrings:
+    def test_samples_to_strings(self):
+        ss = [{
+            'ws': ['a', 'c', 'c'],
+            'i': 1
+        }, {
+            'ws': ['b', 'c'],
+            'i': 2
+        }, {
+            'ws': ['b'],
+            'i': 3
+        }]
+        vocab = Vocab({'ws': StringStore('abc')})
+        assert list(vocab.to_strings(vocab.to_indices(ss))) == ss
+
+    def test_value_is_str(self):
+        ss = [{'ws': ['a', 'b', 'c']}]
+        vocab = Vocab({'ws': StringStore('abc')})
+        assert list(vocab.to_strings(ss)) == ss

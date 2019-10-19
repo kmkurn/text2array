@@ -45,7 +45,20 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         Returns:
             ~typing.Iterable[Sample]: Converted samples.
         """
-        return map(self._index_sample, samples)
+        return map(self._apply_to_sample, samples)
+
+    def to_strings(self, samples: Iterable[Sample]) -> Iterable[Sample]:
+        """Convert the given samples to strings according to this vocabulary.
+
+        This method is essentially the inverse of `~Vocab.to_indices`.
+
+        Args:
+            samples (~typing.Iterable[Sample]): Samples to convert.
+
+        Returns:
+            ~typing.Iterable[Sample]: Converted samples.
+        """
+        return map(lambda s: self._apply_to_sample(s, index=False), samples)
 
     @classmethod
     def from_samples(
@@ -148,7 +161,8 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         for x in xs:
             yield from cls._flatten(x)
 
-    def _index_sample(self, sample: Sample) -> Sample:
+    def _apply_to_sample(self, sample: Sample, index: bool = True) -> Sample:
+        fn = self._index_value if index else self._get_value
         s = {}
         for name, value in sample.items():
             try:
@@ -156,7 +170,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             except KeyError:
                 s[name] = value
             else:
-                s[name] = self._index_value(store, value)
+                s[name] = fn(store, value)
         return s
 
     @classmethod
@@ -167,6 +181,15 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             return value
 
         return [cls._index_value(store, v) for v in value]
+
+    @classmethod
+    def _get_value(cls, store: 'StringStore', value: FieldValue) -> FieldValue:
+        if not isinstance(value, Sequence):
+            return store[value]
+        if isinstance(value, str):
+            return value
+
+        return [cls._get_value(store, v) for v in value]
 
 
 class StringStore(OrderedSet):
