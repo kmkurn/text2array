@@ -31,12 +31,12 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             raise KeyError(f"no vocabulary found for field name '{name}'")
 
     def stoi(self, samples: Iterable[Sample]) -> Iterable[Sample]:
-        """Convert the given samples to indices according to this vocabulary.
+        """Convert strings in the given samples to integers according to this vocabulary.
 
-        This conversion means mapping all the (nested) field values to other values
+        This conversion means mapping all the (nested) string field values to integers
         according to the mapping specified by the `StringStore` object of that field.
         Field names with no entry in the vocabulary are ignored. Note that the actual
-        conversion is not performed until the resulting iterable is iterated over.
+        conversion is lazy; it is not performed until the resulting iterable is iterated over.
 
         Args:
             samples (~typing.Iterable[Sample]): Samples to convert.
@@ -47,9 +47,9 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         return map(self._apply_to_sample, samples)
 
     def itos(self, samples: Iterable[Sample]) -> Iterable[Sample]:
-        """Convert the given samples to strings according to this vocabulary.
+        """Convert integers in the given samples to strings according to this vocabulary.
 
-        This method is essentially the inverse of `~Vocab.to_indices`.
+        This method is essentially the inverse of `~Vocab.stoi`.
 
         Args:
             samples (~typing.Iterable[Sample]): Samples to convert.
