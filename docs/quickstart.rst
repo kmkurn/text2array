@@ -34,7 +34,7 @@ Overview
     >>> # Applying vocab to samples
     >>> samples
     [{'ws': ['john', 'talks']}, {'ws': ['john', 'loves', 'mary']}, {'ws': ['mary']}]
-    >>> samples = list(vocab.to_indices(samples))
+    >>> samples = list(vocab.stoi(samples))
     >>> list(samples)
     [{'ws': [2, 1]}, {'ws': [2, 1, 3]}, {'ws': [3]}]
     >>>

@@ -15,7 +15,7 @@ from this type).
 Vocabulary
 ----------
 
-After creating samples, we need to build a vocabulary. A vocabulary holds ordered set
+After creating samples, we need to build a vocabulary. A vocabulary holds an ordered set
 of string values for each field. Building a vocabulary from scratch is tedious. So, it's
 easier to build the vocabulary from the given samples. The `Vocab` class can be used for
 this purpose.
@@ -51,16 +51,16 @@ if all the samples fit in the memory. You can pass an iterable that streams the
 samples from disk if you like. See the documentation to see other arguments that
 it accepts to customize vocabulary creation.
 
-Converting samples to indices
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Converting strings in samples to integers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once a vocabulary is built, we need convert our samples with it. This conversion
-means mapping all field values according to the vocabulary. Continuing from the
-previous example:
+Once a vocabulary is built, we need convert strings in our samples with it. This
+conversion means mapping all field values according to the vocabulary. Continuing
+from the previous example:
 
 .. doctest::
 
-   >>> for s in vocab.to_indices(samples):
+   >>> for s in vocab.stoi(samples):
    ...   print(s)
    ...
    {'ws': [2, 1], 'i': 10, 'label': 1}
@@ -81,7 +81,7 @@ convert an ``Iterable[Sample]`` to ``Sequence[Sample]`` by converting it to a `l
 
 .. doctest::
 
-   >>> samples = list(vocab.to_indices(samples))  # now we have a sequence
+   >>> samples = list(vocab.stoi(samples))  # now we have a sequence
    >>> from random import Random
    >>> from text2array import ShuffleIterator
    >>> iterator = ShuffleIterator(samples, key=lambda s: len(s['ws']), rng=Random(1234))
@@ -137,7 +137,7 @@ padded, **no matter how deeply nested they are**.
    ...   {'ws': ['mary'], 'cs': [list('mary')]}
    ... ]
    >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2), 'cs': dict(min_count=2)})
-   >>> samples = list(vocab.to_indices(samples))
+   >>> samples = list(vocab.stoi(samples))
    >>> iterator = BatchIterator(samples, batch_size=2)
    >>> it = iter(iterator)
    >>> batch = next(it)
