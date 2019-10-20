@@ -145,7 +145,7 @@ class TestFromSamples():
         assert 'c' in vocab['w']
 
 
-class TestToIndices:
+class TestStoi:
     def test_samples_to_indices(self):
         ss = [{
             'ws': ['a', 'c', 'c'],
@@ -158,7 +158,7 @@ class TestToIndices:
             'i': 3
         }]
         vocab = Vocab({'ws': StringStore('abc')})
-        ss_ = vocab.to_indices(ss)
+        ss_ = vocab.stoi(ss)
         assert isinstance(ss_, Iterable)
         assert list(ss_) == [{
             'ws': [0, 2, 2],
@@ -174,10 +174,10 @@ class TestToIndices:
     def test_value_is_not_str(self):
         ss = [{'ws': [0, 1, 2]}]
         vocab = Vocab({'ws': StringStore('abc')})
-        assert list(vocab.to_indices(ss)) == ss
+        assert list(vocab.stoi(ss)) == ss
 
 
-class TestToStrings:
+class TestItos:
     def test_samples_to_strings(self):
         ss = [{
             'ws': ['a', 'c', 'c'],
@@ -190,9 +190,9 @@ class TestToStrings:
             'i': 3
         }]
         vocab = Vocab({'ws': StringStore('abc')})
-        assert list(vocab.to_strings(vocab.to_indices(ss))) == ss
+        assert list(vocab.itos(vocab.stoi(ss))) == ss
 
     def test_value_is_str(self):
         ss = [{'ws': ['a', 'b', 'c']}]
         vocab = Vocab({'ws': StringStore('abc')})
-        assert list(vocab.to_strings(ss)) == ss
+        assert list(vocab.itos(ss)) == ss

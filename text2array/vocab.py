@@ -24,14 +24,13 @@ from .samples import FieldName, FieldValue, Sample
 
 class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
     """A dictionary from field names to `StringStore` objects as the field's vocabulary."""
-
     def __getitem__(self, name: FieldName) -> 'StringStore':
         try:
             return super().__getitem__(name)
         except KeyError:
             raise KeyError(f"no vocabulary found for field name '{name}'")
 
-    def to_indices(self, samples: Iterable[Sample]) -> Iterable[Sample]:
+    def stoi(self, samples: Iterable[Sample]) -> Iterable[Sample]:
         """Convert the given samples to indices according to this vocabulary.
 
         This conversion means mapping all the (nested) field values to other values
@@ -47,7 +46,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         """
         return map(self._apply_to_sample, samples)
 
-    def to_strings(self, samples: Iterable[Sample]) -> Iterable[Sample]:
+    def itos(self, samples: Iterable[Sample]) -> Iterable[Sample]:
         """Convert the given samples to strings according to this vocabulary.
 
         This method is essentially the inverse of `~Vocab.to_indices`.
@@ -222,7 +221,6 @@ class StringStore(OrderedSet):
         default: Default string as a representation of unknown strings, i.e. those that
             do not exist in the store.
     """
-
     def __init__(
             self,
             initial: Optional[Sequence[str]] = None,
