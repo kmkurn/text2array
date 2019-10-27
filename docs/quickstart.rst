@@ -8,16 +8,20 @@ Installation
 Overview
 ========
 
-.. doctest::
+.. doctest:: quickstart
 
+    >>> ### Import required modules ###
+    >>> from random import Random
+    >>> from text2array import BatchIterator, ShuffleIterator, Vocab
+    >>>
+    >>> ### Create samples ###
     >>> samples = [
     ...   {'ws': ['john', 'talks']},
     ...   {'ws': ['john', 'loves', 'mary']},
     ...   {'ws': ['mary']}
     ... ]
     >>>
-    >>> # Create a Vocab
-    >>> from text2array import Vocab
+    >>> ### Create a Vocab ###
     >>> vocab = Vocab.from_samples(samples, options={'ws': dict(min_count=2)})
     >>> vocab['ws']
     StringStore(['<pad>', '<unk>', 'john', 'mary'], default='<unk>')
@@ -31,16 +35,14 @@ Overview
     >>> vocab['ws'].index('talks')  # unknown word is mapped to '<unk>'
     1
     >>>
-    >>> # Applying vocab to samples
+    >>> ### Applying vocab to samples ###
     >>> samples
     [{'ws': ['john', 'talks']}, {'ws': ['john', 'loves', 'mary']}, {'ws': ['mary']}]
     >>> samples = list(vocab.stoi(samples))
     >>> samples
     [{'ws': [2, 1]}, {'ws': [2, 1, 3]}, {'ws': [3]}]
     >>>
-    >>> # Shuffle, create batches of size 2, convert to array
-    >>> from random import Random
-    >>> from text2array import BatchIterator, ShuffleIterator
+    >>> ### Shuffle, create batches of size 2, convert to array ###
     >>> iterator = BatchIterator(ShuffleIterator(samples, rng=Random(123)), batch_size=2)
     >>> len(iterator)
     2
