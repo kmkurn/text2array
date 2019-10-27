@@ -13,10 +13,10 @@ Classes
 
 .. currentmodule:: text2array
 
-BatchIterator
-^^^^^^^^^^^^^
+Vocab
+^^^^^
 
-.. autoclass:: BatchIterator
+.. autoclass:: Vocab
    :members:
    :show-inheritance:
 
@@ -27,17 +27,17 @@ ShuffleIterator
    :members:
    :show-inheritance:
 
+BatchIterator
+^^^^^^^^^^^^^
+
+.. autoclass:: BatchIterator
+   :members:
+   :show-inheritance:
+
 Batch
 ^^^^^
 
 .. autoclass:: Batch
-   :members:
-   :show-inheritance:
-
-Vocab
-^^^^^
-
-.. autoclass:: Vocab
    :members:
    :show-inheritance:
 
