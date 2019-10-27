@@ -35,7 +35,7 @@ Overview
     >>> samples
     [{'ws': ['john', 'talks']}, {'ws': ['john', 'loves', 'mary']}, {'ws': ['mary']}]
     >>> samples = list(vocab.stoi(samples))
-    >>> list(samples)
+    >>> samples
     [{'ws': [2, 1]}, {'ws': [2, 1, 3]}, {'ws': [3]}]
     >>>
     >>> # Shuffle, create batches of size 2, convert to array
@@ -44,13 +44,13 @@ Overview
     >>> iterator = BatchIterator(ShuffleIterator(samples, rng=Random(123)), batch_size=2)
     >>> len(iterator)
     2
-    >>> it = iter(iterator)
-    >>> batch = next(it)
-    >>> arr = batch.to_array()
-    >>> arr['ws']
+    >>> for i, batch in enumerate(iterator):
+    ...     print(f'Batch #{i+1}')
+    ...     arr = batch.to_array()
+    ...     print(repr(arr['ws']))
+    ...
+    Batch #1
     array([[3, 0, 0],
            [2, 1, 3]])
-    >>> batch = next(it)
-    >>> arr = batch.to_array()
-    >>> arr['ws']
+    Batch #2
     array([[2, 1]])
