@@ -17,10 +17,10 @@ Vocabulary
 
 After creating samples, we need to build a vocabulary. A vocabulary holds an ordered set
 of string values for each field. Building a vocabulary from scratch is tedious. So, it's
-easier to build the vocabulary from the given samples. The `Vocab` class can be used for
+easier to build the vocabulary from some samples. The `Vocab` class can be used for
 this purpose.
 
-.. doctest::
+.. doctest:: tutorial
 
     >>> from text2array import Vocab
     >>> samples = [
@@ -58,7 +58,7 @@ Once a vocabulary is built, we need convert strings in our samples with it. This
 conversion means mapping all field values according to the vocabulary. Continuing
 from the previous example:
 
-.. doctest::
+.. doctest:: tutorial
 
    >>> for s in vocab.stoi(samples):
    ...   print(s)
@@ -79,7 +79,7 @@ Shuffling
 To shuffle, we need to pass a ``Sequence[Sample]`` to `ShuffleIterator`. We can easily
 convert an ``Iterable[Sample]`` to ``Sequence[Sample]`` by converting it to a `list`.
 
-.. doctest::
+.. doctest:: tutorial
 
    >>> samples = list(vocab.stoi(samples))  # now we have a sequence
    >>> from random import Random
@@ -109,7 +109,7 @@ To do batching, pass an ``Iterable[Sample]`` to `BatchIterator`. Since `ShuffleI
 is an ``Iterable[Sample]``, it is thus possible passing it to perform shuffling and
 batching sequentially on each iteration.
 
-.. doctest::
+.. doctest:: tutorial
 
    >>> from text2array import Batch, BatchIterator, ShuffleIterator
    >>> iterator = ShuffleIterator(samples, key=lambda s: len(s['ws']))
@@ -129,7 +129,7 @@ A `Batch` is just a ``MutableSequence[Sample]``, but it has a `~Batch.to_array` 
 samples in that batch to an array. The nice thing is sequential fields are automatically
 padded, **no matter how deeply nested they are**.
 
-.. doctest::
+.. doctest:: tutorial
 
    >>> samples = [
    ...   {'ws': ['john', 'talks'], 'cs': [list('john'), list('talks')]},
