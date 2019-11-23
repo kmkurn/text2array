@@ -24,6 +24,7 @@ from .samples import FieldName, FieldValue, Sample
 
 class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
     """A dictionary from field names to `StringStore` objects as the field's vocabulary."""
+
     def __getitem__(self, name: FieldName) -> 'StringStore':
         try:
             return super().__getitem__(name)
@@ -63,8 +64,9 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
     def from_samples(
             cls,
             samples: Iterable[Sample],
-            pbar: Optional[tqdm] = None,
             options: Optional[Mapping[FieldName, dict]] = None,
+            *,
+            pbar: Optional[tqdm] = None,
     ) -> 'Vocab':
         """Make an instance of this class from an iterable of samples.
 
@@ -221,9 +223,11 @@ class StringStore(OrderedSet):
         default: Default string as a representation of unknown strings, i.e. those that
             do not exist in the store.
     """
+
     def __init__(
             self,
             initial: Optional[Sequence[str]] = None,
+            *,
             default: Optional[str] = None,
     ) -> None:
         super().__init__(initial)

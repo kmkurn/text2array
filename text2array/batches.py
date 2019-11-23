@@ -37,6 +37,7 @@ class Batch(UserList, MutableSequence[Sample]):
 
     def to_array(
             self,
+            *,
             pad_with: Union[int, Mapping[FieldName, int]] = 0,
     ) -> Dict[FieldName, np.ndarray]:
         """Convert the batch into `~numpy.ndarray`.
