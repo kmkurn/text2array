@@ -114,6 +114,7 @@ batching sequentially on each iteration.
    >>> from text2array import Batch, BatchIterator, ShuffleIterator
    >>> iterator = ShuffleIterator(samples, key=lambda s: len(s['ws']))
    >>> iterator = BatchIterator(iterator, batch_size=2)
+   >>> iterator = ShuffleIterator(iterator)  # shuffle the batches
    >>> len(iterator)
    2
    >>> for s in iterator:
