@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from random import Random
-from typing import Callable, Iterable, Iterator, Optional, Sequence, Sized
+from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, Sized
 import statistics as stat
 
 from text2array import Batch, Sample
@@ -76,17 +76,17 @@ class BatchIterator(Iterable[Batch], Sized):
                 yield batch
 
 
-class ShuffleIterator(Iterable[Sample], Sized):
-    r"""Iterator that shuffles the samples before iterating.
+class ShuffleIterator(Iterable[Any], Sized):
+    r"""Iterator that shuffles a sequence of items before iterating.
 
     When ``key`` is not given, this iterator performs ordinary shuffling using
-    `random.shuffle`. Otherwise, a noisy sorting is performed. The samples are
+    `random.shuffle`. Otherwise, a noisy sorting is performed. The items are
     sorted ascending by the value of the given key, plus some random noise
     :math:`\epsilon \sim` Uniform :math:`(-z, z)`, where :math:`z` equals ``scale``
     times the standard deviation of key values. This formulation means that ``scale``
     regulates how noisy the sorting is. The larger it is, the more noisy the sorting
     becomes, i.e. it resembles random shuffling more closely. In an extreme case
-    where ``scale=0``, this method just sorts the samples by ``key``. This method is
+    where ``scale=0``, this method just sorts the items by ``key``. This method is
     useful when working with text data, where we want to shuffle the dataset and also
     minimize padding by ensuring that sentences of similar lengths are not too far apart.
 
@@ -108,9 +108,8 @@ class ShuffleIterator(Iterable[Sample], Sized):
         {'ws': ['a', 'b', 'b']}
 
     Args:
-        samples (~typing.Sequence[Sample]): Sequence of samples to shuffle and iterate over.
-        key (typing.Callable[[Sample], int]): Callable to get the key value of a
-            given sample.
+        items (~typing.Sequence[Any]): Sequence of items to shuffle and iterate over.
+        key (typing.Callable[[Any], int]): Callable to get the key value of an item.
         scale: Value to regulate the noise of the sorting. Must not be negative.
         rng: Random number generator to use for shuffling. Set this to ensure reproducibility.
             If not given, an instance of `~random.Random` with the default seed is used.
@@ -118,9 +117,9 @@ class ShuffleIterator(Iterable[Sample], Sized):
 
     def __init__(
             self,
-            samples: Sequence[Sample],
+            items: Sequence[Any],
             *,
-            key: Optional[Callable[[Sample], int]] = None,
+            key: Optional[Callable[[Any], int]] = None,
             scale: float = 1.0,
             rng: Optional[Random] = None,
     ) -> None:
@@ -129,34 +128,34 @@ class ShuffleIterator(Iterable[Sample], Sized):
         if rng is None:  # pragma: no cover
             rng = Random()
 
-        self._samples = samples
+        self._items = items
         self._key = key
         self._scale = scale
         self._rng = rng
 
     def __len__(self) -> int:
-        return len(self._samples)
+        return len(self._items)
 
     def __iter__(self) -> Iterator[Sample]:
         if self._key is None:
             self._shuffle()
         else:
             self._shuffle_by_key()
-        return iter(self._samples)
+        return iter(self._items)
 
     def _shuffle(self) -> None:
-        self._samples = list(self._samples)
-        self._rng.shuffle(self._samples)
+        self._items = list(self._items)
+        self._rng.shuffle(self._items)
 
     def _shuffle_by_key(self) -> None:
         assert self._key is not None
 
-        std = stat.stdev(self._key(s) for s in self._samples)
+        std = stat.stdev(self._key(s) for s in self._items)
         z = self._scale * std
 
-        noises = [self._rng.uniform(-z, z) for _ in range(len(self._samples))]
-        indices = list(range(len(self._samples)))
-        indices.sort(key=lambda i: self._key(self._samples[i]) + noises[i])  # type: ignore
-        shuf_samples = [self._samples[i] for i in indices]
+        noises = [self._rng.uniform(-z, z) for _ in range(len(self._items))]
+        indices = list(range(len(self._items)))
+        indices.sort(key=lambda i: self._key(self._items[i]) + noises[i])  # type: ignore
+        shuf_items = [self._items[i] for i in indices]
 
-        self._samples = shuf_samples
+        self._items = shuf_items
