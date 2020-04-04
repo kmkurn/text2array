@@ -23,11 +23,11 @@ def test_init_kwargs(rng):
 def test_rng_called_correctly(rng, samples):
     mock_rng = Mock(wraps=rng)
 
-    _ = list(ShuffleIterator(samples, rng=mock_rng))
+    list(ShuffleIterator(samples, rng=mock_rng))
     assert mock_rng.shuffle.call_count == 1
 
     ss = [{'i': 3}, {'i': 1}, {'i': 2}, {'i': 5}, {'i': 4}]
-    _ = list(ShuffleIterator(ss, key=lambda s: s['i'], rng=mock_rng))
+    list(ShuffleIterator(ss, key=lambda s: s['i'], rng=mock_rng))
     assert mock_rng.uniform.call_count == len(ss)
 
 
