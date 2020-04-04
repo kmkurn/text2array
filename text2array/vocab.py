@@ -65,7 +65,6 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             cls,
             samples: Iterable[Sample],
             options: Optional[Mapping[FieldName, dict]] = None,
-            *,
             pbar: Optional[tqdm] = None,
     ) -> 'Vocab':
         """Make an instance of this class from an iterable of samples.
@@ -227,7 +226,6 @@ class StringStore(OrderedSet):
     def __init__(
             self,
             initial: Optional[Sequence[str]] = None,
-            *,
             default: Optional[str] = None,
     ) -> None:
         super().__init__(initial)

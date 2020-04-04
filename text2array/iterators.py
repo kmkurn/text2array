@@ -118,7 +118,6 @@ class ShuffleIterator(Iterable[Any], Sized):
     def __init__(
             self,
             items: Sequence[Any],
-            *,
             key: Optional[Callable[[Any], int]] = None,
             scale: float = 1.0,
             rng: Optional[Random] = None,
