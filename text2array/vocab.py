@@ -24,6 +24,8 @@ from .samples import FieldName, FieldValue, Sample
 
 class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
     """A dictionary from field names to `StringStore` objects as the field's vocabulary."""
+    PAD_TOKEN = '<pad>'
+    UNK_TOKEN = '<unk>'
 
     def __getitem__(self, name: FieldName) -> 'StringStore':
         try:
@@ -122,8 +124,8 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             opts = options.get(name, {})
 
             # Padding and unknown tokens
-            pad = opts.get('pad', '<pad>')
-            unk = opts.get('unk', '<unk>')
+            pad = opts.get('pad', cls.PAD_TOKEN)
+            unk = opts.get('unk', cls.UNK_TOKEN)
             inits = []
             if name in seqfield and pad is not None:
                 inits.append(pad)
@@ -222,7 +224,6 @@ class StringStore(OrderedSet):
         default: Default string as a representation of unknown strings, i.e. those that
             do not exist in the store.
     """
-
     def __init__(
             self,
             initial: Optional[Sequence[str]] = None,
