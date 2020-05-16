@@ -196,3 +196,54 @@ class TestItos:
         ss = [{'ws': ['a', 'b', 'c']}]
         vocab = Vocab({'ws': StringStore('abc')})
         assert list(vocab.itos(ss)) == ss
+
+
+class TestExtend:
+    def test_ok(self):
+        vocab = Vocab({
+            'ws': StringStore('abc'),
+            'ds': StringStore('123'),
+            'l': StringStore('p'),
+        })
+        vocab.extend([
+            {
+                'ws': list('cbd'),
+                'ds': list('221'),
+                'l': 'p'
+            },
+            {
+                'ws': list('abe'),
+                'ds': list('33'),
+                'l': 'n',
+                'cs': list('XYZ')
+            },
+        ])
+
+        assert 'cs' not in vocab
+        assert list(vocab['ws']) == list('abcde')
+        assert list(vocab['ds']) == list('123')
+        assert list(vocab['l']) == list('pn')
+
+    def test_selected_field_names(self):
+        vocab = Vocab({
+            'ws': StringStore('abc'),
+            'ds': StringStore('123'),
+            'l': StringStore('p'),
+        })
+        vocab.extend([
+            {
+                'ws': list('cbd'),
+                'ds': list('221'),
+                'l': 'p'
+            },
+            {
+                'ws': list('abe'),
+                'ds': list('33'),
+                'l': 'n',
+                'cs': list('XYZ')
+            },
+        ],
+                     fields=['l'])
+
+        assert list(vocab['ws']) == list('abc')
+        assert list(vocab['l']) == list('pn')

@@ -145,6 +145,22 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
 
         return cls(m)
 
+    def extend(
+        self,
+        samples: Iterable[Sample],
+        fields: Optional[Iterable[FieldName]] = None,
+    ) -> None:
+        if fields is None:
+            fields = self.keys()
+
+        for s in samples:
+            for name in fields:
+                store = self[name]
+                val = s[name]
+                if isinstance(val, str):
+                    val = [val]
+                store.update(val)
+
     @classmethod
     def _needs_vocab(cls, val: FieldValue) -> bool:
         if isinstance(val, str):
