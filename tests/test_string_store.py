@@ -1,4 +1,5 @@
 from typing import MutableSet, Sequence
+import pickle
 
 import pytest
 
@@ -64,3 +65,13 @@ def test_eq():
 
     store3 = StringStore('abbccc', default='b')
     assert store2 != store3
+
+
+def test_pickling(tmp_path):
+    store1 = StringStore('bac', default='z')
+    with open(tmp_path / 'store.pkl', 'w+b') as f:
+        pickle.dump(store1, f)
+        f.seek(0)
+        store2 = pickle.load(f)
+
+    assert store1 == store2

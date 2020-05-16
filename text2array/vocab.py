@@ -247,3 +247,15 @@ class StringStore(OrderedSet):
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({list(self)!r}, default={self.default!r})'
+
+    # We need to customize __getstate__ and __setstate__ because OrderedSet override these
+    # to pickle only the sequence of items, resulting in `default` always set to None
+    def __getstate__(self):
+        return {
+            'initial': super().__getstate__(),
+            'default': self.default,
+        }
+
+    def __setstate__(self, state):
+        super().__setstate__(state.get('initial', []))
+        self.default = state.get('default')
