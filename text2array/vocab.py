@@ -16,8 +16,8 @@ from collections import Counter, UserDict, defaultdict
 from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
     MutableMapping, Optional, Sequence, Set
 
-from ordered_set import OrderedSet
-from tqdm import tqdm
+from ordered_set import OrderedSet  # type: ignore
+from tqdm import tqdm  # type: ignore
 
 from .samples import FieldName, FieldValue, Sample
 
@@ -64,10 +64,10 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
 
     @classmethod
     def from_samples(
-            cls,
-            samples: Iterable[Sample],
-            options: Optional[Mapping[FieldName, dict]] = None,
-            pbar: Optional[tqdm] = None,
+        cls,
+        samples: Iterable[Sample],
+        options: Optional[Mapping[FieldName, dict]] = None,
+        pbar: Optional[tqdm] = None,
     ) -> 'Vocab':
         """Make an instance of this class from an iterable of samples.
 
@@ -225,9 +225,9 @@ class StringStore(OrderedSet):
             do not exist in the store.
     """
     def __init__(
-            self,
-            initial: Optional[Sequence[str]] = None,
-            default: Optional[str] = None,
+        self,
+        initial: Optional[Sequence[str]] = None,
+        default: Optional[str] = None,
     ) -> None:
         super().__init__(initial)
         self.default = default

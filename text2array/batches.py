@@ -16,7 +16,7 @@ from collections import UserList
 from functools import reduce
 from typing import Dict, List, Mapping, MutableSequence, Optional, Sequence, Union, cast
 
-import numpy as np
+import numpy as np  # type: ignore
 
 from .samples import FieldName, FieldValue, Sample
 
@@ -28,7 +28,6 @@ class Batch(UserList, MutableSequence[Sample]):
         samples (~typing.Sequence[Sample]): Sequence of samples this batch
             should contain.
     """
-
     def __init__(self, samples: Optional[Sequence[Sample]] = None) -> None:
         # constructor required; see https://docs.python.org/3.6/library/collections.html#collections.UserList
         if samples is None:
@@ -36,8 +35,8 @@ class Batch(UserList, MutableSequence[Sample]):
         super().__init__(samples)
 
     def to_array(
-            self,
-            pad_with: Union[int, Mapping[FieldName, int]] = 0,
+        self,
+        pad_with: Union[int, Mapping[FieldName, int]] = 0,
     ) -> Dict[FieldName, np.ndarray]:
         """Convert the batch into `~numpy.ndarray`.
 
@@ -95,7 +94,7 @@ class Batch(UserList, MutableSequence[Sample]):
             return [len(values)]
 
         # Recursive case
-        maxlenss = [cls._get_maxlens(x) for x in values]
+        maxlenss = [cls._get_maxlens(x) for x in values]  # type: ignore
         if not all(len(x) == len(maxlenss[0]) for x in maxlenss):
             raise cls._InconsistentDepthError
 
@@ -113,11 +112,11 @@ class Batch(UserList, MutableSequence[Sample]):
 
     @classmethod
     def _pad(
-            cls,
-            values: Sequence[FieldValue],
-            maxlens: List[int],
-            paddings: List[Union[int, List[int]]],
-            depth: int,
+        cls,
+        values: Sequence[FieldValue],
+        maxlens: List[int],
+        paddings: List[Union[int, List[int]]],
+        depth: int,
     ) -> Sequence[FieldValue]:
         assert values
         assert len(maxlens) == len(paddings)
@@ -128,7 +127,9 @@ class Batch(UserList, MutableSequence[Sample]):
             values_ = list(values)
         # Recursive case
         else:
-            values_ = [cls._pad(x, maxlens, paddings, depth + 1) for x in values]
+            values_ = [
+                cls._pad(x, maxlens, paddings, depth + 1) for x in values  # type: ignore
+            ]
 
         for _ in range(maxlens[depth] - len(values)):
             values_.append(paddings[depth])
