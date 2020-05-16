@@ -1,6 +1,6 @@
 from typing import Iterable, MutableMapping
 
-from tqdm import tqdm
+from tqdm import tqdm  # type: ignore
 import pytest
 
 from text2array import StringStore, Vocab

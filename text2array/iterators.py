@@ -16,7 +16,7 @@ from random import Random
 from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, Sized
 import statistics as stat
 
-from text2array import Batch, Sample
+from . import Batch, Sample
 
 
 class BatchIterator(Iterable[Batch], Sized):
@@ -46,7 +46,6 @@ class BatchIterator(Iterable[Batch], Sized):
         be passed to `len` to get the number of batches. Otherwise, a `TypeError`
         is raised.
     """
-
     def __init__(self, samples: Iterable[Sample], batch_size: int = 1) -> None:
         if batch_size <= 0:
             raise ValueError('batch size must be greater than 0')
@@ -114,13 +113,12 @@ class ShuffleIterator(Iterable[Any], Sized):
         rng: Random number generator to use for shuffling. Set this to ensure reproducibility.
             If not given, an instance of `~random.Random` with the default seed is used.
     """
-
     def __init__(
-            self,
-            items: Sequence[Any],
-            key: Optional[Callable[[Any], int]] = None,
-            scale: float = 1.0,
-            rng: Optional[Random] = None,
+        self,
+        items: Sequence[Any],
+        key: Optional[Callable[[Any], int]] = None,
+        scale: float = 1.0,
+        rng: Optional[Random] = None,
     ) -> None:
         if scale < 0:
             raise ValueError('scale cannot be less than 0')
