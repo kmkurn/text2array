@@ -150,6 +150,13 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         samples: Iterable[Sample],
         fields: Optional[Iterable[FieldName]] = None,
     ) -> None:
+        """Extend vocabulary with field values in samples.
+
+        Args:
+            samples (~typing.Iterable[Sample]): Samples to extend the vocabulary with.
+            fields: Extend only these field names. Defaults to all field names in the
+                vocabulary.
+        """
         if fields is None:
             fields = self.keys()
 
