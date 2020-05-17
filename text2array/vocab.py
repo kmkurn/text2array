@@ -156,9 +156,7 @@ class Vocab(UserDict, MutableMapping[FieldName, "StringStore"]):
         return cls(m)
 
     def extend(
-        self,
-        samples: Iterable[Sample],
-        fields: Optional[Iterable[FieldName]] = None,
+        self, samples: Iterable[Sample], fields: Optional[Iterable[FieldName]] = None,
     ) -> None:
         """Extend vocabulary with field values in samples.
 
@@ -257,10 +255,9 @@ class StringStore(OrderedSet):
         default: Default string as a representation of unknown strings, i.e. those that
             do not exist in the store.
     """
+
     def __init__(
-        self,
-        initial: Optional[Sequence[str]] = None,
-        default: Optional[str] = None,
+        self, initial: Optional[Sequence[str]] = None, default: Optional[str] = None,
     ) -> None:
         super().__init__(initial)
         self.default = default

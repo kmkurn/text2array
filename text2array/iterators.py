@@ -46,6 +46,7 @@ class BatchIterator(Iterable[Batch], Sized):
         be passed to `len` to get the number of batches. Otherwise, a `TypeError`
         is raised.
     """
+
     def __init__(self, samples: Iterable[Sample], batch_size: int = 1) -> None:
         if batch_size <= 0:
             raise ValueError("batch size must be greater than 0")
@@ -113,6 +114,7 @@ class ShuffleIterator(Iterable[Any], Sized):
         rng: Random number generator to use for shuffling. Set this to ensure reproducibility.
             If not given, an instance of `~random.Random` with the default seed is used.
     """
+
     def __init__(
         self,
         items: Sequence[Any],

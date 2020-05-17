@@ -28,6 +28,7 @@ class Batch(UserList, MutableSequence[Sample]):
         samples (~typing.Sequence[Sample]): Sequence of samples this batch
             should contain.
     """
+
     def __init__(self, samples: Optional[Sequence[Sample]] = None) -> None:
         # constructor required; see https://docs.python.org/3.6/library/collections.html#collections.UserList
         if samples is None:
@@ -35,8 +36,7 @@ class Batch(UserList, MutableSequence[Sample]):
         super().__init__(samples)
 
     def to_array(
-        self,
-        pad_with: Union[int, Mapping[FieldName, int]] = 0,
+        self, pad_with: Union[int, Mapping[FieldName, int]] = 0,
     ) -> Dict[FieldName, np.ndarray]:
         """Convert the batch into `~numpy.ndarray`.
 
