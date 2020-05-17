@@ -48,7 +48,7 @@ class BatchIterator(Iterable[Batch], Sized):
     """
     def __init__(self, samples: Iterable[Sample], batch_size: int = 1) -> None:
         if batch_size <= 0:
-            raise ValueError('batch size must be greater than 0')
+            raise ValueError("batch size must be greater than 0")
 
         self._samples = samples
         self._bsz = batch_size
@@ -121,7 +121,7 @@ class ShuffleIterator(Iterable[Any], Sized):
         rng: Optional[Random] = None,
     ) -> None:
         if scale < 0:
-            raise ValueError('scale cannot be less than 0')
+            raise ValueError("scale cannot be less than 0")
         if rng is None:  # pragma: no cover
             rng = Random()
 

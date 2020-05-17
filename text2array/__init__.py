@@ -13,14 +13,14 @@
 # limitations under the License.
 """Convert your NLP text data to arrays!"""
 
-__version__ = '0.1.2'
+__version__ = "0.1.2"
 __all__ = [
-    'Sample',
-    'Batch',
-    'Vocab',
-    'StringStore',
-    'BatchIterator',
-    'ShuffleIterator',
+    "Sample",
+    "Batch",
+    "Vocab",
+    "StringStore",
+    "BatchIterator",
+    "ShuffleIterator",
 ]
 
 from .batches import Batch

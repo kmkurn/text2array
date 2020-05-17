@@ -13,8 +13,17 @@
 # limitations under the License.
 
 from collections import Counter, UserDict, defaultdict
-from typing import Counter as CounterT, Dict, Iterable, Iterator, Mapping, \
-    MutableMapping, Optional, Sequence, Set
+from typing import (
+    Counter as CounterT,
+    Dict,
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Sequence,
+    Set,
+)
 
 from ordered_set import OrderedSet  # type: ignore
 from tqdm import tqdm  # type: ignore
@@ -22,12 +31,13 @@ from tqdm import tqdm  # type: ignore
 from .samples import FieldName, FieldValue, Sample
 
 
-class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
+class Vocab(UserDict, MutableMapping[FieldName, "StringStore"]):
     """A dictionary from field names to `StringStore` objects as the field's vocabulary."""
-    PAD_TOKEN = '<pad>'
-    UNK_TOKEN = '<unk>'
 
-    def __getitem__(self, name: FieldName) -> 'StringStore':
+    PAD_TOKEN = "<pad>"
+    UNK_TOKEN = "<unk>"
+
+    def __getitem__(self, name: FieldName) -> "StringStore":
         try:
             return super().__getitem__(name)
         except KeyError:
@@ -68,7 +78,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         samples: Iterable[Sample],
         options: Optional[Mapping[FieldName, dict]] = None,
         pbar: Optional[tqdm] = None,
-    ) -> 'Vocab':
+    ) -> "Vocab":
         """Make an instance of this class from an iterable of samples.
 
         A vocabulary is only made for fields whose value is a string token or a (nested)
@@ -104,7 +114,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             Vocab: Vocabulary instance.
         """
         if pbar is None:  # pragma: no cover
-            pbar = tqdm(samples, desc='Counting', unit='sample')
+            pbar = tqdm(samples, desc="Counting", unit="sample")
         if options is None:
             options = {}
 
@@ -124,8 +134,8 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
             opts = options.get(name, {})
 
             # Padding and unknown tokens
-            pad = opts.get('pad', cls.PAD_TOKEN)
-            unk = opts.get('unk', cls.UNK_TOKEN)
+            pad = opts.get("pad", cls.PAD_TOKEN)
+            unk = opts.get("unk", cls.UNK_TOKEN)
             inits = []
             if name in seqfield and pad is not None:
                 inits.append(pad)
@@ -134,8 +144,8 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
 
             store = StringStore(inits, default=unk)
 
-            min_count = opts.get('min_count', 1)
-            max_size = opts.get('max_size')
+            min_count = opts.get("min_count", 1)
+            max_size = opts.get("max_size")
             n = len(store)
             for tok, freq in c.most_common():
                 if freq < min_count or (max_size is not None and len(store) - n >= max_size):
@@ -199,7 +209,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         return s
 
     @classmethod
-    def _index_value(cls, store: 'StringStore', value: FieldValue) -> FieldValue:
+    def _index_value(cls, store: "StringStore", value: FieldValue) -> FieldValue:
         if isinstance(value, str):
             return store.index(value)
         if not isinstance(value, Sequence):
@@ -208,7 +218,7 @@ class Vocab(UserDict, MutableMapping[FieldName, 'StringStore']):
         return [cls._index_value(store, v) for v in value]
 
     @classmethod
-    def _get_value(cls, store: 'StringStore', value: FieldValue) -> FieldValue:
+    def _get_value(cls, store: "StringStore", value: FieldValue) -> FieldValue:
         if not isinstance(value, Sequence):
             return store[value]
         if isinstance(value, str):
@@ -269,16 +279,16 @@ class StringStore(OrderedSet):
         return self.default == o.default and super().__eq__(o)
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({list(self)!r}, default={self.default!r})'
+        return f"{self.__class__.__name__}({list(self)!r}, default={self.default!r})"
 
     # We need to customize __getstate__ and __setstate__ because OrderedSet override these
     # to pickle only the sequence of items, resulting in `default` always set to None
     def __getstate__(self):
         return {
-            'initial': super().__getstate__(),
-            'default': self.default,
+            "initial": super().__getstate__(),
+            "default": self.default,
         }
 
     def __setstate__(self, state):
-        super().__setstate__(state.get('initial', []))
-        self.default = state.get('default')
+        super().__setstate__(state.get("initial", []))
+        self.default = state.get("default")
