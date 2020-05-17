@@ -22,7 +22,7 @@ def test_init_stream(stream):
 
 
 def test_init_kwargs():
-    ss = [{'i': i} for i in range(5)]
+    ss = [{"i": i} for i in range(5)]
     bsz = 2
     iter_ = BatchIterator(ss, batch_size=bsz)
     assert iter_.batch_size == bsz
@@ -38,4 +38,4 @@ def test_init_kwargs():
 def test_init_nonpositive_batch_size(samples):
     with pytest.raises(ValueError) as exc:
         BatchIterator(samples, batch_size=0)
-    assert 'batch size must be greater than 0' in str(exc.value)
+    assert "batch size must be greater than 0" in str(exc.value)

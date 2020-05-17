@@ -4,12 +4,13 @@ import pytest
 @pytest.fixture
 def rng():
     from random import Random
+
     return Random(42)
 
 
 @pytest.fixture
 def samples():
-    return [{'i': i, 'f': (i + 1) / 3} for i in range(5)]
+    return [{"i": i, "f": (i + 1) / 3} for i in range(5)]
 
 
 @pytest.fixture
