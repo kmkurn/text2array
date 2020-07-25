@@ -34,6 +34,13 @@ BatchIterator
    :members:
    :show-inheritance:
 
+BucketIterator
+^^^^^^^^^^^^^^
+
+.. autoclass:: BucketIterator
+   :members:
+   :show-inheritance:
+
 Batch
 ^^^^^
 

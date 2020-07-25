@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import defaultdict
 from random import Random
 from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, Sized
 import statistics as stat
@@ -158,3 +159,57 @@ class ShuffleIterator(Iterable[Any], Sized):
         shuf_items = [self._items[i] for i in indices]
 
         self._items = shuf_items
+
+
+class BucketIterator(Iterable[Batch], Sized):
+    """Iterator that batches together samples from the same bucket.
+
+    Example:
+
+        >>> from text2array import BucketIterator
+        >>> samples = [
+        ...   {'ws': ['a']},
+        ...   {'ws': ['a', 'b']},
+        ...   {'ws': ['b']},
+        ...   {'ws': ['c']},
+        ...   {'ws': ['b', 'b']},
+        ... ]
+        >>> iter_ = BucketIterator(samples, key=lambda s: len(s['ws']), batch_size=2)
+        >>> for b in iter_:
+        ...   print(list(b))
+        ...
+        [{'ws': ['a']}, {'ws': ['b']}]
+        [{'ws': ['c']}]
+        [{'ws': ['a', 'b']}, {'ws': ['b', 'b']}]
+
+    Args:
+        samples (~typing.Iterable[Sample]): Iterable of samples to batch.
+        key (typing.Callable[[Sample], Any]): Callable to get the bucket key of a sample.
+        batch_size: Maximum number of samples in each batch.
+
+    Note:
+        When ``samples`` is an instance of `~typing.Sized`, this iterator can
+        be passed to `len` to get the number of batches. Otherwise, a `TypeError`
+        is raised.
+    """
+
+    def __init__(
+        self, samples: Iterable[Sample], key: Callable[[Sample], Any], batch_size: int = 1
+    ) -> None:
+        self._bsz = batch_size
+
+        bucket_dict = defaultdict(list)
+        for s in samples:
+            bucket_dict[key(s)].append(s)
+        self._buckets = [BatchIterator(v, batch_size) for v in bucket_dict.values()]
+
+    @property
+    def batch_size(self):
+        return self._bsz
+
+    def __len__(self):
+        return sum(len(b) for b in self._buckets)
+
+    def __iter__(self):
+        for b in self._buckets:
+            yield from b

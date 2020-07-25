@@ -20,10 +20,11 @@ __all__ = [
     "Vocab",
     "StringStore",
     "BatchIterator",
+    "BucketIterator",
     "ShuffleIterator",
 ]
 
 from .batches import Batch
 from .samples import Sample
-from .iterators import BatchIterator, ShuffleIterator
+from .iterators import BatchIterator, BucketIterator, ShuffleIterator
 from .vocab import StringStore, Vocab
