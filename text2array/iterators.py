@@ -186,6 +186,9 @@ class BucketIterator(Iterable[Batch], Sized):
         samples (~typing.Iterable[Sample]): Iterable of samples to batch.
         key (typing.Callable[[Sample], Any]): Callable to get the bucket key of a sample.
         batch_size: Maximum number of samples in each batch.
+        shuffle_bucket: Whether to shuffle every bucket before batching.
+        rng: Random number generator to use for shuffling. Set this to ensure reproducibility.
+            If not given, an instance of `~random.Random` with the default seed is used.
 
     Note:
         When ``samples`` is an instance of `~typing.Sized`, this iterator can
@@ -194,22 +197,34 @@ class BucketIterator(Iterable[Batch], Sized):
     """
 
     def __init__(
-        self, samples: Iterable[Sample], key: Callable[[Sample], Any], batch_size: int = 1
+        self,
+        samples: Iterable[Sample],
+        key: Callable[[Sample], Any],
+        batch_size: int = 1,
+        shuffle_bucket: bool = False,
+        rng: Optional[Random] = None,
     ) -> None:
+        if rng is None:  # pragma: no cover
+            rng = Random()
+
         self._bsz = batch_size
+        self._shuf = shuffle_bucket
+        self._rng = rng
 
         bucket_dict = defaultdict(list)
         for s in samples:
             bucket_dict[key(s)].append(s)
-        self._buckets = [BatchIterator(v, batch_size) for v in bucket_dict.values()]
+        self._buckets = bucket_dict.values()
 
     @property
     def batch_size(self):
         return self._bsz
 
     def __len__(self):
-        return sum(len(b) for b in self._buckets)
+        return sum(len(BatchIterator(ss, self._bsz)) for ss in self._buckets)
 
     def __iter__(self):
-        for b in self._buckets:
-            yield from b
+        for ss in self._buckets:
+            if self._shuf:
+                self._rng.shuffle(ss)
+            yield from BatchIterator(ss, self._bsz)
