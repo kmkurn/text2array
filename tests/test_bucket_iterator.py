@@ -32,3 +32,16 @@ def test_shuffle_bucket(rng):
     bs1 = [list(b) for b in iter_]
     bs2 = [list(b) for b in iter_]
     assert bs1 != bs2
+
+
+def test_sort_bucket():
+    samples = [{"n": n} for n in range(100)]
+    bucket_key = lambda s: s["n"] // 10
+
+    iter_ = BucketIterator(
+        samples, bucket_key, batch_size=3, sort_bucket=True, sort_bucket_by=lambda s: -s["n"]
+    )
+
+    for b in iter_:
+        for s, s_ in zip(b, b[1:]):
+            assert s["n"] > s_["n"]

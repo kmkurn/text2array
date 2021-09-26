@@ -203,6 +203,8 @@ class BucketIterator(Iterable[Batch], Sized):
         batch_size: int = 1,
         shuffle_bucket: bool = False,
         rng: Optional[Random] = None,
+        sort_bucket: bool = False,
+        sort_bucket_by: Optional[Callable[[Sample], Any]] = None,
     ) -> None:
         if rng is None:  # pragma: no cover
             rng = Random()
@@ -215,6 +217,9 @@ class BucketIterator(Iterable[Batch], Sized):
         for s in samples:
             bucket_dict[key(s)].append(s)
         self._buckets = bucket_dict.values()
+        if sort_bucket:
+            for bkt in self._buckets:
+                bkt.sort(key=sort_bucket_by)
 
     @property
     def batch_size(self):
