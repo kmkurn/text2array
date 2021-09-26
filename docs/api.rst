@@ -6,7 +6,7 @@ Type aliases
 
 * ``Sample = Mapping[FieldName, FieldValue]``
 * ``FieldName = str``
-* ``FieldValue = Union[float, int, str, Sequence[FieldValue]``
+* ``FieldValue = Union[float, int, bool, str, Sequence[FieldValue]``
 
 Classes
 -------

@@ -193,7 +193,8 @@ class BucketIterator(Iterable[Batch], Sized):
         sort_bucket: Whether to sort every bucket before batching. When both ``shuffle_bucket``
             and ``sort_bucket`` is ``True``, sorting will be ignored (but don't rely on this
             behavior).
-        sort_bucket_by: Callable acting as the sort key if ``sort_bucket=True``.
+        sort_bucket_by (typing.Callable[[Sample], Any]): Callable acting as the sort key
+            if ``sort_bucket=True``.
 
     Note:
         When ``samples`` is an instance of `~typing.Sized`, this iterator can

@@ -71,7 +71,12 @@ Iterators
 ---------
 
 There are two iterators provided in this library: `ShuffleIterator` and `BatchIterator`.
-They are used to perform shuffling and batching respectively.
+They are used to perform shuffling and batching respectively. There is another iterator
+provided in this library, `BucketIterator`, which groups samples into buckets and performs
+batching in a way that ensures samples in one batch comes from the same bucket. This is
+particularly useful in NLP where having batches of samples of similar lengths is desirable.
+The iterator is not included in this tutorial. Please consult the API documentation for more
+info.
 
 Shuffling
 ^^^^^^^^^
