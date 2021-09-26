@@ -16,6 +16,7 @@ from collections import defaultdict
 from random import Random
 from typing import Any, Callable, Iterable, Iterator, Optional, Sequence, Sized
 import statistics as stat
+import warnings
 
 from . import Batch, Sample
 
@@ -189,6 +190,10 @@ class BucketIterator(Iterable[Batch], Sized):
         shuffle_bucket: Whether to shuffle every bucket before batching.
         rng: Random number generator to use for shuffling. Set this to ensure reproducibility.
             If not given, an instance of `~random.Random` with the default seed is used.
+        sort_bucket: Whether to sort every bucket before batching. When both ``shuffle_bucket``
+            and ``sort_bucket`` is ``True``, sorting will be ignored (but don't rely on this
+            behavior).
+        sort_bucket_by: Callable acting as the sort key if ``sort_bucket=True``.
 
     Note:
         When ``samples`` is an instance of `~typing.Sized`, this iterator can
@@ -208,6 +213,10 @@ class BucketIterator(Iterable[Batch], Sized):
     ) -> None:
         if rng is None:  # pragma: no cover
             rng = Random()
+        if shuffle_bucket and sort_bucket:
+            warnings.warn(
+                "Both shuffle_bucket and sort_bucket is True; sort_bucket will have no effect"
+            )
 
         self._bsz = batch_size
         self._shuf = shuffle_bucket

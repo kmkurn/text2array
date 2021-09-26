@@ -1,5 +1,7 @@
 from typing import Iterable, Sized
 
+import pytest
+
 from text2array import Batch, BucketIterator
 
 
@@ -45,3 +47,8 @@ def test_sort_bucket():
     for b in iter_:
         for s, s_ in zip(b, b[1:]):
             assert s["n"] > s_["n"]
+
+
+def test_shuffle_and_sort_bucket():
+    with pytest.warns(UserWarning):
+        BucketIterator([], len, shuffle_bucket=True, sort_bucket=True)
