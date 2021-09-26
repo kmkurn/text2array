@@ -36,13 +36,14 @@ class Batch(UserList, MutableSequence[Sample]):
         super().__init__(samples)
 
     def to_array(
-        self, pad_with: Union[int, Mapping[FieldName, int]] = 0,
+        self,
+        pad_with: Union[int, float, bool, Mapping[FieldName, Union[int, float, bool]]] = 0,
     ) -> Dict[FieldName, np.ndarray]:
         """Convert the batch into `~numpy.ndarray`.
 
         Args:
-            pad_with: Pad sequential field values with this number. Can
-                also be a mapping from field names to padding number for
+            pad_with: Pad sequential field values with this value. Can
+                also be a mapping from field names to padding value for
                 that field. Fields whose name is not in the mapping will
                 be padded with zeros.
 
