@@ -11,8 +11,8 @@ text2array
    :target: https://pypi.org/project/text2array
    :alt: PyPI project
 
-.. image:: https://img.shields.io/travis/kmkurn/text2array.svg?style=flat
-   :target: https://travis-ci.org/kmkurn/text2array
+.. image:: https://github.com/kmkurn/text2array/actions/workflows/run_tests.yml/badge.svg
+   :target: https://github.com/kmkurn/text2array/actions/workflows/run_tests.yml
    :alt: Build status
 
 .. image:: https://img.shields.io/readthedocs/text2array.svg?style=flat
